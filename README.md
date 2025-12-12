@@ -60,7 +60,7 @@ This project is part of a broader ecosystem.
 Licenses, legal framing, and historical background can be found here:
 
 * **Licenses & legal framework**
-  [https://github.com/EllenBosMarcelMulder/.-hexLICences-](https://github.com/EllenBosMarcelMulder/.-hexLICences-).
+  [https://github.com/EllenBosMarcelMulder/.-hexLICences-](https://github.com/EllenBosMarcelMulder/.-hexLICences-.)
 
 * **Historical and conceptual background (Egypt context)**
   [https://github.com/EllenBosMarcelMulder/Egypt](https://github.com/EllenBosMarcelMulder/Egypt)
