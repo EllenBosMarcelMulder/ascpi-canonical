@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-12T17:18:24.747668Z
+Generated: 2025-12-12T17:35:41.199904Z
 Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
@@ -17,7 +17,8 @@ ad2d1e92f259de982bad01d855e665c25387e4b9c207459d4d9cb85d276f445d  ARCHITECTURE.m
 4278e8835a93972a5c8b1ba8bd1a71662e52ee9c8e75a4efb42f2de5dda910c2  CODE_OF_CONDUCT.md
 ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
 c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
-3dcc6f8bd015e015bc9f724bccad5d49acdde3d4484aa6f98d213be11ea12928  README.md
+ffbff4b7eda855ae1ed8699649241d49a8d140d128f95fde702470d9346a6d53  LICENCE.md
+272e6990f9dd1a1a258be0c65c2f3043610f232f7f37e4246763dab6d4d030ed  README.md
 97a31777687ea2486a5f922f7178013a725d18a7441982e398f0430a5ea07873  ROADMAP.md
 afee066f51886f0189e7cc375798755eb6fb1ee5f818a5ba9f8bd5979b8d8914  RUNTIME_LIFECYCLE.md
 ae27183769ca2d27865e10aa4793cb24307040ef03077e834a77d89f2db34385  sha256_and_mapping.py
@@ -30,6 +31,21 @@ ae27183769ca2d27865e10aa4793cb24307040ef03077e834a77d89f2db34385  sha256_and_map
 [DIR] archive\gui_experiments
 93c74ed1ef030b5540a1c887e2c0083ca101864db7dd5aa376333ab792e83260  archive\gui_experiments\14.1.html
 ffa3a761a36606556d3d5300dd14f72501f6bf02ec233d176c50ac5649369f37  archive\gui_experiments\14.2.html
+
+[DIR] ascpi-publications
+
+[DIR] ascpi-publications\academic
+1b604c2a73ffeb0ea208112e2264eb73c0f59cd0cf73c3335e6b30bd80472298  ascpi-publications\academic\FULL ACADEMIC PAPER.md
+
+[DIR] ascpi-publications\conceptual
+
+[DIR] ascpi-publications\government
+ddbe08f2a75f979bcb4c3f199dcec5ed1618d48e1bda22ea90402291de581c58  ascpi-publications\government\GOVERNMENT BRIEFING PACKAGE.md
+
+[DIR] ascpi-publications\legal
+
+[DIR] ascpi-publications\press
+259d575178f13a403ba4aa839858ecad9c7bd1068c41e64873153a717d71f5c1  ascpi-publications\press\INTERNATIONAL PRESS RELEASE.md
 
 [DIR] core
 5bc17779ebb7a087f4ddaeb27c0d48e559d94eaca820279e86f216e0671621fc  core\ascpi_field_compiler_v1.0.js
