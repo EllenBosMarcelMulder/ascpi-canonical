@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCπ Runtime - Field Compiler + Projector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --text: #e8e8f0;
+            --kappa: #2a9d8f;
+            --theta: #9b5de5;
+            --coherence: #7fff00;
+            --energy: #00d4ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .container {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            border-radius: 12px;
+            background: var(--surface);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 90vw;
+            width: 800px;
+        }
+
+        #fieldCanvas {
+            border-radius: 8px;
+            background: #000;
+            cursor: crosshair;
+            flex-grow: 1;
+            height: 400px;
+            width: 100%;
+        }
+
+        .info-panel {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-box {
+            background: var(--surface);
+            border: 1px solid var(--kappa);
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .param-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .param-line span { font-weight: 300; }
+        .param-label { width: 50px; }
+        .param-value { text-align: right; }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            background: var(--kappa);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #248d81;
+            transform: translateY(-1px);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            background: #000;
+            color: var(--text);
+            border: 1px solid var(--kappa);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls" style="width: 800px; max-width: 90vw;">
+    <h2 class="text-xl font-bold text-center">ASCπ Field Compiler</h2>
+    <textarea id="inputCode" rows="4" placeholder="Enter code or data to compile...">function example() { return "Hello ASCπ"; }</textarea>
+    <button onclick="runCompiler()">▶ Compile with Field</button>
+    <div id="compileResult" style="display:none;" class="p-4 bg-gray-900 border border-gray-700 rounded-lg">
+        <div class="text-sm text-gray-400 mb-2">Compilation Result:</div>
+        <pre id="resultOutput" class="text-xs text-green-400 overflow-auto max-h-40"></pre>
+    </div>
+</div>
+
+<div class="container">
+    <canvas id="fieldCanvas" width="450" height="450"></canvas>
+
+    <div class="info-panel">
+        <h2 class="text-xl font-bold mb-2 text-center text-gray-200">ASCπ Veldtoestand (Ψ)</h2>
+        
+        <div class="status-box" id="psiDisplay">
+            <div class="param-line" style="color:var(--kappa)">
+                <span class="param-label">κ</span>
+                <span id="display-kappa" class="param-value">0.000</span>
+            </div>
+            <div class="param-line" style="color:var(--theta)">
+                <span class="param-label">θ</span>
+                <span id="display-theta" class="param-value">0.000</span>
+            </div>
+            <div class="param-line mt-3" style="color:var(--coherence)">
+                <span class="param-label">C</span>
+                <span id="display-C" class="param-value">0.000</span>
+            </div>
+            <div class="param-line" style="color:var(--energy)">
+                <span class="param-label">N</span>
+                <span id="display-N" class="param-value">0.000</span>
+            </div>
+            <div class="param-line mt-3 text-gray-400">
+                <span class="param-label">ΔΦ</span>
+                <span id="display-dPhi" class="param-value">0.000</span>
+            </div>
+            <div class="param-line text-gray-400">
+                <span class="param-label">t</span>
+                <span id="display-t" class="param-value">0</span>
+            </div>
+        </div>
+
+        <div class="text-xs text-gray-500 mt-4 p-2 rounded bg-gray-900 border border-gray-800">
+            <strong>Discrete Hex UI:</strong> Hover to explore sectors, click to commit decision. Compiler button runs field evolution.
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// CORE: ascpi_field_core_v14.js (IMMUTABLE, CANONICAL)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CONST = Object.freeze({
+    phi: (1 + Math.sqrt(5)) / 2,
+    pi: Math.PI,
+    tau: 2 * Math.PI,
+    eps: 1e-12,
+    DPHI_ATTRACTOR: (1 + Math.sqrt(5)) / 4,
+    COHERENCE_THRESHOLD: 0.9999,
+    kappa_min: 0.01,
+    kappa_max: 10.0,
+});
+
+function encode(text) {
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0;
+    }
+    return (Math.abs(hash) % 1000) / 100 + 1.0;
+}
+
+function F(psi, config) {
+    const K = config.K_coupling;
+    const dPhi_dt = -(psi.dPhi - CONST.DPHI_ATTRACTOR) * (1 - psi.C) * config.alpha_phi;
+    let kappa_dt = K * psi.dPhi * (1 - psi.C);
+    if (psi.kappa + kappa_dt > CONST.kappa_max) kappa_dt = CONST.kappa_max - psi.kappa;
+    if (psi.kappa + kappa_dt < CONST.kappa_min) kappa_dt = CONST.kappa_min - psi.kappa;
+    const theta_dt = K * psi.dPhi / psi.kappa;
+    const N_dt = 0;
+    const C_dt = (1 - psi.C) * config.alpha_c - Math.abs(psi.dPhi - CONST.DPHI_ATTRACTOR) * config.beta_c;
+    const t_dt = 1;
+    return { dPhi: dPhi_dt, kappa: kappa_dt, theta: theta_dt, N: N_dt, C: C_dt, t: t_dt };
+}
+
+class Psi {
+    constructor(dPhi = CONST.DPHI_ATTRACTOR, kappa = 1.0, theta = 0.0, N = 1.0, C = 0.5, t = 0) {
+        this.dPhi = dPhi;
+        this.kappa = kappa;
+        this.theta = theta;
+        this.N = N;
+        this.C = C;
+        this.t = t;
+    }
+    toJSON() {
+        return { dPhi: this.dPhi, kappa: this.kappa, theta: this.theta, N: this.N, C: this.C, t: this.t };
+    }
+    static fromJSON(json) {
+        return new Psi(json.dPhi, json.kappa, json.theta, json.N, json.C, json.t);
+    }
+}
+
+class ASCPIEngine {
+    constructor(config = {}) {
+        this.config = {
+            maxSteps: 1000,
+            stepSize: 0.1,
+            alpha_phi: 0.05,
+            alpha_c: 0.05,
+            beta_c: 0.5,
+            K_coupling: 0.1,
+            ...config
+        };
+        this.ψ = new Psi();
+        this.history = [];
+        this.stepCount = 0;
+        this.originalInput = '';
+        this.memory = { update: () => {}, toJSON: () => ({}) };
+        this.awareness = { update: () => {}, toJSON: () => ({}) };
+    }
+
+    step() {
+        if (this.ψ.C >= CONST.COHERENCE_THRESHOLD || this.stepCount >= this.config.maxSteps) {
+            return false;
+        }
+        const dψ_dt = F(this.ψ, this.config);
+        const dt = this.config.stepSize;
+        this.ψ.dPhi += dψ_dt.dPhi * dt;
+        this.ψ.kappa += dψ_dt.kappa * dt;
+        this.ψ.theta = (this.ψ.theta + dψ_dt.theta * dt) % CONST.tau;
+        this.ψ.C += dψ_dt.C * dt;
+        this.ψ.C = Math.max(0, Math.min(1, this.ψ.C));
+        this.ψ.t += dψ_dt.t * dt;
+        this.history.push(this.ψ.toJSON());
+        this.stepCount++;
+        return true;
+    }
+
+    rewriteCodeFromField(originalCode, psi) {
+        const rewriteResult = `/* Herschreven door ASCπ Field Compiler v1.0 */\n`;
+        if (psi.C >= CONST.COHERENCE_THRESHOLD) {
+            const hash = encode(originalCode).toFixed(0);
+            return `${rewriteResult}
+/* Veld-Compilatie Voltooid.
+   Coherentie: ${psi.C.toFixed(4)} (ΔΦ: ${psi.dPhi.toFixed(4)} -> ΔΦ*=${CONST.DPHI_ATTRACTOR.toFixed(4)}).
+*/
+const FNO_OUTPUT = "canonical_operator_hash_${hash}_C_${psi.C.toFixed(4).replace('.', '_')}";
+return FNO_OUTPUT;
+`;
+        } else {
+            return `${rewriteResult}
+/* Coherentie (${psi.C.toFixed(4)}) nog niet voldoende.
+   Iteratie ${this.stepCount} / ${this.config.maxSteps}.
+*/
+return originalCode;
+`;
+        }
+    }
+
+    process(input) {
+        this.originalInput = input;
+        const initialN = encode(input);
+        const initialdPhi = CONST.DPHI_ATTRACTOR + (Math.random() - 0.5) * 0.5;
+        this.ψ = new Psi(initialdPhi, 1.0, 0.0, initialN, 0.5, 0);
+        while (this.step()) {}
+        const compiledOutput = this.rewriteCodeFromField(input, this.ψ);
+        return {
+            status: this.ψ.C >= CONST.COHERENCE_THRESHOLD ? 'COMPILED' : 'MAX_STEPS_REACHED',
+            iterations: this.stepCount,
+            finalPsi: this.ψ.toJSON(),
+            compiledOutput: compiledOutput
+        };
+    }
+}
+
+const ASCPI_FIELD_COMPILER = {
+    VERSION: '1.0.0',
+    CANONICAL: true,
+    PARADIGM: 'FIELD_COMPILER',
+    CONST,
+    Psi,
+    ASCPIEngine,
+    createEngine(config) { return new ASCPIEngine(config); },
+    compile(input, config) {
+        const engine = new ASCPIEngine(config);
+        return engine.process(input);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ADAPTER: adapter.js (TRIVIAL STATE TRANSFER ONLY)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const FieldProjectorAdapter = {
+    syncToGUI(corePsi, guiPsi) {
+        guiPsi.dPhi = corePsi.dPhi;
+        guiPsi.kappa = corePsi.kappa;
+        guiPsi.theta = corePsi.theta;
+        guiPsi.N = corePsi.N;
+        guiPsi.C = corePsi.C;
+        guiPsi.t = corePsi.t;
+    },
+    toCoreState(guiPsi) {
+        return new ASCPI_FIELD_COMPILER.Psi(
+            guiPsi.dPhi, guiPsi.kappa, guiPsi.theta,
+            guiPsi.N, guiPsi.C, guiPsi.t
+        );
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROJECTOR: GUI Constants and State
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const GUI_CONST = Object.freeze({
+    tau: 2 * Math.PI,
+    kappa_max: 5.0,
+    kappa_min: 0.1,
+    dphi_base: 0.1,
+});
+
+let mutablePsi = {
+    dPhi: GUI_CONST.dphi_base,
+    kappa: 0.5,
+    theta: 0.0,
+    N: 0.5,
+    C: 0.5,
+    t: 0
+};
+
+const canvas = document.getElementById('fieldCanvas');
+const ctx = canvas.getContext('2d');
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DISCRETE HEXAGONAL DECISION INTERFACE (from decision_hex_ui.js)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+let hoveredSector = -1;
+let lastHoveredSector = -1;
+let committedSector = -1;
+let visualRotation = 0;
+
+function getSectorFromMouse(mouseX, mouseY) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const center = { x: W / 2, y: H / 2 };
+    
+    const dx = mouseX - center.x;
+    const dy = mouseY - center.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = Math.min(W, H) * 0.4;
+    
+    if (dist < radius * 0.15) return -1;
+    
+    let angle = Math.atan2(dy, dx);
+    if (angle < 0) angle += GUI_CONST.tau;
+    
+    const sector = Math.floor((angle / GUI_CONST.tau) * 6);
+    return sector % 6;
+}
+
+function commitSectorDecision(sector) {
+    if (sector < 0 || sector > 5) return;
+    
+    committedSector = sector;
+    
+    const sectorMappings = [
+        { theta: 0.0 * Math.PI / 3, kappa: 2.5, C: 0.9, N: 0.8, dPhi: GUI_CONST.dphi_base + 1.5 * 0.05 },
+        { theta: 1.0 * Math.PI / 3, kappa: 1.5, C: 0.75, N: 0.6, dPhi: GUI_CONST.dphi_base - 0.5 * 0.05 },
+        { theta: 2.0 * Math.PI / 3, kappa: 3.5, C: 0.85, N: 0.9, dPhi: GUI_CONST.dphi_base + 2.5 * 0.05 },
+        { theta: 3.0 * Math.PI / 3, kappa: 2.0, C: 0.65, N: 0.5, dPhi: GUI_CONST.dphi_base - 1.5 * 0.05 },
+        { theta: 4.0 * Math.PI / 3, kappa: 4.0, C: 0.95, N: 0.7, dPhi: GUI_CONST.dphi_base + 0.5 * 0.05 },
+        { theta: 5.0 * Math.PI / 3, kappa: 1.0, C: 0.7, N: 0.4, dPhi: GUI_CONST.dphi_base - 2.5 * 0.05 }
+    ];
+    
+    const mapping = sectorMappings[sector];
+    mutablePsi.theta = mapping.theta;
+    mutablePsi.kappa = mapping.kappa;
+    mutablePsi.C = mapping.C;
+    mutablePsi.N = mapping.N;
+    mutablePsi.dPhi = mapping.dPhi;
+    
+    drawPsi();
+}
+
+function drawPsi() {
+    const W = canvas.width;
+    const H = canvas.height;
+    const center = { x: W / 2, y: H / 2 };
+    const radius = Math.min(W, H) * 0.4;
+
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+    
+    const { kappa, N, C } = mutablePsi;
+    const coreRadius = radius * (0.2 + N * 0.4);
+    const alpha = 0.5 + C * 0.5;
+    
+    for (let s = 0; s < 6; s++) {
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y);
+        
+        const startAngle = s * GUI_CONST.tau / 6 + visualRotation;
+        const endAngle = (s + 1) * GUI_CONST.tau / 6 + visualRotation;
+        
+        for (let i = 0; i <= 20; i++) {
+            const angle = startAngle + (endAngle - startAngle) * (i / 20);
+            const dynamicRadius = coreRadius * (1 + 0.1 * Math.sin(kappa * s));
+            const dx = center.x + dynamicRadius * Math.cos(angle);
+            const dy = center.y + dynamicRadius * Math.sin(angle);
+            ctx.lineTo(dx, dy);
+        }
+        ctx.closePath();
+        
+        const hue = (s * 60) % 360;
+        let sectorAlpha = alpha * 0.6;
+        
+        if (s === committedSector) {
+            sectorAlpha = alpha;
+        } else if (s === hoveredSector) {
+            sectorAlpha = alpha * 0.8;
+        }
+        
+        ctx.fillStyle = `hsla(${hue}, 70%, 50%, ${sectorAlpha})`;
+        ctx.fill();
+        
+        ctx.strokeStyle = `hsla(120, 70%, 70%, ${C * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+    
+    ctx.strokeStyle = `hsla(0, 0%, 100%, 0.3)`;
+    ctx.lineWidth = 1;
+    for (let s = 0; s < 6; s++) {
+        const angle = s * GUI_CONST.tau / 6 + visualRotation;
+        const outerRadius = coreRadius * 1.2;
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y);
+        ctx.lineTo(
+            center.x + outerRadius * Math.cos(angle),
+            center.y + outerRadius * Math.sin(angle)
+        );
+        ctx.stroke();
+    }
+    
+    updatePsiDisplay();
+}
+
+function updatePsiFromMouse(event) {
+    const rect = canvas.getBoundingClientRect();
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const mouseX = (event.clientX - rect.left) * (W / rect.width);
+    const mouseY = (event.clientY - rect.top) * (H / rect.height);
+
+    hoveredSector = getSectorFromMouse(mouseX, mouseY);
+    
+    if (hoveredSector !== lastHoveredSector) {
+        lastHoveredSector = hoveredSector;
+        requestAnimationFrame(drawPsi);
+    }
+}
+
+function commitPsiFromClick(event) {
+    const rect = canvas.getBoundingClientRect();
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const mouseX = (event.clientX - rect.left) * (W / rect.width);
+    const mouseY = (event.clientY - rect.top) * (H / rect.height);
+
+    const sector = getSectorFromMouse(mouseX, mouseY);
+    if (sector >= 0) {
+        commitSectorDecision(sector);
+    }
+}
+
+function updatePsiDisplay() {
+    document.getElementById('display-kappa').textContent = mutablePsi.kappa.toFixed(3);
+    document.getElementById('display-theta').textContent = (mutablePsi.theta / Math.PI).toFixed(3) + ' π';
+    document.getElementById('display-C').textContent = mutablePsi.C.toFixed(3);
+    document.getElementById('display-N').textContent = mutablePsi.N.toFixed(3);
+    document.getElementById('display-dPhi').textContent = mutablePsi.dPhi.toFixed(3);
+    document.getElementById('display-t').textContent = mutablePsi.t.toString();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RUNTIME GLUE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function runCompiler() {
+    const input = document.getElementById('inputCode').value;
+    const result = ASCPI_FIELD_COMPILER.compile(input);
+    
+    FieldProjectorAdapter.syncToGUI(result.finalPsi, mutablePsi);
+    
+    document.getElementById('compileResult').style.display = 'block';
+    document.getElementById('resultOutput').textContent = 
+        `Status: ${result.status}\nIterations: ${result.iterations}\n\n${result.compiledOutput}`;
+    
+    drawPsi();
+}
+
+window.onload = () => {
+    canvas.width = 450;
+    canvas.height = 450;
+    canvas.addEventListener('mousemove', updatePsiFromMouse);
+    canvas.addEventListener('click', commitPsiFromClick);
+    drawPsi();
+};
+</script>
+</body>
+</html>
