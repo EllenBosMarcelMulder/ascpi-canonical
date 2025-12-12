@@ -95,6 +95,16 @@ Community contributions should respect the **field-based paradigm** and the froz
 
 ---
 
+## Public Interest & Governance Context
+
+This project implements a deterministic, auditable and reproducible field-based runtime architecture.
+Its design principles align with requirements commonly applicable to public-sector systems,
+including transparency, non-arbitrary behavior and verifiable decision pathways.
+
+A non-normative legal and governance context note is provided in `/docs/governance/`.
+
+---
+
 ## License
 
 This project is released under the **Humanity Heritage License π**.
@@ -109,3 +119,6 @@ It is not a promise.
 It is a **working, deterministic system** — now made stable so others can safely build on it.
 
 Welcome to the beginning.
+
+---
+
