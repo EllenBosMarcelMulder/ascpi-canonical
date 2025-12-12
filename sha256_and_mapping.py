@@ -26,7 +26,7 @@ from datetime import datetime
 # ──────────────────────────────────────────────────────────────────────────────
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-OUTPUT_FILE = "ASCPI_REPO_HASH_MANIFEST.txt"
+OUTPUT_FILE = "sha256_and_mapping.py.txt"
 
 EXCLUDE_DIRS = {
     ".git",
