@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-12T19:23:26.710171Z
+Generated: 2025-12-12T19:32:50.870511Z
 Hash Algorithm: SHA256
 
 This file provides a deterministic integrity snapshot of the entire
@@ -12,7 +12,7 @@ change this manifest.
 
 [DIR] /
 6566638efdcf62c3cccad28d96961c2c47bf7736ddb2a060e803f21059f45a9a  ARCHITECTURAL_DECISIONS.md
-ad2d1e92f259de982bad01d855e665c25387e4b9c207459d4d9cb85d276f445d  ARCHITECTURE.md
+dadb2349043ddb092ccca3d39e4d2c8b4f938288b1246fd0a311151a6c7300fd  ARCHITECTURE.md
 4278e8835a93972a5c8b1ba8bd1a71662e52ee9c8e75a4efb42f2de5dda910c2  CODE_OF_CONDUCT.md
 ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
 c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
