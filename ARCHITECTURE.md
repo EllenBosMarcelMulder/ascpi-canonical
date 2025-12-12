@@ -26,13 +26,13 @@ Input Artifact
      │
      ▼
 ┌──────────────────────────┐
-│  Layer 3: Projection &  │
-│  Discrete Intervention  │
+│  Layer 3: Projection &   │
+│  Discrete Intervention   │
 └──────────────────────────┘
      │
      ▼
 ┌──────────────────────────┐
-│  Layer 4: FNO Output    │
+│  Layer 4: FNO Output     │
 └──────────────────────────┘
 ```
 
