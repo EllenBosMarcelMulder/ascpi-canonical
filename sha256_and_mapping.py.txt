@@ -1,7 +1,8 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-12T19:32:50.870511Z
+Generated: 2025-12-12T19:55:53.549183Z
+Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
 This file provides a deterministic integrity snapshot of the entire
@@ -77,6 +78,10 @@ f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  runtime\adapte
 df5cb9ab5598554282134b068cf7eaaa60fdd94ebd5748c3dfddced92e8ffd7f  runtime\decision_hex_ui.js
 
 [DIR] tests
+
+[DIR] tests\Alfa
+4f5dcbaaefe4cbd4c6fed61c1bbed9b06a0762c94a7dfa5528ee8feb20ec2827  tests\Alfa\ascpi_canonical_integrity.test_v1.0.2.js
+1b6fa2c0c11c0f7e6226829c3065d0f8cbd45b255ae62451fe3e47d6076eb99b  tests\Alfa\ascpi_ecosystem_v1.0.2.js
 
 [DIR] tests\canonical
 14701089214bf1ea5dbdbad14671df35fd762c8561385eb1cf928cf56f1992ab  tests\canonical\ascpi_canonical_integrity.test.js
