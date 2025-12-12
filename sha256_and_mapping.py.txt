@@ -1,8 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-12T22:35:26.240254Z
-Architecture\v14\ascpi
+Generated: 2025-12-12T22:47:38.786556Z
 Hash Algorithm: SHA256
 
 This file provides a deterministic integrity snapshot of the entire
@@ -18,7 +17,7 @@ dadb2349043ddb092ccca3d39e4d2c8b4f938288b1246fd0a311151a6c7300fd  ARCHITECTURE.m
 ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
 c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
 ffbff4b7eda855ae1ed8699649241d49a8d140d128f95fde702470d9346a6d53  LICENCE.md
-272e6990f9dd1a1a258be0c65c2f3043610f232f7f37e4246763dab6d4d030ed  README.md
+45dd209533004c6772f92d33041ea8a6ef21944735e52553a5d3fc84c7bdc00b  README.md
 97a31777687ea2486a5f922f7178013a725d18a7441982e398f0430a5ea07873  ROADMAP.md
 afee066f51886f0189e7cc375798755eb6fb1ee5f818a5ba9f8bd5979b8d8914  RUNTIME_LIFECYCLE.md
 ae27183769ca2d27865e10aa4793cb24307040ef03077e834a77d89f2db34385  sha256_and_mapping.py
@@ -66,6 +65,9 @@ e44ee00d7d0eb36fa9e480bbbb256dad906b8aebc48f14c28bdcd3cf8d57dd79  core\ascpi_eng
 f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gui_projector_v14.html
 
 [DIR] docs
+
+[DIR] docs\governance
+166a1d49c0a7fb62a0dac11d1616b46298c380dd3fbb65ec747709833038d00d  docs\governance\Legal_Notice_and_Public_Interest.md
 
 [DIR] docs\runtime
 0e62b9da7979b924be270c58ea030d15fe46c3cf72f9aafceb349c1cf9441f7d  docs\runtime\ascpi_runtime_binding_specification.md
