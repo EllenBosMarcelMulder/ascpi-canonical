@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-12T17:16:38.033089Z
+Generated: 2025-12-12T17:18:24.747668Z
 Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
@@ -12,7 +12,14 @@ Any modification to files, filenames, or directory structure will
 change this manifest.
 
 [DIR] /
+6566638efdcf62c3cccad28d96961c2c47bf7736ddb2a060e803f21059f45a9a  ARCHITECTURAL_DECISIONS.md
+ad2d1e92f259de982bad01d855e665c25387e4b9c207459d4d9cb85d276f445d  ARCHITECTURE.md
+4278e8835a93972a5c8b1ba8bd1a71662e52ee9c8e75a4efb42f2de5dda910c2  CODE_OF_CONDUCT.md
+ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
+c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
 3dcc6f8bd015e015bc9f724bccad5d49acdde3d4484aa6f98d213be11ea12928  README.md
+97a31777687ea2486a5f922f7178013a725d18a7441982e398f0430a5ea07873  ROADMAP.md
+afee066f51886f0189e7cc375798755eb6fb1ee5f818a5ba9f8bd5979b8d8914  RUNTIME_LIFECYCLE.md
 ae27183769ca2d27865e10aa4793cb24307040ef03077e834a77d89f2db34385  sha256_and_mapping.py
 
 [DIR] archive
