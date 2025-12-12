@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-12T17:08:18.260302Z
+Generated: 2025-12-12T17:16:38.033089Z
 Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
@@ -12,7 +12,8 @@ Any modification to files, filenames, or directory structure will
 change this manifest.
 
 [DIR] /
-c08f82e255fea5a408f4c89dc02aa77b6cd9a4f2de098e14eed0bb9821af53c5  sha256_and_mapping.py
+3dcc6f8bd015e015bc9f724bccad5d49acdde3d4484aa6f98d213be11ea12928  README.md
+ae27183769ca2d27865e10aa4793cb24307040ef03077e834a77d89f2db34385  sha256_and_mapping.py
 
 [DIR] archive
 
@@ -22,8 +23,6 @@ c08f82e255fea5a408f4c89dc02aa77b6cd9a4f2de098e14eed0bb9821af53c5  sha256_and_map
 [DIR] archive\gui_experiments
 93c74ed1ef030b5540a1c887e2c0083ca101864db7dd5aa376333ab792e83260  archive\gui_experiments\14.1.html
 ffa3a761a36606556d3d5300dd14f72501f6bf02ec233d176c50ac5649369f37  archive\gui_experiments\14.2.html
-
-[DIR] canonical
 
 [DIR] core
 5bc17779ebb7a087f4ddaeb27c0d48e559d94eaca820279e86f216e0671621fc  core\ascpi_field_compiler_v1.0.js
@@ -42,8 +41,6 @@ f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  runtime\adapte
 03c5b216c913dd83c333940c4d4f527f9ad2453b17f08d1a60ab32ca5f6e3d7d  runtime\ascpi_ecosystem_v1.0.1.js
 8380de1af6a932a7b203fe20541b9cbc9bc5c6c01633137e6597b51fe2958201  runtime\ascpi_runtime_integrated_14.3.html
 df5cb9ab5598554282134b068cf7eaaa60fdd94ebd5748c3dfddced92e8ffd7f  runtime\decision_hex_ui.js
-
-[DIR] src
 
 [DIR] tests
 
