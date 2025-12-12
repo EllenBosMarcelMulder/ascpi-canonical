@@ -2,7 +2,6 @@ ASCπ REPOSITORY HASH MANIFEST
 ============================
 
 Generated: 2025-12-12T19:14:43.007785Z
-Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
 This file provides a deterministic integrity snapshot of the entire
@@ -85,3 +84,4 @@ df5cb9ab5598554282134b068cf7eaaa60fdd94ebd5748c3dfddced92e8ffd7f  runtime\decisi
 
 [DIR] tools\fieldlab
 6146fb5f15c2d88f5de14c947da16616f875138bfc0c7161d24cb7c35d47a93b  tools\fieldlab\ascpi_field_lab.html
+
