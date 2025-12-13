@@ -110,6 +110,7 @@ df5cb9ab5598554282134b068cf7eaaa60fdd94ebd5748c3dfddced92e8ffd7f  runtime\decisi
 4f5dcbaaefe4cbd4c6fed61c1bbed9b06a0762c94a7dfa5528ee8feb20ec2827  tests\canonical\ascpi_canonical_integrity.test_v1.0.2.js
 ca68bbc882572664ec2538f53c6d2e854f6c458cdfdb1a941a5c77e95502ba4b  tests\canonical\ascpi_canonical_integrity_tests_v1.1.js
 112a6b8836ed3d0fbd34c129823dd88abe6172e75d8431c800818d591ee63c9f  tests\canonical\ascpi_ui_canonical_tests_v1.2.js
+de8b9fb6474f96c4f386a7f6d7a9d3f82af0a4bb751dc57267d4b39eb647d03c  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\Reality_Without_Time.md
 
 [DIR] tools
 
@@ -120,6 +121,7 @@ ca68bbc882572664ec2538f53c6d2e854f6c458cdfdb1a941a5c77e95502ba4b  tests\canonica
 
 [DIR] ui\audit
 84444bb3bc36684e6e7be71d16e52621eb8d29a472a9864812c58029757dc317  ui\audit\ascpi_ui_audit_model.js
+
 
 
 
