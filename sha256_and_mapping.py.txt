@@ -78,6 +78,8 @@ af5e3188c63bf0128f327e2a8219ce5b729814b2aeab031da0cb21661b4632c0  prior_art\HELL
 
 [DIR] prior_art\hexECO³
 5d41f7cd0c47ba287f3982be6e5d1f9fd641e3170d18a221525001dd18913174  prior_art\hexECO³\CANonicalFIEldPROjectionCOMputingPHAseCURvature.md
+1296b46ad7f9fcabbc782c453f992e02b2687bd118d1b1dd07979566eefd1d48  prior_art\hexECO³\PRIOR_ART__Canonical_Field-Projection_Computing__ASCpi_hexGLYphSNAke__2025-12-13.md
+
 
 [DIR] prior_art\ASCπ_hexGLYphSNAke_Projective_Field_Interface
 977dd0b4c091b218837a6a32f147f9f7ecdd57058b0a6ea1f3a2ae4d991022c0  prior_art\ASCπ_hexGLYphSNAke_Projective_Field_Interface\ASCπ_hexGLYphSNAke_Projective_Field_Interface.md
@@ -114,6 +116,7 @@ ca68bbc882572664ec2538f53c6d2e854f6c458cdfdb1a941a5c77e95502ba4b  tests\canonica
 
 [DIR] ui\audit
 84444bb3bc36684e6e7be71d16e52621eb8d29a472a9864812c58029757dc317  ui\audit\ascpi_ui_audit_model.js
+
 
 
 
