@@ -80,6 +80,9 @@ af5e3188c63bf0128f327e2a8219ce5b729814b2aeab031da0cb21661b4632c0  prior_art\HELL
 b24904c5bc588d218939855393da7eecb86ccd6cf35dbafa3e15517f1bd45941  prior_art\background\Hybrid Engine Laughing Loop (HELL).md
 b0eca857850924ff53a188016fe0277d8010f0fa5ca2dc698bcc0e3f83763701  prior_art\background\Scientific_Foundations_Hybrid_Engine_Laughing_Loop-HELL.md
 
+[DIR] prior_art\Hexagonal _Field_Interaction_Units_(HFIU)_Spherical_Projection_Interfaces
+adaac8b289e9ff387445b2af5c97ca2c4729cbd1339a9274437eb051d9dffdd5  prior_art\Hexagonal _Field_Interaction_Units_(HFIU)_Spherical_Projection_Interfaces\Hexagonal _Field_Interaction_Units_(HFIU)_Spherical_Projection_Interfaces.md
+
 [DIR] runtime
 f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  runtime\adapter.js
 03c5b216c913dd83c333940c4d4f527f9ad2453b17f08d1a60ab32ca5f6e3d7d  runtime\ascpi_ecosystem_v1.0.1.js
@@ -105,3 +108,4 @@ ca68bbc882572664ec2538f53c6d2e854f6c458cdfdb1a941a5c77e95502ba4b  tests\canonica
 
 [DIR] ui\audit
 84444bb3bc36684e6e7be71d16e52621eb8d29a472a9864812c58029757dc317  ui\audit\ascpi_ui_audit_model.js
+
