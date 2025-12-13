@@ -87,6 +87,10 @@ af5e3188c63bf0128f327e2a8219ce5b729814b2aeab031da0cb21661b4632c0  prior_art\HELL
 [DIR] prior_art\Glyph-only Field Computing
 0527edba8aacd8f4d7e9de9379fe013fe94905dc7d8f1136615fea3fd32ce7ce  prior_art\Glyph-only Field Computing\Glyph-only Field Computing.md
 89e4504afe3998280016d333095de2b11d7c714a6235d06b7a425d47425f4b55  prior_art\Glyph-only Field Computing\Letters_as_Field-Motor_Triggers.md
+5ef8d8137e28283ea6d83780916d45168aeb897d8cf2c5743f2b5c8510e54860  prior_art\Glyph-only Field Computing\decision_reflective_simulation_20251213_233816.json
+ec23bde33d7eaaf1f4f7f16621ee1cc02825a78a7286d6260b92ea436b004993  prior_art\Glyph-only Field Computing\decision_reflective_simulator.py
+6abc423859fd152d20ea8ed977242066a44a724371ac8e1552870590150fbbd5  prior_art\Glyph-only Field Computing\decision_reflective_visualization.html
+
 
 [DIR] prior_art\background
 b24904c5bc588d218939855393da7eecb86ccd6cf35dbafa3e15517f1bd45941  prior_art\background\Hybrid Engine Laughing Loop (HELL).md
@@ -121,6 +125,7 @@ de8b9fb6474f96c4f386a7f6d7a9d3f82af0a4bb751dc57267d4b39eb647d03c  tests\ASCPI_BE
 
 [DIR] ui\audit
 84444bb3bc36684e6e7be71d16e52621eb8d29a472a9864812c58029757dc317  ui\audit\ascpi_ui_audit_model.js
+
 
 
 
