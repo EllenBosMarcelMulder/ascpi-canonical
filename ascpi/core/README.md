@@ -124,10 +124,42 @@ It is explicitly **not**:
 * a simulator
 * a UI engine
 * a performance-optimized runtime
-* a numerical solver
 * a language processor
 
 Those concerns belong to higher layers.
+
+---
+
+## Isomorphic Glyph Realization (Hex3D HexGlyph)
+
+The ASCπ kernel admits a **complete isomorphic realization as a single closed three-dimensional hexagonal glyph** (often referred to as a *Hex3D HexGlyph*).
+
+In such a realization:
+
+* The field state Ψ is represented as a position, orientation, or phase within the glyph.
+* Transitions correspond to topological rotations or edge-to-edge connections.
+* Discrete symbols (letters, triggers, ports) act purely as **connection activators**, not as logic.
+* The entire motor can operate without textual code, data structures, or numerical integration.
+
+This glyph representation is:
+
+* Structurally complete
+* Topologically closed
+* Information-preserving
+* Suitable for hardware, analog, symbolic, or spatial implementations
+
+Crucially, the glyph is **not an alternative kernel**.
+
+It is an **isomorphic projection** of the canonical kernel.
+
+Formally:
+
+* `ascpi_kernel.py` defines the axioms and invariants of the field law.
+* The Hex3D HexGlyph is a concrete geometric embodiment of that law.
+
+Both representations are equivalent in expressive power, but **only the kernel is normative**.
+
+All glyph-based, hardware-based, or symbolic realizations must therefore be understood as **implementations of the kernel**, never as redefinitions of it.
 
 ---
 
