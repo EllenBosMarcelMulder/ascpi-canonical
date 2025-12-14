@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-14T12:23:18.991089Z
+Generated: 2025-12-14T16:11:25.593007Z
 Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
@@ -12,8 +12,9 @@ Any modification to files, filenames, or directory structure will
 change this manifest.
 
 [DIR] /
-82ad85ebd2ab35f4ad49dd81f499474a6d9761d56fd51be830e2b58cd2967ef3  ARCHITECTURAL_DECISIONS.md
-dadb2349043ddb092ccca3d39e4d2c8b4f938288b1246fd0a311151a6c7300fd  ARCHITECTURE.md
+35ab8aaff9ab37d127d7cafaf64a88c00424254a338c15fb4e06aa96984d5a2b  ARCHITECTURAL_DECISIONS_v1.2.md
+2d8002df8dc97825bfdfe9dcacd43444cc68cff8a32769f293f5e345e8b21d6f  ARCHITECTURE.md
+26e9c99a12bc8fa4f23139ae33d0444e049237ee81755c5f76209ce848a7193d  ARCHITECTURE_v1.1.md
 4278e8835a93972a5c8b1ba8bd1a71662e52ee9c8e75a4efb42f2de5dda910c2  CODE_OF_CONDUCT.md
 ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
 c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
@@ -58,12 +59,14 @@ ddbe08f2a75f979bcb4c3f199dcec5ed1618d48e1bda22ea90402291de581c58  ascpi-publicat
 259d575178f13a403ba4aa839858ecad9c7bd1068c41e64873153a717d71f5c1  ascpi-publications\press\INTERNATIONAL PRESS RELEASE.md
 
 [DIR] core
+c5aebf0055f5fc56bbb4497fee286b343ac77372e756e75ea9d88c3f1e6ebd75  core\CYClicLANguageFIEldLAW.md
 83884a248dd69c14752368f2ab7c48e9667049dccccf807fcff509549180731c  core\README.md
 16db4b5c9c3bc0cf94b2557bf68f056c45b1010b4f6c61c2d55b374e59b8ea74  core\SYStemANAlysis.md
 1b6fa2c0c11c0f7e6226829c3065d0f8cbd45b255ae62451fe3e47d6076eb99b  core\ascpi_ecosystem_v1.0.2.js
 e44ee00d7d0eb36fa9e480bbbb256dad906b8aebc48f14c28bdcd3cf8d57dd79  core\ascpi_engine_complete_v1.0.2.js
 5bc17779ebb7a087f4ddaeb27c0d48e559d94eaca820279e86f216e0671621fc  core\ascpi_field_compiler_v1.0.js
 b26bb35915c8e3abf02811cb4e6f9c5186a5c9c0f6acd35dc8dd0ecba53f8406  core\ascpi_kernel.py
+43e44c44d060e6cf3cb8f2836682736ec9dbed99bfa05a534fce10804d3eca8c  core\ascpi_kernel_v1.1.py
 10db77d9769b0406e28e1d907e793f8af2a107848eda366d8c55e2fbe153e054  core\hex3DhexGLYph.py
 
 [DIR] core\hex3DhexGLYph
@@ -88,6 +91,14 @@ f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gu
 
 [DIR] docs\runtime
 0e62b9da7979b924be270c58ea030d15fe46c3cf72f9aafceb349c1cf9441f7d  docs\runtime\ascpi_runtime_binding_specification.md
+
+[DIR] governance
+fbdad81380de4a09eea47fa0cf59cac5b70881510db4adeff8d81ae0053ff876  governance\draft.md
+
+[DIR] old
+6566638efdcf62c3cccad28d96961c2c47bf7736ddb2a060e803f21059f45a9a  old\ARCHITECTURAL_DECISIONS.md
+cd3c99270ef66c644bc78f0bacb18f87f4a73b84d1c0ae79e4124710989a5aa2  old\ARCHITECTURAL_DECISIONS_v1.1.md
+dadb2349043ddb092ccca3d39e4d2c8b4f938288b1246fd0a311151a6c7300fd  old\ARCHITECTURE.md
 
 [DIR] prior_art
 af5e3188c63bf0128f327e2a8219ce5b729814b2aeab031da0cb21661b4632c0  prior_art\HELL - Canonical Technical Enhancement Package — CTEP-1.md
