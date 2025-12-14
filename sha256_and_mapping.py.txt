@@ -63,6 +63,10 @@ e44ee00d7d0eb36fa9e480bbbb256dad906b8aebc48f14c28bdcd3cf8d57dd79  core\ascpi_eng
 83884a248dd69c14752368f2ab7c48e9667049dccccf807fcff509549180731c  core\README.md
 b26bb35915c8e3abf02811cb4e6f9c5186a5c9c0f6acd35dc8dd0ecba53f8406  core\ascpi_kernel.py
 
+[DIR] core\hex3DhexGLYph
+b5cf7d9b84dd2ecf095c0ffbd26d667286a5078619e9b93b34ed2b8f60c84e95  core\hex3DhexGLYph\hex3DhexGLYph_ISOmorphicGLYph_.md
+57212313c30b1b23d5690d4118b423db44143d9a31be439e4b283c2f89bab546  core\hex3DhexGLYph\hex3DhexGLYph_SPEcification.md
+
 [DIR] demos
 f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gui_projector_v14.html
 
@@ -127,6 +131,7 @@ de8b9fb6474f96c4f386a7f6d7a9d3f82af0a4bb751dc57267d4b39eb647d03c  tests\ASCPI_BE
 
 [DIR] ui\audit
 84444bb3bc36684e6e7be71d16e52621eb8d29a472a9864812c58029757dc317  ui\audit\ascpi_ui_audit_model.js
+
 
 
 
