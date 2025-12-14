@@ -60,6 +60,8 @@ ddbe08f2a75f979bcb4c3f199dcec5ed1618d48e1bda22ea90402291de581c58  ascpi-publicat
 1b6fa2c0c11c0f7e6226829c3065d0f8cbd45b255ae62451fe3e47d6076eb99b  core\ascpi_ecosystem_v1.0.2.js
 e44ee00d7d0eb36fa9e480bbbb256dad906b8aebc48f14c28bdcd3cf8d57dd79  core\ascpi_engine_complete_v1.0.2.js
 5bc17779ebb7a087f4ddaeb27c0d48e559d94eaca820279e86f216e0671621fc  core\ascpi_field_compiler_v1.0.js
+d6c701d18a696faae2e9666d2a365fd8786bfcfa2898ddf6ff145ef966b30714  core\README.md
+b26bb35915c8e3abf02811cb4e6f9c5186a5c9c0f6acd35dc8dd0ecba53f8406  core\ascpi_kernel.py
 
 [DIR] demos
 f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gui_projector_v14.html
@@ -125,6 +127,7 @@ de8b9fb6474f96c4f386a7f6d7a9d3f82af0a4bb751dc57267d4b39eb647d03c  tests\ASCPI_BE
 
 [DIR] ui\audit
 84444bb3bc36684e6e7be71d16e52621eb8d29a472a9864812c58029757dc317  ui\audit\ascpi_ui_audit_model.js
+
 
 
 
