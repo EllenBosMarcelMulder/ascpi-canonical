@@ -1,4 +1,4 @@
-# Architectural Decisions — ASCπ
+# Architectural Decisions — ASCπ - version 1.1
 
 This document records the **key architectural decisions** behind the ASCπ Canonical Field Compiler.
 
