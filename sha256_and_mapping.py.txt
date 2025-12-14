@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-14T16:11:25.593007Z
+Generated: 2025-12-14T19:48:53.582183Z
 Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
@@ -13,8 +13,7 @@ change this manifest.
 
 [DIR] /
 35ab8aaff9ab37d127d7cafaf64a88c00424254a338c15fb4e06aa96984d5a2b  ARCHITECTURAL_DECISIONS_v1.2.md
-2d8002df8dc97825bfdfe9dcacd43444cc68cff8a32769f293f5e345e8b21d6f  ARCHITECTURE.md
-26e9c99a12bc8fa4f23139ae33d0444e049237ee81755c5f76209ce848a7193d  ARCHITECTURE_v1.1.md
+c0bcb13c6c15c4c229003425e0370fa1726a19f597da9d6b289bc4bf81874e5c  ARCHITECTURE_v1.1.md
 4278e8835a93972a5c8b1ba8bd1a71662e52ee9c8e75a4efb42f2de5dda910c2  CODE_OF_CONDUCT.md
 ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
 c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
@@ -61,7 +60,7 @@ ddbe08f2a75f979bcb4c3f199dcec5ed1618d48e1bda22ea90402291de581c58  ascpi-publicat
 [DIR] core
 c5aebf0055f5fc56bbb4497fee286b343ac77372e756e75ea9d88c3f1e6ebd75  core\CYClicLANguageFIEldLAW.md
 83884a248dd69c14752368f2ab7c48e9667049dccccf807fcff509549180731c  core\README.md
-16db4b5c9c3bc0cf94b2557bf68f056c45b1010b4f6c61c2d55b374e59b8ea74  core\SYStemANAlysis.md
+f835eef43ffb01de76ad4a8dbffe9fef41186c982df57e1d0301a97f25ff50b9  core\SYStemANAlysisV1.1.md
 1b6fa2c0c11c0f7e6226829c3065d0f8cbd45b255ae62451fe3e47d6076eb99b  core\ascpi_ecosystem_v1.0.2.js
 e44ee00d7d0eb36fa9e480bbbb256dad906b8aebc48f14c28bdcd3cf8d57dd79  core\ascpi_engine_complete_v1.0.2.js
 5bc17779ebb7a087f4ddaeb27c0d48e559d94eaca820279e86f216e0671621fc  core\ascpi_field_compiler_v1.0.js
@@ -81,6 +80,9 @@ e4221a8decb208eb169a3e17a4df4cc011e48af86c1e87c51180c50b83f6a2b3  core\hex3DhexG
 fac9334831a77141637e6f09e54c5e9b513c7970729d8518b08ef20d2dc94079  core\hex3DhexGLYph\old\hex3dhexglyphV1.3.py
 e9d44b9093d7f98d578b2c497ac46ed9c7d33089fc3f148609437b9a3c007fa8  core\hex3DhexGLYph\old\hex3dhexglyphV1.py
 
+[DIR] core\old
+16db4b5c9c3bc0cf94b2557bf68f056c45b1010b4f6c61c2d55b374e59b8ea74  core\old\SYStemANAlysis.md
+
 [DIR] demos
 f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gui_projector_v14.html
 
@@ -93,12 +95,43 @@ f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gu
 0e62b9da7979b924be270c58ea030d15fe46c3cf72f9aafceb349c1cf9441f7d  docs\runtime\ascpi_runtime_binding_specification.md
 
 [DIR] governance
-fbdad81380de4a09eea47fa0cf59cac5b70881510db4adeff8d81ae0053ff876  governance\draft.md
+
+[DIR] governance\[hexCASusZACharias]
+6d2f27f2420cb4f83cb390723a6281970616d4ab742582e80920a54d7fd6f63a  governance\[hexCASusZACharias]\000 opzet project.txt
+8539f9ace564f2a539eaf5c5300feebd75e8e3087cb5fe085659f054d328c7a1  governance\[hexCASusZACharias]\Rapport 2017-095 Geen powerplay maar fair play_0.pdf
+22dbf2a3bfeac02e4f288b19c328ce3c71e88420b87ec2dab6dc825ed1dd1b20  governance\[hexCASusZACharias]\files (1).zip
+4a38c93eba1c76ff8ab3207d4b571d13d90ff0edecbd37f8ac5bc511cf4dffad  governance\[hexCASusZACharias]\files (2).zip
+db392e9efab2f8c19593efc6b3bc97c8ffc11da6c154c42c58ab5cb84b996d9e  governance\[hexCASusZACharias]\files.zip
+
+[DIR] governance\[hexCASusZACharias]\files
+3289f79b037541d41a5ec6c7060d493d3d0cf34ceddbdeca179a24efc2e2bc2e  governance\[hexCASusZACharias]\files\README.md
+0fd2fd85167cc5545c474f0cef5aa3765b6996635ed07a177c72d1c9ab39ede3  governance\[hexCASusZACharias]\files\demo_analysis.py
+70af53a6baf62ac402cc2b24d6c808842aaf05550f33e207c0ddce06cbeff10f  governance\[hexCASusZACharias]\files\ombudsman_analyzer.py
+5d12b60228b49e51a2ddd9bb62d7f3329b893a8fc7844578d6319d64a38684f4  governance\[hexCASusZACharias]\files\pdf_processor.py
+89a9ce5fda77d1c908340ea8e91b0f780db9cdeeff5ef3cfc1a65e955c9fb102  governance\[hexCASusZACharias]\files\structural_analysis_engine.py
+
+[DIR] governance\[hexCASusZACharias]\files (1)
+3289f79b037541d41a5ec6c7060d493d3d0cf34ceddbdeca179a24efc2e2bc2e  governance\[hexCASusZACharias]\files (1)\README.md
+8872870dbb4d4ff16b383a7f621205d0abc38b34d95e1c74e48d4122f479321e  governance\[hexCASusZACharias]\files (1)\demo_analysis.py
+0287f34e824ac4688f582ea2e045436a3e3908887dd898892a49b26dac1e8c3a  governance\[hexCASusZACharias]\files (1)\install_dependencies.sh
+bafc58cfcee9ebad5cddb978366e6fd291a3f8895baed6de0b6c280ddd2f9458  governance\[hexCASusZACharias]\files (1)\ombudsman_analyzer.py
+fcc6a06ce720bfc8474c4d372d97e5b70349f93a66c53d88b93bbe753acd510e  governance\[hexCASusZACharias]\files (1)\pdf_processor.py
+f143669603a39916641a65d36d123619f628284e00f4e6d19ccdcac3f542b197  governance\[hexCASusZACharias]\files (1)\structural_analysis_engine.py
+
+[DIR] governance\[hexCASusZACharias]\files (2)
+8698f6d706d440f939e389e63bba44359c2b96b60738136562e65caace92bb2c  governance\[hexCASusZACharias]\files (2)\README.md
+c5fae9375cf594a3277902eab481115e57009e955ee16fae879d70ae0b8c8a2c  governance\[hexCASusZACharias]\files (2)\demo_analysis.py
+0287f34e824ac4688f582ea2e045436a3e3908887dd898892a49b26dac1e8c3a  governance\[hexCASusZACharias]\files (2)\install_dependencies.sh
+1d844232a9a99d6e989d9a1c9351736a868a3b200fb115c9dea21328d00ead7a  governance\[hexCASusZACharias]\files (2)\ombudsman_analyzer.py
+fcc6a06ce720bfc8474c4d372d97e5b70349f93a66c53d88b93bbe753acd510e  governance\[hexCASusZACharias]\files (2)\pdf_processor.py
+50d235f5fb3688997cb62059db6e57a9a2067ee54908740d747e150133df6a4d  governance\[hexCASusZACharias]\files (2)\structural_analysis_engine.py
 
 [DIR] old
 6566638efdcf62c3cccad28d96961c2c47bf7736ddb2a060e803f21059f45a9a  old\ARCHITECTURAL_DECISIONS.md
 cd3c99270ef66c644bc78f0bacb18f87f4a73b84d1c0ae79e4124710989a5aa2  old\ARCHITECTURAL_DECISIONS_v1.1.md
 dadb2349043ddb092ccca3d39e4d2c8b4f938288b1246fd0a311151a6c7300fd  old\ARCHITECTURE.md
+87c5901c456cd3ee97f2330ccd085f5eb84cb97e34c2389ca9b90a4928e1a655  old\Structural_Governance_Timing_Letter.md
+fbdad81380de4a09eea47fa0cf59cac5b70881510db4adeff8d81ae0053ff876  old\draft.md
 
 [DIR] prior_art
 af5e3188c63bf0128f327e2a8219ce5b729814b2aeab031da0cb21661b4632c0  prior_art\HELL - Canonical Technical Enhancement Package — CTEP-1.md
@@ -217,6 +250,9 @@ cf07c4f3d1256f39fa704080bf6a6a09e010de5310c30e7163e209fa568208e5  tests\ASCPI_BE
 4b1e08b02e064067240ab299ed76e743c6949151c0e9a7dd48babc66c67c34bb  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\NOT FINISHED The_Beginning_of_Truth_Scientific_Article.md
 de8b9fb6474f96c4f386a7f6d7a9d3f82af0a4bb751dc57267d4b39eb647d03c  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\Reality_Without_Time.md
 e2f1a3244a11066dbfb6f37ed56b3552fbf6d17ad8e22e1f709c7efd355bf2f4  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\files.zip.ots
+
+[DIR] tests\New folder
+f30cc34504dd9fc98ddf03f6fdebb92f3ae4d1d761274efe94e813cfca04e903  tests\New folder\cyclan.py
 
 [DIR] tests\canonical
 14701089214bf1ea5dbdbad14671df35fd762c8561385eb1cf928cf56f1992ab  tests\canonical\ascpi_canonical_integrity.test.js
