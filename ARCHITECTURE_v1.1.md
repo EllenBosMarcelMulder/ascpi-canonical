@@ -1,4 +1,4 @@
-# ASCπ Architecture - version 1.1
+# ASCπ Architecture
 
 This document describes the **architectural structure** of the **ASCπ Canonical Field Compiler** and defines the strict separation between its canonical core and the surrounding ecosystem.
 
@@ -119,12 +119,6 @@ Intervention → Ψₛ → F(Ψₛ)
 
 This prevents any “human-in-the-loop optimization” interpretation.
 
-Language processing within ASCπ follows a cyclic field model rather than a linear symbolic model.
-The formal architectural decision governing this choice is defined in ARCHITECTURAL_DECISIONS_v1.2.md (version my change)
-
-ADR-009: *Cyclic Language as Field Law*.
-
-
 ---
 
 ## Layer 4 — Field Native Operator (FNO)
@@ -165,6 +159,34 @@ The FNO preserves a trace of **field convergence**, not a computation plan.
 * External integrations
 
 All innovation must occur **outside** the frozen core.
+
+## Canonical Lock Activation (Clarification)
+
+The term *“frozen”* as used throughout this document refers to the **internal architectural closure**
+of the ASCπ core, not to its final, irreversible global locking.
+
+Earlier descriptions treated “frozen” as if it implied absolute immutability.
+This was **too early and too shallow** an interpretation.
+
+Canonical locking in the strict sense occurs **only** when the ASCπ kernel is
+**formally presented as a global field system**, coupled to:
+
+- the π-referenced global field (Pi-lock), and
+- an explicit earth-referenced coherence frame (Earth-lock),
+
+for which dedicated prior art disclosures already exist.
+
+Before this moment, the architecture operates in a **pre-field canonical phase**:
+internally strict, version-normative, and non-arbitrary, but not yet bound to a
+global physical–mathematical field reference.
+
+After Pi-lock and Earth-lock activation:
+- the kernel becomes irreversibly locked,
+- canonical superseding ceases,
+- and the system transitions from *architecturally frozen* to *globally field-locked*.
+
+This distinction preserves scientific corrigibility during development
+while ensuring absolute stability once the global field is declared.
 
 ---
 
