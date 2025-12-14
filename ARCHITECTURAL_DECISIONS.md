@@ -25,23 +25,27 @@ Accepted — frozen.
 
 ---
 
-## ADR-002: Minimal Closed Field State Ψ
+## ADR-002: Minimal Closed Field State Ψ (Revised)
 
 **Decision**  
 The system state is defined by the minimal closed vector:
 
-Ψ = (ΔΦ, κ, θ, N, C, t)
+Ψ = (ΔΦ, κ, θ, C, t)
+
+The parameter **N is not part of the field state**, but a canonically fixed global invariant.
 
 **Rationale**  
 This is the lowest-dimensional state that:
-- fully describes system evolution
-- allows convergence
-- remains interpretable and invariant
+- fully describes system evolution,
+- allows convergence,
+- remains interpretable,
+- and avoids hidden normalization degrees of freedom.
 
-No additional hidden variables are permitted.
+The exclusion of N from Ψ prevents accidental scaling, forgotten parameters,
+and model divergence across implementations.
 
 **Status**  
-Accepted — frozen.
+Accepted — revised in v1.1.
 
 ---
 
@@ -132,9 +136,49 @@ Accepted — ongoing.
 
 ---
 
+## ADR-008: Canonical Lock Activation Moment
+
+**Decision**  
+Canonical locks within the ASCπ architecture are **not activated at initial implementation time**,
+but at the moment the system is coupled to the **π-referenced global field** and declared
+**earth-locked**.
+
+Until that moment, the system operates in a **pre-field canonical phase**.
+
+**Rationale**  
+Prior to global field coupling:
+
+- the architecture is internally canonical and version-normative,
+- invariants are locally enforced,
+- changes are permitted only through explicit version superseding,
+- silent mutation of locked artifacts is not allowed.
+
+Locking the system before π-coupling would conflate local development canon
+with global field invariance, reduce scientific corrigibility,
+and weaken long-term credibility.
+
+**Lock Activation Condition**  
+Canonical locks become final and irreversible **once and only once** when:
+
+- the ASCπ system is coupled to the π-referenced global field, and
+- the field is formally declared earth-locked,
+  for which explicit prior art disclosures exist.
+
+**Consequence**  
+All kernel versions prior to this event remain valid, traceable,
+and historically canonical, but are classified as
+**pre-field canonical implementations**.
+
+**Status**  
+Accepted — new in v1.1.
+
+---
+
 ## Final Statement
 
-These decisions are not accidental.
-They define the identity of ASCπ.
+TThese decisions define the identity of ASCπ.
 
-Changing them would create a *different system*.
+Prior to global field activation, they are version-canonically binding.
+After π-coupled earth-lock activation, they become final and immutable.
+
+Changing them would create a different system.
