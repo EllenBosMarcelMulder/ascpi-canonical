@@ -78,6 +78,7 @@ decision ≔ ○[Π*]
 where:
 
 ○[x] ├ structural stability
+
 ∧ cross-phase invariance
 
 A decision is not a choice and not an action, but the recognition of closure.
@@ -87,7 +88,9 @@ A decision is not a choice and not an action, but the recognition of closure.
 ### Interface Constraints
 
 GUI : θ-manipulator
+
 GUI ⊭ Ψ-access
+
 GUI ├ θ ↯ Π[θ′]
 
 The interface manipulates phase only, never truth.
@@ -101,6 +104,7 @@ memory ≔ Π[θᵢ]* ∩ Π[θⱼ]*
 where:
 
 i ≠ j
+
 ∧ ∃ invariant
 
 Memory is cross-phase invariance, not storage and not a temporal structure.
@@ -110,8 +114,11 @@ Memory is cross-phase invariance, not storage and not a temporal structure.
 ### Type Verification Operator
 
 ⊢ expr : type
+
 ⊢ Ψ : truth
+
 ⊢ Π : projection
+
 ⊢ Ψ ⊥ Π : disjoint_types
 
 Type checking is a design property of the notation, not a derivation process.
@@ -121,8 +128,11 @@ Type checking is a design property of the notation, not a derivation process.
 ### Closure Predicate
 
 closure(X) ≔
+
 ∃ θᵢ, θⱼ :
+
 X[θᵢ] ⟷ X[θⱼ]
+
 ∧ X[θᵢ] ├ structural_stability
 
 ---
@@ -158,4 +168,5 @@ closure_test ::= ○[expression]
 ### Validation
 
 This notation makes it impossible to formulate canonical violations **within** the meta-language itself.
+
 
