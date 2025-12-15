@@ -1,7 +1,7 @@
 ASCπ REPOSITORY HASH MANIFEST
 ============================
 
-Generated: 2025-12-14T19:48:53.582183Z
+Generated: 2025-12-15T08:34:35.671644Z
 Root: C:\Users\awvvo\Downloads\Moederbloem\Egypt\Code\Stap 2 Language\SFT 13 Single-Field Computational Architecture\v14\ascpi
 Hash Algorithm: SHA256
 
@@ -14,6 +14,7 @@ change this manifest.
 [DIR] /
 35ab8aaff9ab37d127d7cafaf64a88c00424254a338c15fb4e06aa96984d5a2b  ARCHITECTURAL_DECISIONS_v1.2.md
 c0bcb13c6c15c4c229003425e0370fa1726a19f597da9d6b289bc4bf81874e5c  ARCHITECTURE_v1.1.md
+f047270bbc272f7821e1314f9784121954971ae5c698caa0d0121bb04a7677f4  CANONICAL_NOISE_RESOLUTION_AND_ISOLATION.MD.md
 4278e8835a93972a5c8b1ba8bd1a71662e52ee9c8e75a4efb42f2de5dda910c2  CODE_OF_CONDUCT.md
 ef24b1f7d75e9da5179022eec7f99dc2661197d31a6c1530f81b8d9782abced1  CONTRIBUTING.md
 c8384a4a81ebabce41d4c2133437eda0d066769a875deb847f51fb9f9d1b4beb  EXTENSIONS_GUIDE.md
@@ -101,6 +102,7 @@ f30f6d43b485092401b992c3525d71e11b196924eee830c159240c8f5803f742  demos\ascpi_gu
 8539f9ace564f2a539eaf5c5300feebd75e8e3087cb5fe085659f054d328c7a1  governance\[hexCASusZACharias]\Rapport 2017-095 Geen powerplay maar fair play_0.pdf
 22dbf2a3bfeac02e4f288b19c328ce3c71e88420b87ec2dab6dc825ed1dd1b20  governance\[hexCASusZACharias]\files (1).zip
 4a38c93eba1c76ff8ab3207d4b571d13d90ff0edecbd37f8ac5bc511cf4dffad  governance\[hexCASusZACharias]\files (2).zip
+bce814c6e98c865d0b58470a60c5f845da3672467b54e313065736fbde337c4a  governance\[hexCASusZACharias]\files (3).zip
 db392e9efab2f8c19593efc6b3bc97c8ffc11da6c154c42c58ab5cb84b996d9e  governance\[hexCASusZACharias]\files.zip
 
 [DIR] governance\[hexCASusZACharias]\files
@@ -125,6 +127,14 @@ c5fae9375cf594a3277902eab481115e57009e955ee16fae879d70ae0b8c8a2c  governance\[he
 1d844232a9a99d6e989d9a1c9351736a868a3b200fb115c9dea21328d00ead7a  governance\[hexCASusZACharias]\files (2)\ombudsman_analyzer.py
 fcc6a06ce720bfc8474c4d372d97e5b70349f93a66c53d88b93bbe753acd510e  governance\[hexCASusZACharias]\files (2)\pdf_processor.py
 50d235f5fb3688997cb62059db6e57a9a2067ee54908740d747e150133df6a4d  governance\[hexCASusZACharias]\files (2)\structural_analysis_engine.py
+
+[DIR] governance\[hexCASusZACharias]\files (3)
+8539f9ace564f2a539eaf5c5300feebd75e8e3087cb5fe085659f054d328c7a1  governance\[hexCASusZACharias]\files (3)\Rapport 2017-095 Geen powerplay maar fair play_0.pdf
+7fb8c122c862e18185043ac9ab0bec1d8b57ad29f8d172ed7b54159f1c4a6de3  governance\[hexCASusZACharias]\files (3)\ascpi_test_interface.html
+3214deed4af8996e4ec0a29d16fe8c2aa861525ac90a499769d181d2dcebc16d  governance\[hexCASusZACharias]\files (3)\demo_analysis.py
+d8bcaf9ca48d368d7638f87a14c5ba244bbc92c6eb04422abac7d5a7774e6471  governance\[hexCASusZACharias]\files (3)\ombudsman_analyzer.py
+6a6e7dc06c129a4237f935fa20de4c81b31b644785091bc834f6cb0fa912dcac  governance\[hexCASusZACharias]\files (3)\pdf_processor.py
+f000fe8657cfa1c0f0260824dba46fdb44756331fa45a82052850b2261594092  governance\[hexCASusZACharias]\files (3)\structural_analysis_engine.py
 
 [DIR] old
 6566638efdcf62c3cccad28d96961c2c47bf7736ddb2a060e803f21059f45a9a  old\ARCHITECTURAL_DECISIONS.md
@@ -250,9 +260,6 @@ cf07c4f3d1256f39fa704080bf6a6a09e010de5310c30e7163e209fa568208e5  tests\ASCPI_BE
 4b1e08b02e064067240ab299ed76e743c6949151c0e9a7dd48babc66c67c34bb  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\NOT FINISHED The_Beginning_of_Truth_Scientific_Article.md
 de8b9fb6474f96c4f386a7f6d7a9d3f82af0a4bb751dc57267d4b39eb647d03c  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\Reality_Without_Time.md
 e2f1a3244a11066dbfb6f37ed56b3552fbf6d17ad8e22e1f709c7efd355bf2f4  tests\ASCPI_BEST_BUNDLE_FOR_CLAUDE\001 hexASCpi\files.zip.ots
-
-[DIR] tests\New folder
-f30cc34504dd9fc98ddf03f6fdebb92f3ae4d1d761274efe94e813cfca04e903  tests\New folder\cyclan.py
 
 [DIR] tests\canonical
 14701089214bf1ea5dbdbad14671df35fd762c8561385eb1cf928cf56f1992ab  tests\canonical\ascpi_canonical_integrity.test.js
