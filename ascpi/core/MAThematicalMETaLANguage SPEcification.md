@@ -3,12 +3,19 @@
 ### Base Symbols (Primitives)
 
 Ψ truth (inaccessible)
+
 Π projection
+
 θ phase (∈ ℤ₆)
+
 χ viewing curve
+
 ○ closure
+
 ∅ no closure
+
 ⊥ type disjunction
+
 * invariance marker
 
 ---
@@ -16,11 +23,17 @@
 ### Structural Relators (Not Operations)
 
 ⟼ structural projection (Ψ ⟼ Π)
+
 ↯ phase binding (θ ↯ Π)
+
 ≔ positional anchor
+
 ⟷ equivalence within type
+
 ├ closure verification
+
 ⊭ forbidden path
+
 
 Relators do not cause effects; they only position or constrain.
 
@@ -31,9 +44,13 @@ Relators do not cause effects; they only position or constrain.
 #### Valid Constructions
 
 Ψ ⟼ Π[θᵢ]  projection with phase index
+
 Π[θᵢ] ⟷ Π[θⱼ] projection equivalence
+
 χ : θ ↯ Π  viewing-curve binding
+
 ∃○ : [expr] ├ closure closure test
+
 Π* ≔ memory invariance positioning
 
 ---
@@ -41,9 +58,13 @@ Relators do not cause effects; they only position or constrain.
 #### Forbidden Constructions
 
 Π ⟼ Ψ    ⊭ upward causation
+
 Ψ(t)    ⊭ temporal parameter
+
 f(Π) → Π′  ⊭ functional transformation
+
 Π ← agent  ⊭ agency
+
 ∫ Π dt   ⊭ temporal integration
 
 These constructions are not merely forbidden; they are **not formulable** within the language.
@@ -137,3 +158,4 @@ closure_test ::= ○[expression]
 ### Validation
 
 This notation makes it impossible to formulate canonical violations **within** the meta-language itself.
+
