@@ -126,11 +126,11 @@ closure_test ::= ○[expression]
 
 ### Distinguishing Properties
 
-* No conjugation or grammatical tense
-* All statements are positional anchors or constraint verifications
-* Syntax renders temporal and causal constructions syntactically invalid
-* Type checking is built into the notation
-* Meta-recursion: the language describes its own constraint system
+- No conjugation or grammatical tense
+- All statements are positional anchors or constraint verifications
+- Syntax renders temporal and causal constructions syntactically invalid
+- Type checking is built into the notation
+- Meta-recursion: the language describes its own constraint system
 
 ---
 
