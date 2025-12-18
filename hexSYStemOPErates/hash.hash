@@ -73,3 +73,8 @@ CertUtil: -hashfile command completed successfully.
 SHA256 hash of hexsystem_mathematically_correct.html:
 63b6474333386fd6b71a9419dc84c987aeda52e45527f404842faf19965060a0
 CertUtil: -hashfile command completed successfully.
+==== README.md ==== 
+SHA256 hash of README.md:
+8c4d058107d5ed490a8aa4433bcd7b605ef06bcbdcc78f803bb35702ba50a663
+CertUtil: -hashfile command completed successfully.
+
