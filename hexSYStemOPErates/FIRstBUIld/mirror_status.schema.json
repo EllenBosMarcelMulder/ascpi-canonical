@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hex Mirror Status",
+  "type": "object",
+  "required": ["mode", "permissions"],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "const": "reflective_only"
+    },
+    "permissions": {
+      "type": "object",
+      "required": ["may_reflect", "may_decide", "may_initiate"],
+      "properties": {
+        "may_reflect": { "const": true },
+        "may_decide": { "const": false },
+        "may_initiate": { "const": false }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hex Field State",
+  "type": "object",
+  "required": ["topology", "nodes", "relations"],
+  "properties": {
+    "topology": {
+      "const": "hexagonal"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "position"],
+        "properties": {
+          "id": { "type": "string" },
+          "position": {
+            "type": "object",
+            "required": ["q", "r"],
+            "properties": {
+              "q": { "type": "integer" },
+              "r": { "type": "integer" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["a", "b", "visibility"],
+        "properties": {
+          "a": { "type": "string" },
+          "b": { "type": "string" },
+          "visibility": {
+            "type": "string",
+            "enum": ["low", "mid", "high"]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

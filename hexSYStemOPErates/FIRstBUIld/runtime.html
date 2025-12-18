@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>hexSYStemOPErates - Runtime</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: monospace;
+    color: #fff;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .node {
+    fill: rgba(255,255,255,0.6);
+  }
+
+  .link {
+    stroke: rgba(255,255,255,0.4);
+    stroke-width: 1;
+    filter: blur(0.5px);
+  }
+
+  .low {
+    opacity: 0.2;
+    filter: blur(1.5px);
+  }
+
+  .mid {
+    opacity: 0.5;
+    filter: blur(0.8px);
+  }
+
+  .high {
+    opacity: 0.9;
+    filter: blur(0.2px);
+  }
+
+  #status {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+    border: 1px solid #333;
+  }
+</style>
+</head>
+<body>
+
+<div id="status">
+  <div>hexSYStemOPErates - CORE RUNTIME</div>
+  <div>Status: <span id="runtime-status">Initializing</span></div>
+</div>
+
+<svg id="field"></svg>
+
+<script src="projector.js"></script>
+
+<script>
+/* ========== CANONICAL CORE CONSTANTS ========== */
+const D_MAX = 120;
+const HEX_RADIUS = 60;
+
+/* ========== CANONICAL CORE IMPLEMENTATION ========== */
+// Non-decisional core using structural filtering
+function project(field) {
+  const validField = field && field.topology === "hexagonal";
+  const nullResult = validField ? null : null;  // Always null for invalid
+  
+  const out = { nodes: field.nodes, relations: [] };
+  
+  for (let i = 0; i < field.nodes.length; i++) {
+    for (let j = i + 1; j < field.nodes.length; j++) {
+      const a = field.nodes[i];
+      const b = field.nodes[j];
+      const d =
+        (Math.abs(a.q - b.q) +
+         Math.abs(a.q + a.r - b.q - b.r) +
+         Math.abs(a.r - b.r)) / 2;
+      
+      // Structural filtering without decision
+      const withinRange = d <= D_MAX;
+      const visibility = 
+        d < 40 && withinRange ? "high" :
+        d < 80 && withinRange ? "mid"  :
+        withinRange ? "low" : null;
+      
+      visibility && out.relations.push({ a: a.id, b: b.id, visibility });
+    }
+  }
+  
+  return validField ? out : null;
+}
+
+/* ========== FIELD STATE GENERATION ========== */
+function generateFieldState() {
+  const nodes = [];
+  for (let r = 0; r < 6; r++) {
+    for (let q = 0; q < 8; q++) {
+      nodes.push({
+        id: `n_${q}_${r}`,
+        position: { q, r }
+      });
+    }
+  }
+  
+  return {
+    topology: "hexagonal",
+    nodes: nodes.map(n => ({ id: n.id, q: n.position.q, r: n.position.r })),
+    relations: []
+  };
+}
+
+/* ========== INITIALIZATION ========== */
+const svg = document.getElementById('field');
+const fieldState = generateFieldState();
+
+// Run core projection
+const projection = project(fieldState);
+document.getElementById('runtime-status').textContent = 'Core Operational';
+
+// Use projector for visualization - structural presence check
+const projectorAvailable = projection && typeof svgProjector !== 'undefined';
+const statusText = projectorAvailable ? 'Operational' : 'Projector Missing';
+document.getElementById('runtime-status').textContent = statusText;
+
+projectorAvailable && svgProjector.render(svg, projection);
+
+/* ========== CYCLIC RE-PROJECTION (NO TIME AUTHORITY) ========== */
+function cyclicProjection() {
+  const currentProjection = project(fieldState);
+  const projectorReady = currentProjection && typeof svgProjector !== 'undefined';
+  projectorReady && svgProjector.render(svg, currentProjection);
+  requestAnimationFrame(cyclicProjection);
+}
+
+cyclicProjection();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "topology": "hexagonal",
+  "nodes": [
+    { "id": "n_0_0", "q": 0, "r": 0 },
+    { "id": "n_1_0", "q": 1, "r": 0 },
+    { "id": "n_0_1", "q": 0, "r": 1 },
+    { "id": "n_1_1", "q": 1, "r": 1 },
+    { "id": "n_2_0", "q": 2, "r": 0 },
+    { "id": "n_2_1", "q": 2, "r": 1 }
+  ],
+  "relations": [
+    { "a": "n_0_0", "b": "n_1_0", "visibility": "high" },
+    { "a": "n_0_0", "b": "n_0_1", "visibility": "high" },
+    { "a": "n_1_0", "b": "n_1_1", "visibility": "high" },
+    { "a": "n_1_0", "b": "n_2_0", "visibility": "high" },
+    { "a": "n_0_1", "b": "n_1_1", "visibility": "high" },
+    { "a": "n_1_1", "b": "n_2_1", "visibility": "high" },
+    { "a": "n_2_0", "b": "n_2_1", "visibility": "high" }
+  ]
+}

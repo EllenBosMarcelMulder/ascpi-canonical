@@ -1,0 +1,23 @@
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./HASH.txt
+90a40c58f732db2418e0f90b4a9cd803d8ee702258cb16a2358ce396cb3ffc1e  ./NON_DECISIONAL_NOTICE.md
+776eb5204fc8f8187c7598f916bf3ef416cde864bc85956df98b2ceae60a2362  ./PRIOR_ART.md
+a2350658d1b6c35de6204509acfa55ab19a119732632ed7f1a8455b27b951a29  ./README.md
+081bfdbc0275f48ed249f20a05db14ab4b4f8c51a3aa5a20a1699260c3eac304  ./core/core.pseudo
+a71a2dc5bef2d4aa7fe30794d12c5a6255cf4a18a424cccc6740d0b359008b22  ./core/definitions.md
+73de807e14efadf90682d75fc9d5b429f374c89d385b43de078f81a759b3c9c0  ./core/invariants.md
+d67e0d6751405e9cfef6928a3c7f4828c2f252126bde01fa06f68308ea737ec9  ./core/mapping.md
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./runtime/projector.js
+6e3b732910c66785fb7c904a31d3133153e442c3a9263cea07c04ef459b44aad  ./runtime/runtime.html
+cfa8120556fd84be2d219591a7507c168f2b38101ad19de0178357fdddadb0a5  ./schema/crossed_link.schema.json
+b5128ca4e53e64a98817ec644fa7cd88df5a9cf1eb23b8db0f6d9c120c71c254  ./schema/field_state.schema.json
+eff5abadffb4368df5f2c267d779a8afd18e6a1d81ab3ff5f610483633b79ac2  ./schema/mirror_status.schema.json
+d81163d09174b941f8a36d4fa403a3b8d65c3e484a73f6ed1bc70602bfe0036e  ./schema/phase_state.schema.json
+4e63b636b7adf5946b6f6a255a50ea2541c3f861556ef4c32a228b39bc01751b  ./tests/sample_field.json
+41c37fa9fd7e716e914f22d79f7fee573e41ee66229288ff75b6f6d35ef9ff3c  ./verifier/hexsys_verifier.js
+33af02dfd28235bd836741bb18638e867fae66330fdea9548bf588fc5cd225db  ./verifier/hexsys_verifier.py
+
+==== README.md ==== 
+SHA256 hash of README.md:
+a2350658d1b6c35de6204509acfa55ab19a119732632ed7f1a8455b27b951a29
+CertUtil: -hashfile command completed successfully.
+

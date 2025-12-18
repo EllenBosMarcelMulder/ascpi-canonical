@@ -1,0 +1,29 @@
+// hexSYStemOPErates - Canonical Core (Pseudocode)
+
+INPUT: field_state
+OUTPUT: projection
+
+procedure PROJECT(field_state):
+    if not VALID(field_state):
+        return ∅
+    
+    nodes = field_state.nodes
+    relations = []
+    
+    for each unordered pair (i, j) in nodes:
+        d = HEX_DISTANCE(i, j)
+        if d ≤ d_max:
+            v = VISIBILITY(d)
+            relations.append((i.id, j.id, v))
+    
+    return {
+        nodes: nodes,
+        relations: relations
+    }
+
+// Properties:
+// - geen mutatie
+// - geen geheugen
+// - geen optimalisatie
+// - geen tijd
+// - idempotent

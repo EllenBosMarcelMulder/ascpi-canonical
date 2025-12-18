@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hex Phase State",
+  "type": "object",
+  "required": ["phase_id", "closure"],
+  "properties": {
+    "phase_id": {
+      "type": "string",
+      "description": "Identifier only; no ordering implied"
+    },
+    "closure": {
+      "type": "string",
+      "enum": ["structurally_open", "structurally_closed"]
+    },
+    "internal_expansion": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "additionalProperties": false
+}
