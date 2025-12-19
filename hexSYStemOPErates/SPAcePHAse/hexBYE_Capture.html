@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ .:: hexBYE ::. ] — Behavioral Yield Exclusion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@100;200;300;400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap');
+        
+        :root {
+            --void-black: #000000;
+            --terminal-green: #00ff41;
+            --warning-red: #ff0000;
+            --neutral-white: #ffffff;
+            --ghost-gray: #333333;
+            --forensic-cyan: #00ffff;
+            --evidence-amber: #ffaa00;
+            
+            --mono-font: 'Azeret Mono', 'Courier Prime', monospace;
+            --scan-duration: 0.8s;
+            --capture-duration: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--void-black);
+            color: var(--neutral-white);
+            font-family: var(--mono-font);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* Forensic Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Main Interface Container */
+        .hexbye-interface {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "capture output console"
+                "status status status";
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 80px 1fr 60px;
+            z-index: 10;
+        }
+
+        /* Header - Forensic Identity */
+        .header-zone {
+            grid-area: header;
+            background: linear-gradient(90deg, var(--void-black) 0%, rgba(0,255,65,0.1) 50%, var(--void-black) 100%);
+            border-bottom: 1px solid var(--terminal-green);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .hexbye-title {
+            font-size: 1.2rem;
+            font-weight: 200;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--terminal-green);
+        }
+
+        .title-explanation {
+            font-size: 0.6rem;
+            color: var(--ghost-gray);
+            font-weight: 100;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .scan-indicator {
+            width: 12px;
+            height: 12px;
+            background: var(--warning-red);
+            border-radius: 50%;
+            animation: forensic-pulse 2s infinite;
+        }
+
+        @keyframes forensic-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--warning-red); }
+            50% { opacity: 0.3; box-shadow: 0 0 0 10px transparent; }
+        }
+
+        /* Capture Zone - Left Panel */
+        .capture-zone {
+            grid-area: capture;
+            background: rgba(0,0,0,0.8);
+            border-right: 1px solid var(--ghost-gray);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .capture-title {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--forensic-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--ghost-gray);
+            padding-bottom: 0.5rem;
+        }
+
+        .drop-zone {
+            flex: 1;
+            border: 2px dashed var(--ghost-gray);
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--terminal-green);
+            background: rgba(0,255,65,0.05);
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--warning-red);
+            background: rgba(255,0,0,0.1);
+            animation: capture-ready var(--capture-duration) ease;
+        }
+
+        @keyframes capture-ready {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .drop-instruction {
+            font-size: 0.7rem;
+            font-weight: 200;
+            text-align: center;
+            line-height: 1.6;
+            color: var(--ghost-gray);
+            margin-bottom: 1rem;
+        }
+
+        .drop-instruction strong {
+            color: var(--terminal-green);
+            font-weight: 400;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .screenshot-btn {
+            background: transparent;
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-green);
+            padding: 0.8rem 1.5rem;
+            font-family: var(--mono-font);
+            font-size: 0.65rem;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .screenshot-btn:hover {
+            background: var(--terminal-green);
+            color: var(--void-black);
+            box-shadow: 0 0 20px rgba(0,255,65,0.3);
+        }
+
+        /* Output Zone - Center Panel */
+        .output-zone {
+            grid-area: output;
+            background: rgba(0,0,0,0.9);
+            border-right: 1px solid var(--ghost-gray);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .output-header {
+            padding: 1.5rem 2rem 1rem;
+            border-bottom: 1px solid var(--ghost-gray);
+        }
+
+        .output-title {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--forensic-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .preview-container {
+            flex: 1;
+            padding: 2rem;
+            overflow: auto;
+            position: relative;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--ghost-gray);
+            filter: contrast(1.2) brightness(0.9);
+            transition: all 0.5s ease;
+        }
+
+        .image-preview.processing {
+            filter: contrast(1.2) brightness(0.9) blur(1px);
+            animation: scan-sweep var(--scan-duration) ease;
+        }
+
+        @keyframes scan-sweep {
+            0% { box-shadow: inset 0 0 0 0 rgba(0,255,65,0.2); }
+            50% { box-shadow: inset 0 -10px 0 0 rgba(0,255,65,0.2); }
+            100% { box-shadow: inset 0 0 0 0 rgba(0,255,65,0.2); }
+        }
+
+        .process-btn {
+            background: transparent;
+            border: 1px solid var(--evidence-amber);
+            color: var(--evidence-amber);
+            padding: 1rem 2rem;
+            font-family: var(--mono-font);
+            font-size: 0.7rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .process-btn:hover {
+            background: var(--evidence-amber);
+            color: var(--void-black);
+            box-shadow: 0 0 20px rgba(255,170,0,0.3);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Console Zone - Right Panel */
+        .console-zone {
+            grid-area: console;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .console-header {
+            padding: 1.5rem 2rem 1rem;
+            border-bottom: 1px solid var(--ghost-gray);
+        }
+
+        .console-title {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--forensic-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .json-output {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .json-content {
+            font-family: var(--mono-font);
+            font-size: 0.65rem;
+            font-weight: 200;
+            line-height: 1.4;
+            color: var(--neutral-white);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .json-key {
+            color: var(--forensic-cyan);
+        }
+
+        .json-string {
+            color: var(--terminal-green);
+        }
+
+        .json-number {
+            color: var(--evidence-amber);
+        }
+
+        .export-controls {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--ghost-gray);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .export-btn {
+            background: transparent;
+            border: 1px solid var(--forensic-cyan);
+            color: var(--forensic-cyan);
+            padding: 0.6rem 1.2rem;
+            font-family: var(--mono-font);
+            font-size: 0.6rem;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .export-btn:hover {
+            background: var(--forensic-cyan);
+            color: var(--void-black);
+            box-shadow: 0 0 15px rgba(0,255,255,0.3);
+        }
+
+        /* Status Bar - Bottom */
+        .status-zone {
+            grid-area: status;
+            background: rgba(0,0,0,0.9);
+            border-top: 1px solid var(--ghost-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .status-item {
+            font-size: 0.6rem;
+            font-weight: 200;
+            color: var(--ghost-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-value {
+            color: var(--terminal-green);
+            margin-left: 0.5rem;
+        }
+
+        .status-error {
+            color: var(--warning-red);
+        }
+
+        /* Processing Animation Overlay */
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .processing-overlay.active {
+            display: flex;
+        }
+
+        .processing-message {
+            font-size: 0.8rem;
+            font-weight: 300;
+            color: var(--terminal-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            animation: forensic-pulse 1s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hexbye-interface {
+                grid-template-areas: 
+                    "header"
+                    "capture"
+                    "output"
+                    "console"
+                    "status";
+                grid-template-columns: 1fr;
+                grid-template-rows: 80px 1fr 1fr 1fr 60px;
+            }
+            
+            .capture-zone,
+            .output-zone,
+            .console-zone {
+                border-right: none;
+                border-bottom: 1px solid var(--ghost-gray);
+            }
+        }
+
+        /* Evidence Markers */
+        .evidence-marker {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--warning-red);
+            border: 1px solid var(--neutral-white);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .cluster-marker {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--forensic-cyan);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 8px var(--forensic-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="hexbye-interface">
+        <!-- Header Zone -->
+        <div class="header-zone">
+            <div>
+                <div class="hexbye-title">[ .:: hexBYE ::. ]</div>
+                <div class="title-explanation">Behavioral Yield Exclusion</div>
+            </div>
+            <div>
+                <div class="scan-indicator"></div>
+            </div>
+        </div>
+
+        <!-- Capture Zone -->
+        <div class="capture-zone">
+            <div class="capture-title">Visibility Domain Input</div>
+            
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-instruction">
+                    <strong>DROP IMAGE or JSON</strong><br>
+                    or click to select<br><br>
+                    accepts: screenshots, renders, field_state.json<br>
+                    excludes: meaning, intent, context<br>
+                    preserves: z_lift_spec metadata, visibility_field encoding<br>
+                    reconstructs: pixel-exact visibility from JSON
+                </div>
+                
+                <input type="file" class="file-input" id="fileInput" accept="image/*,.json,application/json">
+                
+                <button class="screenshot-btn" onclick="captureScreen()">
+                    CAPTURE SCREEN
+                </button>
+                
+                <button class="json-reader-btn" onclick="toggleJsonReader()" style="margin-top: 10px; background: transparent; border: 1px solid var(--forensic-cyan); color: var(--forensic-cyan); padding: 8px 16px; font-family: var(--mono-font); font-size: 0.65rem; cursor: pointer;">
+                    JSON READER
+                </button>
+                
+                <div class="json-reader-zone" id="jsonReaderZone" style="display: none; margin-top: 10px;">
+                    <textarea class="json-input" id="jsonReaderInput" style="width: 100%; height: 150px; background: rgba(0,0,0,0.5); border: 1px solid var(--ghost-gray); color: var(--neutral-white); font-family: var(--mono-font); font-size: 0.65rem; padding: 8px; resize: vertical;" placeholder="Paste hexBYE field state JSON here..."></textarea>
+                    <button class="json-load-btn" onclick="loadFromJsonReader()" style="width: 100%; margin-top: 5px; background: transparent; border: 1px solid var(--evidence-amber); color: var(--evidence-amber); padding: 8px; font-family: var(--mono-font); font-size: 0.65rem; cursor: pointer;">
+                        LOAD JSON
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Zone -->
+        <div class="output-zone">
+            <div class="output-header">
+                <div class="output-title">Visibility Evidence</div>
+            </div>
+            
+            <div class="preview-container" id="previewContainer">
+                <div style="text-align: center; color: var(--ghost-gray); margin-top: 4rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                    NO VISIBILITY DATA
+                </div>
+            </div>
+            
+            <button class="process-btn" id="processBtn" onclick="processImage()" disabled>
+                EXTRACT STRUCTURE<br>
+                <span style="font-size: 0.5rem; opacity: 0.7; font-weight: 200;">No decision is made by this action</span>
+            </button>
+        </div>
+
+        <!-- Console Zone -->
+        <div class="console-zone">
+            <div class="console-header">
+                <div class="console-title">Field State Output</div>
+            </div>
+            
+            <div class="json-output">
+                <div class="json-content" id="jsonOutput">
+{
+  "status": "hexBYE ready",
+  "visibility_domain": null,
+  "structure_extracted": false
+}
+                </div>
+            </div>
+            
+            <div class="export-controls">
+                <button class="export-btn" onclick="exportJSON()">EXPORT JSON</button>
+                <button class="export-btn" onclick="exportToHexSys()">TO hexSYS</button>
+            </div>
+        </div>
+
+        <!-- Status Zone -->
+        <div class="status-zone">
+            <div class="status-item">
+                Domain: <span class="status-value" id="domainStatus">EMPTY</span>
+            </div>
+            <div class="status-item">
+                Nodes: <span class="status-value" id="nodeCount">0</span>
+            </div>
+            <div class="status-item">
+                Relations: <span class="status-value" id="relationCount">0</span>
+            </div>
+            <div class="status-item">
+                Invariant: <span class="status-value">NON-DECISIONAL</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div class="processing-overlay" id="processingOverlay">
+        <div class="processing-message">EXTRACTING STRUCTURE</div>
+    </div>
+
+    <script>
+        // hexBYE Core Implementation
+        class HexByeProcessor {
+            constructor() {
+                this.currentImage = null;
+                this.extractedField = null;
+                this.z_lift_spec = null; // Opaque metadata passthrough
+                this.visibility_field = null; // Lossless visibility encoding
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                const dropZone = document.getElementById('dropZone');
+                const fileInput = document.getElementById('fileInput');
+
+                // File input events
+                dropZone.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => this.handleFile(e.target.files[0]));
+
+                // Drag and drop events
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('drag-over');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        this.handleFile(file);
+                    }
+                });
+            }
+
+            handleFile(file) {
+                if (!file) {
+                    this.updateStatus('ERROR: No file provided', 'error');
+                    return;
+                }
+
+                // Handle JSON files
+                if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.importJSON(e.target.result);
+                    };
+                    reader.readAsText(file);
+                    this.updateStatus(`Loading JSON: ${file.name}`);
+                    return;
+                }
+
+                // Handle image files
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.loadImage(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                    this.updateStatus(`Loading: ${file.name}`);
+                    return;
+                }
+
+                this.updateStatus('ERROR: Unsupported file type', 'error');
+            }
+
+            loadImage(imageSrc) {
+                const img = new Image();
+                img.onload = () => {
+                    this.currentImage = img;
+                    this.displayImage(img);
+                    this.updateStatus('Image loaded', 'success');
+                    document.getElementById('processBtn').disabled = false;
+                };
+                img.onerror = () => {
+                    this.updateStatus('ERROR: Failed to load image', 'error');
+                };
+                img.src = imageSrc;
+            }
+
+            /**
+             * Generate lossless visibility field encoding
+             * Uses curve-based compression for pixel-exact reconstruction
+             */
+            generateVisibilityField(imageData, width, height) {
+                const pixels = imageData.data;
+                
+                // Simple run-length encoding for lossless compression
+                const compressed = {
+                    encoding: "run_length_rgba",
+                    width: width,
+                    height: height,
+                    data: [],
+                    checksum: this.calculateChecksum(pixels)
+                };
+
+                // Run-length encode RGBA data
+                let i = 0;
+                while (i < pixels.length) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    const a = pixels[i + 3];
+                    
+                    let runLength = 1;
+                    let j = i + 4;
+                    
+                    // Count consecutive identical pixels
+                    while (j < pixels.length && 
+                           pixels[j] === r && pixels[j + 1] === g && 
+                           pixels[j + 2] === b && pixels[j + 3] === a) {
+                        runLength++;
+                        j += 4;
+                    }
+                    
+                    compressed.data.push([r, g, b, a, runLength]);
+                    i = j;
+                }
+
+                return compressed;
+            }
+
+            /**
+             * Reconstruct exact visibility from visibility_field
+             * Pixel-exact reconstruction guaranteed
+             */
+            reconstructVisibility(visibility_field) {
+                if (!visibility_field || visibility_field.encoding !== "run_length_rgba") {
+                    return null;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = visibility_field.width;
+                canvas.height = visibility_field.height;
+                const ctx = canvas.getContext('2d');
+                
+                const imageData = ctx.createImageData(canvas.width, canvas.height);
+                const pixels = imageData.data;
+
+                // Decompress run-length encoded data
+                let pixelIndex = 0;
+                visibility_field.data.forEach(([r, g, b, a, count]) => {
+                    for (let i = 0; i < count; i++) {
+                        pixels[pixelIndex] = r;
+                        pixels[pixelIndex + 1] = g;
+                        pixels[pixelIndex + 2] = b;
+                        pixels[pixelIndex + 3] = a;
+                        pixelIndex += 4;
+                    }
+                });
+
+                // Verify reconstruction integrity
+                const reconstructedChecksum = this.calculateChecksum(pixels);
+                if (reconstructedChecksum !== visibility_field.checksum) {
+                    console.error('Visibility reconstruction checksum mismatch');
+                    return null;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                return canvas;
+            }
+
+            /**
+             * Calculate checksum for pixel data integrity verification
+             */
+            /**
+             * Reconstruct original image from visibility_field
+             * Display exact reconstruction in preview
+             */
+            reconstructFromVisibilityField() {
+                if (!this.visibility_field) {
+                    return;
+                }
+
+                const reconstructedCanvas = this.reconstructVisibility(this.visibility_field);
+                if (!reconstructedCanvas) {
+                    this.updateStatus('ERROR: Failed to reconstruct visibility', 'error');
+                    return;
+                }
+
+                // Display reconstructed image in preview
+                const container = document.getElementById('previewContainer');
+                container.innerHTML = '';
+                
+                const preview = document.createElement('img');
+                preview.src = reconstructedCanvas.toDataURL();
+                preview.className = 'image-preview';
+                preview.alt = 'Reconstructed visibility';
+                
+                const label = document.createElement('div');
+                label.style.cssText = 'color: var(--evidence-amber); font-size: 0.6rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;';
+                label.textContent = 'Pixel-Exact Reconstruction from visibility_field';
+                
+                container.appendChild(label);
+                container.appendChild(preview);
+                
+                // Store reconstructed canvas for potential re-processing
+                this.currentImage = new Image();
+                this.currentImage.onload = () => {
+                    document.getElementById('processBtn').disabled = false;
+                    this.updateStatus('Visibility reconstructed - ready for hexBYE analysis', 'success');
+                };
+                this.currentImage.src = reconstructedCanvas.toDataURL();
+            }
+
+            calculateChecksum(pixels) {
+                let sum = 0;
+                for (let i = 0; i < pixels.length; i++) {
+                    sum = (sum + pixels[i] * (i + 1)) % 0xFFFFFFFF;
+                }
+                return sum;
+            }
+
+            /**
+             * Import JSON field state with optional z_lift_spec
+             * Preserves z_lift_spec as opaque metadata
+             */
+            importJSON(jsonData) {
+                try {
+                    const fieldState = JSON.parse(jsonData);
+                    
+                    // Validate basic structure
+                    if (!fieldState.topology || !fieldState.nodes || !fieldState.relations) {
+                        throw new Error('Invalid field state structure');
+                    }
+
+                    // Extract and preserve z_lift_spec if present (opaque passthrough)
+                    if (fieldState.z_lift_spec && typeof fieldState.z_lift_spec === 'object') {
+                        this.z_lift_spec = fieldState.z_lift_spec;
+                        this.updateStatus('z_lift_spec preserved as metadata', 'info');
+                    }
+
+                    // Extract and preserve visibility_field if present (lossless visibility)
+                    if (fieldState.visibility_field && typeof fieldState.visibility_field === 'object') {
+                        this.visibility_field = fieldState.visibility_field;
+                        this.updateStatus('visibility_field detected - lossless reconstruction available', 'info');
+                        
+                        // Reconstruct original visibility if possible
+                        this.reconstructFromVisibilityField();
+                    }
+
+                    // Load field data (z_lift_spec not used in processing)
+                    this.extractedField = fieldState;
+                    this.displayResults(fieldState);
+                    this.updateStatus('JSON field state imported', 'success');
+
+                } catch (error) {
+                    this.updateStatus('ERROR: Invalid JSON - ' + error.message, 'error');
+                }
+            }
+
+            displayImage(img) {
+                const container = document.getElementById('previewContainer');
+                container.innerHTML = '';
+                
+                const preview = document.createElement('img');
+                preview.src = img.src;
+                preview.className = 'image-preview';
+                preview.alt = 'Visibility evidence';
+                
+                container.appendChild(preview);
+                
+                document.getElementById('domainStatus').textContent = 'LOADED';
+                
+                this.updateJsonOutput({
+                    status: "visibility_domain_loaded",
+                    dimensions: {
+                        width: img.naturalWidth,
+                        height: img.naturalHeight
+                    },
+                    ready_for_extraction: true
+                });
+            }
+
+            async processImage() {
+                if (!this.currentImage) {
+                    this.updateStatus('ERROR: No image loaded', 'error');
+                    return;
+                }
+
+                // Explicit semantic exclusion (juridical clarity)
+                console.log('hexBYE: No semantic inference performed - visibility-only processing');
+
+                // Show processing overlay
+                document.getElementById('processingOverlay').classList.add('active');
+                
+                // Add processing visual effect
+                const preview = document.querySelector('.image-preview');
+                if (preview) {
+                    preview.classList.add('processing');
+                }
+
+                try {
+                    // Create canvas for pixel analysis
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = this.currentImage.naturalWidth;
+                    canvas.height = this.currentImage.naturalHeight;
+                    
+                    ctx.drawImage(this.currentImage, 0, 0);
+                    
+                    // Extract pixel data
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    // Generate lossless visibility field (separate from hexBYE)
+                    this.visibility_field = this.generateVisibilityField(imageData, canvas.width, canvas.height);
+                    
+                    // Apply hexBYE mapping (independent of visibility field)
+                    const fieldState = this.hexbyeMap(imageData.data, canvas.width, canvas.height);
+                    
+                    // Store result
+                    this.extractedField = fieldState;
+                    
+                    // Update interface
+                    this.displayResults(fieldState);
+                    this.updateStatus('Structure extracted', 'success');
+                    
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    this.updateStatus('ERROR: Processing failed', 'error');
+                } finally {
+                    // Hide processing overlay
+                    setTimeout(() => {
+                        document.getElementById('processingOverlay').classList.remove('active');
+                        if (preview) {
+                            preview.classList.remove('processing');
+                        }
+                    }, 800);
+                }
+            }
+
+            hexbyeMap(pixelBuffer, width, height) {
+                // IMMUTABLE CANONICAL CONSTANTS - readonly during execution
+                const SCALE = Object.freeze(40);              // Fixed scale - never modified
+                const EDGE_THRESHOLD = Object.freeze(20);     // Sobel threshold - sensor constant
+                const MAX_HEX_DISTANCE = Object.freeze(3);    // Relation distance limit
+
+                // Convert to luminance
+                const luminance = new Float32Array(width * height);
+                for (let i = 0; i < pixelBuffer.length; i += 4) {
+                    luminance[i / 4] = 
+                        0.2126 * pixelBuffer[i] +     // R
+                        0.7152 * pixelBuffer[i + 1] + // G
+                        0.0722 * pixelBuffer[i + 2];  // B
+                }
+
+                // Edge detection (Sobel operator)
+                const edges = new Uint8Array(width * height);
+                for (let y = 1; y < height - 1; y++) {
+                    for (let x = 1; x < width - 1; x++) {
+                        const i = y * width + x;
+                        
+                        // Sobel X kernel
+                        const gx = 
+                            -luminance[i - width - 1] - 2 * luminance[i - 1] - luminance[i + width - 1] +
+                             luminance[i - width + 1] + 2 * luminance[i + 1] + luminance[i + width + 1];
+                        
+                        // Sobel Y kernel
+                        const gy = 
+                            -luminance[i - width - 1] - 2 * luminance[i - width] - luminance[i - width + 1] +
+                             luminance[i + width - 1] + 2 * luminance[i + width] + luminance[i + width + 1];
+                        
+                        const magnitude = Math.sqrt(gx * gx + gy * gy);
+                        edges[i] = magnitude > EDGE_THRESHOLD ? 1 : 0;
+                    }
+                }
+
+                // Cluster connected components
+                const visited = new Uint8Array(width * height);
+                const clusters = [];
+
+                for (let i = 0; i < edges.length; i++) {
+                    if (edges[i] && !visited[i]) {
+                        const stack = [i];
+                        let sumX = 0, sumY = 0, count = 0;
+
+                        while (stack.length) {
+                            const p = stack.pop();
+                            if (visited[p]) continue;
+                            
+                            visited[p] = 1;
+                            const x = p % width;
+                            const y = Math.floor(p / width);
+                            sumX += x;
+                            sumY += y;
+                            count++;
+
+                            // Check 8-connected neighbors
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && ny >= 0 && nx < width && ny < height) {
+                                        const ni = ny * width + nx;
+                                        if (edges[ni] && !visited[ni]) {
+                                            stack.push(ni);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Preserve all clusters - no filtering
+                        clusters.push({
+                            x: sumX / count,
+                            y: sumY / count,
+                            size: count
+                        });
+                    }
+                }
+
+                // Map to hex coordinates using immutable scale
+                const nodes = clusters.map((cluster, i) => ({
+                    id: `n${i}`,
+                    position: {
+                        q: Math.round(cluster.x / SCALE),
+                        r: Math.round(cluster.y / SCALE)
+                    },
+                    properties: {
+                        type: "extracted",
+                        cluster_size: cluster.size,
+                        original_position: {
+                            x: cluster.x,
+                            y: cluster.y
+                        }
+                    }
+                }));
+
+                // Generate relations based on proximity using immutable distance
+                const relations = [];
+
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const a = nodes[i].position;
+                        const b = nodes[j].position;
+                        
+                        // Calculate hex distance
+                        const distance = (Math.abs(a.q - b.q) + 
+                                        Math.abs(a.q + a.r - b.q - b.r) + 
+                                        Math.abs(a.r - b.r)) / 2;
+
+                        if (distance <= MAX_HEX_DISTANCE) {
+                            const visibility = distance <= 1 ? 3 : 
+                                             distance <= 2 ? 2 : 1;
+                            relations.push({
+                                a: nodes[i].id,
+                                b: nodes[j].id,
+                                visibility,
+                                properties: {
+                                    type: "structural",
+                                    distance: distance
+                                }
+                            });
+                        }
+                    }
+                }
+
+                const fieldState = {
+                    topology: "hexagonal",
+                    meta: {
+                        phase: "hexBYE",
+                        version: "1.0.0",
+                        source: "visibility_extraction",
+                        dimensions: { width, height },
+                        scale: SCALE,
+                        scale_invariant: true,
+                        constants_immutable: true
+                    },
+                    nodes,
+                    relations,
+                    crossed_link: {
+                        method_identity: "hexBYE ∘ P ∘ hexBYE",
+                        projector_spec: {
+                            type: "deterministic_code_projection",
+                            geometry: "hex_axial_to_visible",
+                            scale: SCALE,
+                            rotation: 0,
+                            translation: "centered",
+                            decision_free: true
+                        },
+                        invariant_claim: "hexBYE(P(F)) ≡ F",
+                        normalization: {
+                            node_order: ["q", "r"],
+                            relation_order: ["a", "b"],
+                            ignore: ["timestamps", "ui", "labels"]
+                        },
+                        validation_mode: "structural_identity_only"
+                    },
+                    validation: {
+                        invariants: [
+                            "non_decisional",
+                            "no_time_authority",
+                            "crossed_link_neutral",
+                            "structurally_correspondent"
+                        ]
+                    }
+                };
+
+                // Passthrough z_lift_spec if present (byte-identical)
+                if (this.z_lift_spec) {
+                    fieldState.z_lift_spec = this.z_lift_spec;
+                }
+
+                // Add visibility_field if generated (lossless visibility encoding)
+                if (this.visibility_field) {
+                    fieldState.visibility_field = this.visibility_field;
+                }
+
+                return fieldState;
+            }
+
+            displayResults(fieldState) {
+                // Update node count
+                document.getElementById('nodeCount').textContent = fieldState.nodes.length;
+                document.getElementById('relationCount').textContent = fieldState.relations.length;
+                
+                // Display JSON
+                this.updateJsonOutput(fieldState);
+                
+                // Corrected visualization priority: visibility_field > projector
+                this.renderVisualization(fieldState);
+            }
+
+            /**
+             * Render visualization with correct priority:
+             * if visibility_field exists: render visibility_field
+             * else: render projector(field_state)
+             */
+            renderVisualization(fieldState) {
+                const container = document.getElementById('previewContainer');
+                
+                // Priority 1: visibility_field exists -> direct reconstruction
+                if (fieldState.visibility_field) {
+                    this.renderFromVisibilityField(fieldState.visibility_field, container, fieldState);
+                    return;
+                }
+                
+                // Priority 2: projector(field_state) for structural visualization
+                this.renderFromProjector(fieldState, container);
+            }
+
+            /**
+             * Render exact reconstruction from visibility_field
+             */
+            renderFromVisibilityField(visibility_field, container, fieldState) {
+                try {
+                    const reconstructedCanvas = this.reconstructVisibility(visibility_field);
+                    if (!reconstructedCanvas) {
+                        throw new Error('Failed to reconstruct visibility_field');
+                    }
+
+                    container.innerHTML = '';
+                    
+                    const label = document.createElement('div');
+                    label.style.cssText = 'color: var(--evidence-amber); font-size: 0.6rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;';
+                    label.textContent = 'EXACT RECONSTRUCTION (visibility_field)';
+                    
+                    const preview = document.createElement('img');
+                    preview.src = reconstructedCanvas.toDataURL();
+                    preview.className = 'image-preview';
+                    preview.alt = 'Exact visibility reconstruction';
+                    
+                    container.appendChild(label);
+                    container.appendChild(preview);
+                    
+                    // Add structural markers on top of exact reconstruction
+                    this.addStructuralMarkers(container, fieldState);
+                    
+                } catch (error) {
+                    console.error('Visibility field reconstruction failed:', error);
+                    // Fallback to projector if reconstruction fails
+                    this.renderFromProjector(fieldState, container);
+                }
+            }
+
+            /**
+             * Render structural visualization from projector
+             */
+            renderFromProjector(fieldState, container) {
+                // Create projector canvas for structural visualization
+                const canvas = document.createElement('canvas');
+                canvas.width = 400;
+                canvas.height = 400;
+                const ctx = canvas.getContext('2d');
+
+                // Clear background
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Project field state to structural visualization
+                this.projectFieldToCanvas(ctx, fieldState, canvas.width, canvas.height);
+
+                container.innerHTML = '';
+                
+                const label = document.createElement('div');
+                label.style.cssText = 'color: var(--forensic-cyan); font-size: 0.6rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;';
+                label.textContent = 'STRUCTURAL VISUALIZATION (projector)';
+                
+                const preview = document.createElement('img');
+                preview.src = canvas.toDataURL();
+                preview.className = 'image-preview';
+                preview.alt = 'Structural field visualization';
+                
+                container.appendChild(label);
+                container.appendChild(preview);
+                
+                // Add structural markers
+                this.addStructuralMarkers(container, fieldState);
+            }
+
+            /**
+             * Project field state nodes and relations to canvas
+             */
+            projectFieldToCanvas(ctx, fieldState, width, height) {
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const scale = 20;
+
+                // Draw nodes as white circles
+                fieldState.nodes.forEach(node => {
+                    const x = centerX + node.position.q * scale;
+                    const y = centerY + node.position.r * scale;
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Draw relations as cyan lines
+                fieldState.relations.forEach(relation => {
+                    const nodeA = fieldState.nodes.find(n => n.id === relation.a);
+                    const nodeB = fieldState.nodes.find(n => n.id === relation.b);
+
+                    if (nodeA && nodeB) {
+                        const x1 = centerX + nodeA.position.q * scale;
+                        const y1 = centerY + nodeA.position.r * scale;
+                        const x2 = centerX + nodeB.position.q * scale;
+                        const y2 = centerY + nodeB.position.r * scale;
+
+                        // Visibility-based line styling
+                        const alphaMap = { 3: 0.9, 2: 0.6, 1: 0.3 };
+                        const alpha = alphaMap[relation.visibility] || 0.5;
+
+                        ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.stroke();
+                    }
+                });
+            }
+
+            addStructuralMarkers(container, fieldState) {
+                // Add hex structure overlay markers (simplified)
+                fieldState.nodes.forEach((node, i) => {
+                    if (i < 10) { // Limit markers for performance
+                        const marker = document.createElement('div');
+                        marker.className = 'cluster-marker';
+                        marker.style.cssText = `
+                            position: absolute;
+                            width: 8px;
+                            height: 8px;
+                            background: var(--terminal-green);
+                            border-radius: 50%;
+                            pointer-events: none;
+                            top: ${50 + node.position.r * 2}%;
+                            left: ${50 + node.position.q * 2}%;
+                            transform: translate(-50%, -50%);
+                        `;
+                        container.appendChild(marker);
+                    }
+                });
+            }
+
+            addVisualMarkers(fieldState) {
+                const container = document.getElementById('previewContainer');
+                const preview = container.querySelector('.image-preview');
+                
+                if (!preview) return;
+                
+                // Remove existing markers
+                container.querySelectorAll('.evidence-marker, .cluster-marker').forEach(el => el.remove());
+                
+                // Add cluster markers
+                fieldState.nodes.forEach(node => {
+                    if (node.properties && node.properties.original_position) {
+                        const marker = document.createElement('div');
+                        marker.className = 'cluster-marker';
+                        
+                        const rect = preview.getBoundingClientRect();
+                        const containerRect = container.getBoundingClientRect();
+                        
+                        const scaleX = preview.clientWidth / this.currentImage.naturalWidth;
+                        const scaleY = preview.clientHeight / this.currentImage.naturalHeight;
+                        
+                        const x = node.properties.original_position.x * scaleX;
+                        const y = node.properties.original_position.y * scaleY;
+                        
+                        marker.style.left = (x + (rect.left - containerRect.left)) + 'px';
+                        marker.style.top = (y + (rect.top - containerRect.top)) + 'px';
+                        marker.title = `Node: ${node.id}, Cluster Size: ${node.properties.cluster_size}`;
+                        
+                        container.appendChild(marker);
+                    }
+                });
+            }
+
+            updateJsonOutput(data) {
+                const output = document.getElementById('jsonOutput');
+                const formatted = JSON.stringify(data, null, 2);
+                
+                // Simple syntax highlighting
+                const highlighted = formatted
+                    .replace(/"([^"]+)":/g, '<span class="json-key">"$1":</span>')
+                    .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+                    .replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
+                
+                output.innerHTML = highlighted;
+            }
+
+            updateStatus(message, type = 'info') {
+                const statusElement = document.getElementById('domainStatus');
+                statusElement.textContent = message;
+                
+                // Remove existing status classes
+                statusElement.classList.remove('status-error');
+                
+                if (type === 'error') {
+                    statusElement.classList.add('status-error');
+                }
+            }
+
+            exportJSON() {
+                if (!this.extractedField) {
+                    this.updateStatus('ERROR: No data to export', 'error');
+                    return;
+                }
+
+                const blob = new Blob([JSON.stringify(this.extractedField, null, 2)], {
+                    type: 'application/json'
+                });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `hexbye_extraction_${Date.now()}.json`;
+                a.click();
+                
+                URL.revokeObjectURL(url);
+                this.updateStatus('Exported successfully', 'success');
+            }
+
+            exportToHexSys() {
+                if (!this.extractedField) {
+                    this.updateStatus('ERROR: No data to export', 'error');
+                    return;
+                }
+
+                // Open in new window with hexSYStemOPErates
+                const dataUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(this.extractedField));
+                window.open(`../hexPHAseTWO_Master.html?load=${dataUrl}`, '_blank');
+                
+                this.updateStatus('Opened in hexSYS', 'success');
+            }
+        }
+
+        // Global functions for HTML event handlers
+        let hexByeProcessor;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            hexByeProcessor = new HexByeProcessor();
+        });
+
+        function processImage() {
+            hexByeProcessor.processImage();
+        }
+
+        function exportJSON() {
+            hexByeProcessor.exportJSON();
+        }
+
+        function exportToHexSys() {
+            hexByeProcessor.exportToHexSys();
+        }
+
+        async function captureScreen() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { mediaSource: 'screen' }
+                });
+                
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+                
+                video.addEventListener('loadedmetadata', () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    ctx.drawImage(video, 0, 0);
+                    
+                    // Stop the stream
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    // Convert to blob and process
+                    canvas.toBlob(blob => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            hexByeProcessor.loadImage(e.target.result);
+                        };
+                        reader.readAsDataURL(blob);
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Screen capture failed:', error);
+                hexByeProcessor.updateStatus('ERROR: Screen capture failed', 'error');
+            }
+        }
+
+        // JSON Reader Functions
+        function toggleJsonReader() {
+            const zone = document.getElementById('jsonReaderZone');
+            const btn = document.querySelector('.json-reader-btn');
+            
+            if (zone.style.display === 'none') {
+                zone.style.display = 'block';
+                btn.textContent = 'HIDE READER';
+                btn.style.color = 'var(--warning-red)';
+                btn.style.borderColor = 'var(--warning-red)';
+            } else {
+                zone.style.display = 'none';
+                btn.textContent = 'JSON READER';
+                btn.style.color = 'var(--forensic-cyan)';
+                btn.style.borderColor = 'var(--forensic-cyan)';
+            }
+        }
+
+        function loadFromJsonReader() {
+            const jsonInput = document.getElementById('jsonReaderInput').value.trim();
+            if (!jsonInput) {
+                hexByeProcessor.updateStatus('No JSON provided', 'warning');
+                return;
+            }
+            
+            try {
+                hexByeProcessor.importJSON(jsonInput);
+                // Hide reader after successful load
+                document.getElementById('jsonReaderZone').style.display = 'none';
+                const btn = document.querySelector('.json-reader-btn');
+                btn.textContent = 'JSON READER';
+                btn.style.color = 'var(--forensic-cyan)';
+                btn.style.borderColor = 'var(--forensic-cyan)';
+                document.getElementById('jsonReaderInput').value = '';
+                hexByeProcessor.updateStatus('JSON loaded successfully', 'success');
+            } catch (error) {
+                hexByeProcessor.updateStatus('Invalid JSON: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
