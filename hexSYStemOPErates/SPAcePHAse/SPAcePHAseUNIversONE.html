@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hexSYStemOPErates — [ .:: hexPIXelWAVe3D ::. ]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: #000; color: #fff;
+            overflow: hidden; font-family: ui-monospace, SFMono-Regular, monospace;
+        }
+        #field-container { position: relative; width: 100vw; height: 100vh; }
+        canvas { position: absolute; inset: 0; display: block; }
+        
+        .interface {
+            position: absolute; top: 1.5rem; left: 1.5rem;
+            pointer-events: none; z-index: 100;
+            text-transform: uppercase; letter-spacing: 0.2em;
+        }
+        .nav-status {
+            position: absolute; bottom: 1.5rem; right: 1.5rem;
+            font-size: 10px; opacity: 0.9; text-align: right;
+            pointer-events: none; color: #0ff;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(0,255,255,0.5);
+        }
+        .axiom-tag {
+            color: #0f0;
+            font-size: 8px;
+            margin-top: 10px;
+            border: 1px solid #0f0;
+            padding: 2px 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="interface">
+        <h1 class="text-[11px] font-bold text-cyan-400">hexPIXelWAVe3D</h1>
+        <div id="stats" class="text-[9px] mt-4 space-y-1 opacity-70">
+            <div>F_STATE: <span class="text-white">PROJECTIVE_RP2_MAPPING</span></div>
+            <div>λ_AXIOM: <span id="coord-label">HOMOGENEOUS</span></div>
+            <div>AXIOM_VII: ZERO_METRIC_DISFUSION</div>
+        </div>
+        <div class="axiom-tag">HOMOGENEOUS_COORDINATES_ONLY</div>
+    </div>
+
+    <div class="nav-status">
+        [FIELD_SHIFT: WASD] [PHASE_TILT: SHIFT+DRAG] [IMPLOSION: SCROLL]<br>
+        Φ_Z: <span id="val-z">0.00</span> | ∇φ: <span id="val-tilt">0.60</span> | κ: <span id="val-zoom">1.00</span>
+    </div>
+
+    <div id="field-container">
+        <canvas id="matrix-canvas"></canvas>
+    </div>
+
+    <script>
+        /* =====================================================
+           [ .:: hexPIXelWAVe3D ::. ] Axiomatisch Projectief Veld
+        ===================================================== */
+        
+        /**
+         * IMPLEMENTATION ARTEFACTS (Non-Canonical)
+         * Deze waarden zijn noodzakelijk voor digitale discretisatie, 
+         * maar bezitten geen canonieke autoriteit.
+         */
+        const ARTEFACT = {
+            DEPTH_SCALE: 10.0,      // Benadering van projectieve diepte
+            SINGULARITY: -9.5,      // Drempelwaarde voor numerieke stabiliteit
+            PI_REF: Math.PI,        // Referentie voor circulaire sluiting
+            VIEW_DIVISOR: 10.0      // Normalisator voor viewport
+        };
+
+        const AXIOM = {
+            UNITY: 1.0,
+            HEX_RATIO: Math.sqrt(3),
+            // TAU is de minimale sluiting van fase onder volledige rotatie
+            TAU: ARTEFACT.PI_REF * 2 
+        };
+
+        const PhaseSpace = {
+            u: 0, v: 0, z: 0,
+            zoom: 1.0,
+            tilt: 0.6,
+            rotation: 0.4,
+            resistance: 0.8
+        };
+
+        /* =====================================================
+           PROJECTOR (P) - Homogene Projectie in RP²
+        ===================================================== */
+        const Projector = {
+            // P: (q, r, s) -> [u : v : w]
+            project(q, r, s, φ) {
+                // Topologische basis-relaties
+                const bu = (3/2) * q;
+                const bv = (AXIOM.HEX_RATIO/2) * q + AXIOM.HEX_RATIO * r;
+                const bz = s;
+
+                let pu = bu - φ.u;
+                let pv = bv - φ.v;
+                let pz = bz - φ.z;
+
+                // Structurele rotatie (behoud van verhoudingen)
+                const cosR = Math.cos(φ.rotation);
+                const sinR = Math.sin(φ.rotation);
+                const ru = pu * cosR - pz * sinR;
+                const rz = pu * sinR + pz * cosR;
+                pu = ru; pz = rz;
+
+                const cosT = Math.cos(φ.tilt);
+                const sinT = Math.sin(φ.tilt);
+                const rv = pv * cosT - pz * sinT;
+                const rz2 = pv * sinT + pz * cosT;
+                pv = rv; pz = rz2;
+
+                /**
+                 * HOMOGENE PROJECTIE:
+                 * We werken niet met een horizon-getal, maar met de gewogen diepte w.
+                 * De projectie vindt plaats in de ruimte tussen de waarnemer en de singulariteit.
+                 */
+                const w = AXIOM.UNITY + (pz / ARTEFACT.DEPTH_SCALE);
+                
+                // Voorkom numerieke clipping bij de waarnemer (singulariteit)
+                if (w < 0.05) return null;
+
+                const perspective = AXIOM.UNITY / w;
+
+                return {
+                    // Genormaliseerde veldcoördinaten [ -1, 1 ]
+                    u: (pu * perspective * φ.zoom) / ARTEFACT.DEPTH_SCALE,
+                    v: (pv * perspective * φ.zoom) / ARTEFACT.DEPTH_SCALE,
+                    scale: perspective * φ.zoom,
+                    // Fase is een functie van de diepte-verhouding
+                    phase: (pz / ARTEFACT.DEPTH_SCALE) * AXIOM.TAU,
+                    alpha: Math.exp(-φ.resistance * (Math.abs(pz) / ARTEFACT.DEPTH_SCALE))
+                };
+            },
+
+            render(ctx, φ) {
+                const { width, height } = ctx.canvas;
+                ctx.clearRect(0, 0, width, height);
+                
+                /**
+                 * VIEWPORT DE-DISCRETISATIE:
+                 * Het scherm is passief. Het normaliseert alleen de output van de projector.
+                 */
+                const screenRes = Math.min(width, height);
+                
+                const range = Math.ceil(15 / φ.zoom);
+                const depthRange = 8;
+
+                const qStart = Math.floor(φ.u / 1.5) - range;
+                const rStart = Math.floor(φ.v / 1.7) - range;
+                const sStart = Math.floor(φ.z) - depthRange;
+
+                for (let s = sStart; s <= sStart + depthRange * 2; s++) {
+                    for (let q = qStart; q <= qStart + range * 2; q++) {
+                        for (let r = rStart; r <= rStart + range * 2; r++) {
+                            const p = this.project(q, r, s, φ);
+                            if (!p) continue;
+
+                            // Projectieve mapping naar viewport
+                            const x = width / 2 + p.u * screenRes;
+                            const y = height / 2 + p.v * screenRes;
+                            
+                            if (x < -100 || x > width + 100 || y < -100 || y > height + 100) continue;
+
+                            // Radius is een fractie van de schermresolutie, gedreven door schaalverhouding
+                            const nodeRadius = (0.045 * p.scale) * screenRes;
+                            
+                            const phase = p.phase;
+                            const r_c = Math.floor(127 + 128 * Math.cos(phase));
+                            const g_c = Math.floor(127 + 128 * Math.cos(phase + AXIOM.TAU/3));
+                            const b_c = Math.floor(127 + 128 * Math.cos(phase + 2 * AXIOM.TAU/3));
+                            
+                            ctx.beginPath();
+                            ctx.lineWidth = Math.max(0.2, (screenRes / 500) * p.scale);
+                            ctx.strokeStyle = `rgba(${r_c}, ${g_c}, ${b_c}, ${p.alpha})`;
+                            
+                            for (let i = 0; i < 6; i++) {
+                                const angle = i * AXIOM.TAU / 6 + AXIOM.TAU/12;
+                                const vx = x + nodeRadius * Math.cos(angle);
+                                const vy = y + nodeRadius * Math.sin(angle);
+                                if (i === 0) ctx.moveTo(vx, vy);
+                                else ctx.lineTo(vx, vy);
+                            }
+                            ctx.closePath();
+                            ctx.stroke();
+
+                            if (p.alpha > 0.6) {
+                                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.1})`;
+                                ctx.beginPath();
+                                ctx.arc(x, y, nodeRadius * 0.1, 0, AXIOM.TAU);
+                                ctx.fill();
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const UI = {
+            keys: {},
+            lastMouse: { x: 0, y: 0 },
+            activeRotation: false,
+
+            init() {
+                window.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = true);
+                window.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
+                window.addEventListener('mousedown', e => {
+                    this.lastMouse = { x: e.clientX, y: e.clientY };
+                    if (e.shiftKey) this.activeRotation = true;
+                });
+                window.addEventListener('mousemove', e => {
+                    if (this.activeRotation) {
+                        const dx = e.clientX - this.lastMouse.x;
+                        const dy = e.clientY - this.lastMouse.y;
+                        PhaseSpace.rotation += dx * 0.005;
+                        PhaseSpace.tilt = Math.max(0.1, Math.min(Math.PI - 0.1, PhaseSpace.tilt + dy * 0.005));
+                    }
+                    this.lastMouse = { x: e.clientX, y: e.clientY };
+                });
+                window.addEventListener('mouseup', () => this.activeRotation = false);
+                window.addEventListener('wheel', e => {
+                    e.preventDefault();
+                    if (e.ctrlKey) {
+                        PhaseSpace.zoom *= e.deltaY > 0 ? 0.95 : 1.05;
+                    } else {
+                        PhaseSpace.z += e.deltaY * 0.005;
+                    }
+                }, { passive: false });
+
+                this.engineLoop();
+            },
+
+            engineLoop() {
+                const speed = 0.05 / PhaseSpace.zoom;
+                
+                if (this.keys['w'] || this.keys['arrowup']) PhaseSpace.v -= speed;
+                if (this.keys['s'] || this.keys['arrowdown']) PhaseSpace.v += speed;
+                if (this.keys['a'] || this.keys['arrowleft']) PhaseSpace.u -= speed;
+                if (this.keys['d'] || this.keys['arrowright']) PhaseSpace.u += speed;
+                if (this.keys['q']) PhaseSpace.z -= speed;
+                if (this.keys['e']) PhaseSpace.z += speed;
+
+                document.getElementById('val-z').textContent = PhaseSpace.z.toFixed(2);
+                document.getElementById('val-tilt').textContent = PhaseSpace.tilt.toFixed(2);
+                document.getElementById('val-zoom').textContent = PhaseSpace.zoom.toFixed(2);
+                document.getElementById('coord-label').textContent = 
+                    `${PhaseSpace.u.toFixed(2)}.${PhaseSpace.v.toFixed(2)}.${PhaseSpace.z.toFixed(2)}`;
+
+                requestAnimationFrame(() => this.engineLoop());
+            }
+        };
+
+        function main() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            UI.init();
+
+            function render() {
+                Projector.render(ctx, PhaseSpace);
+                requestAnimationFrame(render);
+            }
+            render();
+        }
+
+            main();
+    </script>
+</body>
+</html>
