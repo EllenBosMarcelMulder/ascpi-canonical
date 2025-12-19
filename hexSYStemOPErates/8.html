@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hexSYStemOPErates — [ .:: hexPIXelWAVe3D ::. ]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 100vw; height: 100vh;
+            background-color: #000; color: #fff;
+            overflow: hidden; font-family: ui-monospace, SFMono-Regular, monospace;
+        }
+        #field-container { position: relative; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .interface {
+            position: absolute; top: 1.5rem; left: 1.5rem;
+            pointer-events: none; z-index: 100;
+            text-transform: uppercase; letter-spacing: 0.2em;
+        }
+        .nav-status {
+            position: absolute; bottom: 1.5rem; right: 1.5rem;
+            font-size: 10px; opacity: 0.8; text-align: right;
+            pointer-events: none; color: #0ff;
+            text-transform: uppercase;
+        }
+        .axiom-tag {
+            color: #0f0; font-size: 8px; margin-top: 10px;
+            border: 1px solid #0f0; padding: 2px 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="interface">
+        <h1 class="text-[11px] font-bold text-cyan-400">hexPIXelWAVe3D</h1>
+        <div id="stats" class="text-[9px] mt-4 space-y-1 opacity-70">
+            <div>S_TOESTAND: <span id="state-label" class="text-white">ACTIEF</span></div>
+            <div>L_DIEPTE: <span id="layer-label" class="text-white">0</span></div>
+            <div>C_OBJECTEN: <span id="object-label" class="text-green-400">0</span></div>
+        </div>
+        <div class="axiom-tag">FORMELE_TRANSITIE_ENGINE</div>
+    </div>
+
+    <div class="nav-status">
+        [DRAAIEN: MUIS SLEPEN] [TREKKEN: SCROLL] [KNIKKEN: SHIFT+CLICK]<br>
+        S = (L, H, C, D) | RP² ISOMORF
+    </div>
+
+    <div id="field-container">
+        <canvas id="matrix-canvas"></canvas>
+    </div>
+
+    <script>
+        /**
+         * CANONIEKE VERKLARING:
+         * "Alle numerieke constanten in een implementatie zijn non-canonieke
+         * projectie-artefacten. Ze behoren niet tot de canonieke velddefinitie."
+         */
+
+        const CANON = {
+            IDENTITEIT: 1.0,
+            HEX_SYMMETRIE: Math.sqrt(3),
+            SLUITING: Math.PI * 2
+        };
+
+        const ARTEFACT = {
+            HORIZON: 10.0,
+            SINGULARITEIT_CLIP: 0.1,
+            WEERSTAND: 0.5
+        };
+
+        /**
+         * DE CONTROLELAAG: Formele Transitie-Engine
+         * Implementatie van S = (L, H, C, D)
+         */
+        class TransitionEngine {
+            constructor() {
+                this.L = 0; // Laag (L)
+                this.H = new Array(6).fill(null); // Hex-configuratie (H)
+                this.C = []; // Objectset (C)
+                this.D = 'ACTIEF'; // Dynamische Status (D)
+                
+                // Projectie-parameters (Artefacten)
+                this.rotation = 0.5;
+                this.tilt = 0.6;
+                this.zoom = 1.0;
+                this.vibration = 0;
+            }
+
+            /**
+             * Operatie A: Place (u : S -> S')
+             * @param {number} positionIndex - p ∈ {1..6}
+             */
+            place(positionIndex) {
+                if (this.D === 'LOCKED') return; // S blijft ongewijzigd
+                
+                const p = Math.abs(positionIndex % 6);
+                if (this.H[p] !== null) {
+                    this.vibration = 10; // Projectieve weerstand (geen feedback)
+                    return; 
+                }
+
+                // Inbedding
+                this.H[p] = { 
+                    phase: p * (CANON.SLUITING / 6),
+                    q: Math.cos(p * (CANON.SLUITING / 6)) * 2.5,
+                    r: Math.sin(p * (CANON.SLUITING / 6)) * 2.5
+                };
+                
+                this.C = this.H.filter(h => h !== null);
+
+                // Canonieke inertie-check: exact 4 objecten dwingen inertie af
+                if (this.C.length === 4) {
+                    this.D = 'INERT';
+                }
+                this.updateUI();
+            }
+
+            /**
+             * Operatie B: Fold (reduce : S -> S_low)
+             */
+            fold() {
+                if (this.D === 'LOCKED') return;
+                
+                this.D = 'LOCKED'; // Lock-mechanisme geactiveerd
+                this.vibration = 20;
+                this.updateUI();
+
+                // Transitie naar L + 1
+                setTimeout(() => {
+                    this.L += 1;
+                    this.project();
+                }, 600); 
+            }
+
+            /**
+             * Operatie C: Project (project : S_low -> S_new)
+             */
+            project() {
+                this.H = new Array(6).fill(null);
+                this.C = [];
+                this.D = 'ACTIEF';
+                this.zoom *= 1.15; // Schaal-invariantie artefact
+                this.updateUI();
+            }
+
+            updateUI() {
+                const sLab = document.getElementById('state-label');
+                const lLab = document.getElementById('layer-label');
+                const cLab = document.getElementById('object-label');
+                if(sLab) sLab.textContent = this.D;
+                if(lLab) lLab.textContent = this.L;
+                if(cLab) cLab.textContent = this.C.length;
+            }
+        }
+
+        const engine = new TransitionEngine();
+
+        /**
+         * PROJECTOR: Isomorfisme naar scherm
+         */
+        const Projector = {
+            project(q, r, s, engine) {
+                let pu = 1.5 * q;
+                let pv = (CANON.HEX_SYMMETRIE / 2) * q + CANON.HEX_SYMMETRIE * r;
+                let pz = s - (engine.L * 2.0);
+
+                // Rotatie-matrices (Artefacten)
+                const cR = Math.cos(engine.rotation);
+                const sR = Math.sin(engine.rotation);
+                const rU = pu * cR - pz * sR;
+                const rZ = pu * sR + pz * cR;
+                pu = rU; pz = rZ;
+
+                const cT = Math.cos(engine.tilt);
+                const sT = Math.sin(engine.tilt);
+                const rV = pv * cT - pz * sT;
+                const rZ2 = pv * sT + pz * cT;
+                pv = rV; pz = rZ2;
+
+                const w = CANON.IDENTITEIT + (pz / ARTEFACT.HORIZON);
+                if (w < ARTEFACT.SINGULARITEIT_CLIP) return null;
+
+                const invW = CANON.IDENTITEIT / w;
+                return {
+                    x: (pu * invW * engine.zoom) / ARTEFACT.HORIZON,
+                    y: (pv * invW * engine.zoom) / ARTEFACT.HORIZON,
+                    s: invW * engine.zoom,
+                    a: Math.exp(-ARTEFACT.WEERSTAND * (Math.abs(pz) / ARTEFACT.HORIZON))
+                };
+            }
+        };
+
+        function init() {
+            const canvas = document.getElementById('matrix-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Device-agnostische Input mapping
+            window.addEventListener('mousedown', (e) => {
+                if (e.shiftKey) {
+                    engine.fold(); // Knikken / Fase-breuk
+                } else {
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) + Math.PI;
+                    const p = Math.floor((angle / CANON.SLUITING) * 6);
+                    engine.place(p); // Draaien / Plaatsen
+                }
+            });
+
+            window.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                engine.zoom *= e.deltaY > 0 ? 0.96 : 1.04; // Trekken / Schaal
+            }, { passive: false });
+
+            let dragging = false;
+            let lastX = 0, lastY = 0;
+            window.addEventListener('mousedown', (e) => {
+                if(!e.shiftKey) { dragging = true; lastX = e.clientX; lastY = e.clientY; }
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (dragging) {
+                    engine.rotation += (e.clientX - lastX) * 0.005;
+                    engine.tilt += (e.clientY - lastY) * 0.005;
+                    lastX = e.clientX; lastY = e.clientY;
+                }
+            });
+            window.addEventListener('mouseup', () => dragging = false);
+
+            function animate() {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const dim = Math.min(canvas.width, canvas.height);
+                const sX = (Math.random() - 0.5) * engine.vibration;
+                const sY = (Math.random() - 0.5) * engine.vibration;
+                if(engine.vibration > 0.1) engine.vibration *= 0.9;
+
+                // Weergave van het Veld-Grid
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                for (let q = -5; q <= 5; q++) {
+                    for (let r = -5; r <= 5; r++) {
+                        const p = Projector.project(q, r, 0, engine);
+                        if (!p) continue;
+                        ctx.beginPath();
+                        ctx.arc(canvas.width/2 + p.x * dim + sX, canvas.height/2 + p.y * dim + sY, p.s * 1.5, 0, CANON.SLUITING);
+                        ctx.fill();
+                    }
+                }
+
+                // Weergave van Objectset C (Resonantie)
+                engine.H.forEach(node => {
+                    if (!node) return;
+                    const p = Projector.project(node.q, node.r, 0, engine);
+                    if (!p) return;
+                    const vX = canvas.width/2 + p.x * dim + sX;
+                    const vY = canvas.height/2 + p.y * dim + sY;
+
+                    ctx.strokeStyle = `rgba(0, 255, 150, ${p.a})`;
+                    ctx.lineWidth = 2 * p.s;
+                    ctx.beginPath();
+                    ctx.arc(vX, vY, 12 * p.s, 0, CANON.SLUITING);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.setLineDash([4, 4]);
+                    ctx.moveTo(canvas.width/2 + sX, canvas.height/2 + sY);
+                    ctx.lineTo(vX, vY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
