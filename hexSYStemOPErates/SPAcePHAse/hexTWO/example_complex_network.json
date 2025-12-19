@@ -1,0 +1,558 @@
+{
+  "module_id": "example_complex_network",
+  "type": "field_state",
+  "meta": {
+    "name": "Complex Network Structure",
+    "version": "1.0.0",
+    "created": "2025-12-19T10:00:00Z",
+    "author": "hexPHAseTWO System",
+    "description": "Multi-layered hexagonal network demonstrating complex relationships",
+    "tags": ["example", "complex", "network", "multi-layer"],
+    "category": "structure_analysis"
+  },
+  "interface": {
+    "inputs": [
+      {
+        "name": "complexity_factor",
+        "type": "number",
+        "required": false,
+        "default": 1.0
+      }
+    ],
+    "outputs": [
+      {
+        "name": "network_structure",
+        "type": "field_state"
+      },
+      {
+        "name": "analysis_data",
+        "type": "json_data"
+      }
+    ],
+    "events": [
+      {
+        "name": "on_node_focus",
+        "trigger": "node_click",
+        "target": "control"
+      }
+    ]
+  },
+  "content": {
+    "topology": "hexagonal",
+    "meta": {
+      "phase": "hexPHAseTWO",
+      "version": "1.0.0",
+      "created": "2025-12-19T10:00:00Z",
+      "description": "Complex network with multiple node types and relation patterns"
+    },
+    "perspective": {
+      "default_view": "overview",
+      "rotation": {
+        "x": 45,
+        "y": -15
+      },
+      "zoom": 0.8
+    },
+    "nodes": [
+      {
+        "id": "gateway_1",
+        "position": { "q": 0, "r": 0 },
+        "properties": {
+          "type": "gateway",
+          "data": {
+            "throughput": 0.95,
+            "connections": 6
+          },
+          "visual": {
+            "color": "#ff6600",
+            "size": 2.0,
+            "opacity": 1.0
+          }
+        }
+      },
+      {
+        "id": "processor_1",
+        "position": { "q": 2, "r": 0 },
+        "properties": {
+          "type": "processor",
+          "data": {
+            "load": 0.7,
+            "efficiency": 0.85
+          },
+          "visual": {
+            "color": "#6600ff",
+            "size": 1.5,
+            "opacity": 0.9
+          }
+        }
+      },
+      {
+        "id": "processor_2",
+        "position": { "q": -2, "r": 0 },
+        "properties": {
+          "type": "processor",
+          "data": {
+            "load": 0.6,
+            "efficiency": 0.90
+          },
+          "visual": {
+            "color": "#6600ff",
+            "size": 1.5,
+            "opacity": 0.9
+          }
+        }
+      },
+      {
+        "id": "anchor_1",
+        "position": { "q": 1, "r": 2 },
+        "properties": {
+          "type": "anchor",
+          "data": {
+            "stability": 0.98
+          },
+          "visual": {
+            "color": "#00ff88",
+            "size": 1.8,
+            "opacity": 0.95
+          }
+        }
+      },
+      {
+        "id": "anchor_2",
+        "position": { "q": -1, "r": -2 },
+        "properties": {
+          "type": "anchor",
+          "data": {
+            "stability": 0.98
+          },
+          "visual": {
+            "color": "#00ff88",
+            "size": 1.8,
+            "opacity": 0.95
+          }
+        }
+      },
+      {
+        "id": "node_1",
+        "position": { "q": 1, "r": 0 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.7
+          }
+        }
+      },
+      {
+        "id": "node_2",
+        "position": { "q": 0, "r": 1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.7
+          }
+        }
+      },
+      {
+        "id": "node_3",
+        "position": { "q": -1, "r": 1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.7
+          }
+        }
+      },
+      {
+        "id": "node_4",
+        "position": { "q": -1, "r": 0 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.7
+          }
+        }
+      },
+      {
+        "id": "node_5",
+        "position": { "q": 0, "r": -1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.7
+          }
+        }
+      },
+      {
+        "id": "node_6",
+        "position": { "q": 1, "r": -1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.7
+          }
+        }
+      },
+      {
+        "id": "edge_1",
+        "position": { "q": 3, "r": -1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#ffff00",
+            "size": 0.8,
+            "opacity": 0.6
+          }
+        }
+      },
+      {
+        "id": "edge_2",
+        "position": { "q": -3, "r": 1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#ffff00",
+            "size": 0.8,
+            "opacity": 0.6
+          }
+        }
+      }
+    ],
+    "relations": [
+      {
+        "a": "gateway_1",
+        "b": "node_1",
+        "visibility": "high",
+        "properties": {
+          "type": "control",
+          "weight": 0.9,
+          "visual": {
+            "style": "solid",
+            "color": "#ff6600",
+            "width": 2.5
+          }
+        }
+      },
+      {
+        "a": "gateway_1",
+        "b": "node_2",
+        "visibility": "high",
+        "properties": {
+          "type": "control",
+          "weight": 0.9,
+          "visual": {
+            "style": "solid",
+            "color": "#ff6600",
+            "width": 2.5
+          }
+        }
+      },
+      {
+        "a": "gateway_1",
+        "b": "node_3",
+        "visibility": "high",
+        "properties": {
+          "type": "control",
+          "weight": 0.9,
+          "visual": {
+            "style": "solid",
+            "color": "#ff6600",
+            "width": 2.5
+          }
+        }
+      },
+      {
+        "a": "gateway_1",
+        "b": "node_4",
+        "visibility": "high",
+        "properties": {
+          "type": "control",
+          "weight": 0.9,
+          "visual": {
+            "style": "solid",
+            "color": "#ff6600",
+            "width": 2.5
+          }
+        }
+      },
+      {
+        "a": "gateway_1",
+        "b": "node_5",
+        "visibility": "high",
+        "properties": {
+          "type": "control",
+          "weight": 0.9,
+          "visual": {
+            "style": "solid",
+            "color": "#ff6600",
+            "width": 2.5
+          }
+        }
+      },
+      {
+        "a": "gateway_1",
+        "b": "node_6",
+        "visibility": "high",
+        "properties": {
+          "type": "control",
+          "weight": 0.9,
+          "visual": {
+            "style": "solid",
+            "color": "#ff6600",
+            "width": 2.5
+          }
+        }
+      },
+      {
+        "a": "processor_1",
+        "b": "node_1",
+        "visibility": "mid",
+        "properties": {
+          "type": "data",
+          "weight": 0.7,
+          "visual": {
+            "style": "dashed",
+            "color": "#6600ff",
+            "width": 1.5
+          }
+        }
+      },
+      {
+        "a": "processor_1",
+        "b": "node_6",
+        "visibility": "mid",
+        "properties": {
+          "type": "data",
+          "weight": 0.7,
+          "visual": {
+            "style": "dashed",
+            "color": "#6600ff",
+            "width": 1.5
+          }
+        }
+      },
+      {
+        "a": "processor_1",
+        "b": "edge_1",
+        "visibility": "low",
+        "properties": {
+          "type": "data",
+          "weight": 0.4,
+          "visual": {
+            "style": "dotted",
+            "color": "#6600ff",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "processor_2",
+        "b": "node_3",
+        "visibility": "mid",
+        "properties": {
+          "type": "data",
+          "weight": 0.6,
+          "visual": {
+            "style": "dashed",
+            "color": "#6600ff",
+            "width": 1.5
+          }
+        }
+      },
+      {
+        "a": "processor_2",
+        "b": "node_4",
+        "visibility": "mid",
+        "properties": {
+          "type": "data",
+          "weight": 0.6,
+          "visual": {
+            "style": "dashed",
+            "color": "#6600ff",
+            "width": 1.5
+          }
+        }
+      },
+      {
+        "a": "processor_2",
+        "b": "edge_2",
+        "visibility": "low",
+        "properties": {
+          "type": "data",
+          "weight": 0.4,
+          "visual": {
+            "style": "dotted",
+            "color": "#6600ff",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "anchor_1",
+        "b": "processor_1",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 0.95,
+          "visual": {
+            "style": "gradient",
+            "color": "#00ff88",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "anchor_2",
+        "b": "processor_2",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 0.95,
+          "visual": {
+            "style": "gradient",
+            "color": "#00ff88",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "node_1",
+        "b": "node_2",
+        "visibility": "mid",
+        "properties": {
+          "type": "structural",
+          "weight": 0.5,
+          "visual": {
+            "style": "solid",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "node_2",
+        "b": "node_3",
+        "visibility": "mid",
+        "properties": {
+          "type": "structural",
+          "weight": 0.5,
+          "visual": {
+            "style": "solid",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "node_3",
+        "b": "node_4",
+        "visibility": "mid",
+        "properties": {
+          "type": "structural",
+          "weight": 0.5,
+          "visual": {
+            "style": "solid",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "node_4",
+        "b": "node_5",
+        "visibility": "mid",
+        "properties": {
+          "type": "structural",
+          "weight": 0.5,
+          "visual": {
+            "style": "solid",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "node_5",
+        "b": "node_6",
+        "visibility": "mid",
+        "properties": {
+          "type": "structural",
+          "weight": 0.5,
+          "visual": {
+            "style": "solid",
+            "width": 1.0
+          }
+        }
+      },
+      {
+        "a": "node_6",
+        "b": "node_1",
+        "visibility": "mid",
+        "properties": {
+          "type": "structural",
+          "weight": 0.5,
+          "visual": {
+            "style": "solid",
+            "width": 1.0
+          }
+        }
+      }
+    ],
+    "validation": {
+      "invariants": [
+        "non_decisional",
+        "no_time_authority",
+        "idempotent",
+        "crossed_link_neutral",
+        "structurally_correspondent"
+      ],
+      "constraints": {
+        "max_nodes": 100,
+        "max_relations": 500,
+        "max_distance": 15
+      }
+    }
+  },
+  "dependencies": {
+    "modules": [],
+    "schemas": [
+      "field_state_hexPHAseTWO.schema.json"
+    ]
+  },
+  "validation": {
+    "invariants": [
+      "non_decisional",
+      "no_time_authority",
+      "idempotent",
+      "crossed_link_neutral",
+      "structurally_correspondent"
+    ]
+  },
+  "perspective": {
+    "default_view": "overview",
+    "transitions": [
+      {
+        "from": "overview",
+        "to": "control",
+        "trigger": "click"
+      },
+      {
+        "from": "control",
+        "to": "module",
+        "trigger": "click"
+      }
+    ]
+  },
+  "storage": {
+    "persistent": false,
+    "auto_save": true,
+    "export_format": "json"
+  }
+}

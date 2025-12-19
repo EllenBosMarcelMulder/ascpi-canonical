@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hexSYStemOPErates — [ .:: hexPHAseTWO ::. ]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@100;200;300;400;500&display=swap');
+        
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --accent-cyan: #00ffff;
+            --accent-green: #00ff88;
+            --accent-purple: #8844ff;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #333333;
+            
+            --perspective-transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --module-transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        html, body {
+            width: 100%; 
+            height: 100%;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            overflow: hidden; 
+            font-family: 'Space Grotesk', ui-sans-serif;
+        }
+
+        /* Main Layout */
+        .hex-master-container {
+            display: grid;
+            grid-template-areas: 
+                "sidebar viewport controls"
+                "sidebar viewport console";
+            grid-template-columns: 280px 1fr 300px;
+            grid-template-rows: 1fr 200px;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+        }
+
+        /* Perspective Viewport */
+        .perspective-viewport {
+            grid-area: viewport;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(0,255,255,0.05) 0%, transparent 70%);
+            border: 1px solid var(--border-color);
+        }
+
+        .perspective-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: var(--perspective-transition);
+            transform-style: preserve-3d;
+        }
+
+        /* Sidebar - Module Management */
+        .module-sidebar {
+            grid-area: sidebar;
+            background: var(--secondary-bg);
+            border-right: 2px solid var(--accent-cyan);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--secondary-bg) 0%, #2a2a3a 100%);
+        }
+
+        .sidebar-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .module-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .module-item {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--module-transition);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .module-item:hover {
+            background: rgba(0,255,255,0.1);
+            border-color: var(--accent-cyan);
+            transform: translateX(4px);
+        }
+
+        .module-item.active {
+            background: rgba(0,255,255,0.15);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+        }
+
+        .module-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .module-type {
+            color: var(--accent-green);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Controls Panel */
+        .control-panel {
+            grid-area: controls;
+            background: var(--secondary-bg);
+            border-left: 2px solid var(--accent-purple);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .control-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            transition: var(--module-transition);
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 10px rgba(136,68,255,0.3);
+        }
+
+        .perspective-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        /* JSON Console */
+        .json-console {
+            grid-area: console;
+            background: var(--primary-bg);
+            border-top: 2px solid var(--accent-green);
+            border-left: 2px solid var(--accent-purple);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .console-header {
+            padding: 0.75rem 1rem;
+            background: var(--secondary-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .console-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+        }
+
+        .console-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .console-btn {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: var(--module-transition);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .console-btn:hover {
+            background: rgba(0,255,136,0.2);
+            box-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+
+        .console-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .json-display {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        /* File Upload Styling */
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--module-transition);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0,255,255,0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--accent-green);
+            background: rgba(0,255,136,0.1);
+        }
+
+        /* Perspective States */
+        .perspective-universe {
+            transform: perspective(1200px) rotateX(15deg) rotateY(0deg) scale(1);
+        }
+
+        .perspective-control {
+            transform: perspective(800px) rotateX(45deg) rotateY(-15deg) scale(1.1);
+        }
+
+        .perspective-module {
+            transform: perspective(1000px) rotateX(0deg) rotateY(25deg) scale(0.95);
+        }
+
+        .perspective-overview {
+            transform: perspective(1500px) rotateX(60deg) rotateY(0deg) scale(0.8);
+        }
+
+        /* Hex Field Rendering */
+        .hex-node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 10px var(--accent-cyan),
+                0 0 20px var(--accent-cyan),
+                inset 0 0 5px rgba(255,255,255,0.3);
+            transition: var(--module-transition);
+        }
+
+        .hex-node.active {
+            background: var(--accent-green);
+            box-shadow: 
+                0 0 15px var(--accent-green),
+                0 0 30px var(--accent-green),
+                inset 0 0 8px rgba(255,255,255,0.5);
+            transform: scale(1.5);
+        }
+
+        .hex-relation {
+            position: absolute;
+            background: linear-gradient(90deg, 
+                var(--accent-cyan), 
+                transparent, 
+                var(--accent-cyan)
+            );
+            height: 1px;
+            opacity: 0.6;
+            transition: var(--module-transition);
+        }
+
+        .hex-relation.high { opacity: 0.9; height: 2px; }
+        .hex-relation.mid { opacity: 0.7; height: 1.5px; }
+        .hex-relation.low { opacity: 0.4; height: 1px; }
+
+        /* Status Indicators */
+        .status-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-label {
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Animation States */
+        @keyframes moduleLoad {
+            0% { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.9); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .module-loading {
+            animation: moduleLoad 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes perspectiveShift {
+            0% { 
+                filter: blur(2px); 
+                opacity: 0.7; 
+            }
+            50% { 
+                filter: blur(4px); 
+                opacity: 0.4; 
+            }
+            100% { 
+                filter: blur(0px); 
+                opacity: 1; 
+            }
+        }
+
+        .perspective-shifting {
+            animation: perspectiveShift 0.8s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hex-master-container {
+                grid-template-columns: 240px 1fr 260px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hex-master-container {
+                grid-template-areas: 
+                    "viewport"
+                    "controls"
+                    "sidebar"
+                    "console";
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hex-master-container">
+        <!-- Module Sidebar -->
+        <div class="module-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">hexPHAseTWO</div>
+                <div class="sidebar-subtitle">Module Management System</div>
+            </div>
+            
+            <div class="file-upload-area" id="uploadArea">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent-cyan); margin-bottom: 0.5rem;">
+                    UPLOAD JSON MODULE
+                </div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">
+                    Drag & drop or click to select
+                </div>
+                <input type="file" id="fileInput" accept=".json" style="display: none;">
+            </div>
+
+            <div class="module-list" id="moduleList">
+                <!-- Modules will be dynamically loaded here -->
+            </div>
+
+            <div style="padding: 1rem; border-top: 1px solid var(--border-color);">
+                <button class="console-btn" onclick="createNewModule()">+ NEW MODULE</button>
+                <button class="console-btn" onclick="exportCurrentState()" style="margin-left: 0.5rem;">EXPORT</button>
+            </div>
+        </div>
+
+        <!-- Perspective Viewport -->
+        <div class="perspective-viewport">
+            <canvas id="hexCanvas" class="perspective-canvas perspective-universe"></canvas>
+            
+            <div class="status-indicator">
+                <div class="status-row">
+                    <span class="status-label">STATE:</span>
+                    <span id="currentState">UNIVERSE</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">MODULE:</span>
+                    <span id="activeModule">NONE</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">NODES:</span>
+                    <span id="nodeCount">0</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">RELATIONS:</span>
+                    <span id="relationCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="control-section">
+                <div class="control-label">Perspective Control</div>
+                <select class="control-input" id="perspectiveSelect" onchange="changePerspective()">
+                    <option value="universe">Universe View</option>
+                    <option value="control">Control View</option>
+                    <option value="module">Module View</option>
+                    <option value="overview">Overview</option>
+                </select>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">Navigation</div>
+                <div class="perspective-controls">
+                    <input type="range" class="control-input" id="rotationX" min="-90" max="90" value="15" oninput="updateRotation()">
+                    <input type="range" class="control-input" id="rotationY" min="-180" max="180" value="0" oninput="updateRotation()">
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <input type="range" class="control-input" id="zoomLevel" min="0.5" max="2" step="0.1" value="1" oninput="updateZoom()">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">Field Parameters</div>
+                <input type="number" class="control-input" id="fieldSize" placeholder="Field Size" value="10" onchange="updateFieldSize()">
+                <input type="number" class="control-input" id="maxDistance" placeholder="Max Distance" value="120" onchange="updateMaxDistance()" style="margin-top: 0.5rem;">
+            </div>
+
+            <div class="control-section">
+                <div class="control-label">Auto-Generate</div>
+                <button class="console-btn" onclick="generateTestField()" style="width: 100%; margin-bottom: 0.5rem;">GENERATE TEST FIELD</button>
+                <button class="console-btn" onclick="clearField()" style="width: 100%;">CLEAR FIELD</button>
+            </div>
+        </div>
+
+        <!-- JSON Console -->
+        <div class="json-console">
+            <div class="console-header">
+                <div class="console-title">JSON State Manager</div>
+                <div class="console-actions">
+                    <button class="console-btn" onclick="downloadJSON()">DOWNLOAD</button>
+                    <button class="console-btn" onclick="validateJSON()">VALIDATE</button>
+                    <button class="console-btn" onclick="loadFromJSON()">LOAD</button>
+                </div>
+            </div>
+            <div class="console-content">
+                <div class="json-display" id="jsonDisplay">
+{
+  "message": "hexPHAseTWO Ready",
+  "status": "AWAITING_MODULE"
+}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // hexPHAseTWO Core System
+        class HexPhaseTwoSystem {
+            constructor() {
+                this.currentState = 'universe';
+                this.activeModule = null;
+                this.modules = new Map();
+                this.fieldData = null;
+                this.canvas = document.getElementById('hexCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.perspective = {
+                    rotationX: 15,
+                    rotationY: 0,
+                    zoom: 1
+                };
+                
+                this.fieldParameters = {
+                    size: 10,
+                    maxDistance: 120,
+                    hexRadius: 60
+                };
+                
+                this.initializeSystem();
+            }
+
+            initializeSystem() {
+                this.setupCanvas();
+                this.setupFileUpload();
+                this.loadDefaultModules();
+                this.startRenderLoop();
+                this.setupEventListeners();
+            }
+
+            setupCanvas() {
+                const container = this.canvas.parentElement;
+                const resizeCanvas = () => {
+                    this.canvas.width = container.clientWidth;
+                    this.canvas.height = container.clientHeight;
+                    this.render();
+                };
+                
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+            }
+
+            setupFileUpload() {
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+
+                uploadArea.onclick = () => fileInput.click();
+
+                uploadArea.ondragover = (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                };
+
+                uploadArea.ondragleave = () => {
+                    uploadArea.classList.remove('dragover');
+                };
+
+                uploadArea.ondrop = (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) this.handleFileUpload(files[0]);
+                };
+
+                fileInput.onchange = (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileUpload(e.target.files[0]);
+                    }
+                };
+            }
+
+            async handleFileUpload(file) {
+                if (!file.name.endsWith('.json')) {
+                    alert('Please upload a JSON file');
+                    return;
+                }
+
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    this.loadModule(file.name, data);
+                } catch (error) {
+                    alert('Invalid JSON file: ' + error.message);
+                }
+            }
+
+            loadModule(name, data) {
+                const moduleId = 'module_' + Date.now();
+                this.modules.set(moduleId, {
+                    name: name,
+                    data: data,
+                    type: this.detectModuleType(data),
+                    loaded: Date.now()
+                });
+
+                this.updateModuleList();
+                this.activateModule(moduleId);
+                this.updateJSONDisplay();
+            }
+
+            detectModuleType(data) {
+                if (data.topology === 'hexagonal') return 'FIELD_STATE';
+                if (data.phase_id) return 'PHASE_STATE';
+                if (data.status === 'available') return 'CROSSED_LINK';
+                if (data.mode === 'reflective_only') return 'MIRROR_STATUS';
+                return 'UNKNOWN';
+            }
+
+            updateModuleList() {
+                const list = document.getElementById('moduleList');
+                list.innerHTML = '';
+
+                this.modules.forEach((module, id) => {
+                    const item = document.createElement('div');
+                    item.className = 'module-item module-loading';
+                    if (id === this.activeModule) item.classList.add('active');
+                    
+                    item.innerHTML = `
+                        <div class="module-name">${module.name}</div>
+                        <div class="module-type">${module.type}</div>
+                    `;
+                    
+                    item.onclick = () => this.activateModule(id);
+                    list.appendChild(item);
+                });
+            }
+
+            activateModule(moduleId) {
+                if (!this.modules.has(moduleId)) return;
+                
+                // Remove active class from all modules
+                document.querySelectorAll('.module-item').forEach(item => 
+                    item.classList.remove('active'));
+
+                this.activeModule = moduleId;
+                const module = this.modules.get(moduleId);
+                
+                // Update active module display
+                document.getElementById('activeModule').textContent = module.name;
+                
+                // Set active class on selected module
+                const moduleItems = document.querySelectorAll('.module-item');
+                moduleItems.forEach((item, index) => {
+                    if (index === Array.from(this.modules.keys()).indexOf(moduleId)) {
+                        item.classList.add('active');
+                    }
+                });
+
+                // Load module data into field
+                if (module.type === 'FIELD_STATE') {
+                    this.loadFieldData(module.data);
+                    this.changePerspectiveSmooth('module');
+                }
+
+                this.updateJSONDisplay();
+                this.updateStatusCounts();
+            }
+
+            loadFieldData(data) {
+                this.fieldData = data;
+                this.render();
+            }
+
+            changePerspectiveSmooth(newPerspective) {
+                const canvas = this.canvas;
+                canvas.classList.add('perspective-shifting');
+                
+                setTimeout(() => {
+                    this.currentState = newPerspective;
+                    canvas.className = `perspective-canvas perspective-${newPerspective}`;
+                    document.getElementById('currentState').textContent = newPerspective.toUpperCase();
+                    document.getElementById('perspectiveSelect').value = newPerspective;
+                    
+                    setTimeout(() => {
+                        canvas.classList.remove('perspective-shifting');
+                    }, 100);
+                }, 400);
+            }
+
+            updateRotation() {
+                const rotX = document.getElementById('rotationX').value;
+                const rotY = document.getElementById('rotationY').value;
+                
+                this.perspective.rotationX = parseInt(rotX);
+                this.perspective.rotationY = parseInt(rotY);
+                
+                this.applyManualTransform();
+            }
+
+            updateZoom() {
+                const zoom = document.getElementById('zoomLevel').value;
+                this.perspective.zoom = parseFloat(zoom);
+                this.applyManualTransform();
+            }
+
+            applyManualTransform() {
+                const { rotationX, rotationY, zoom } = this.perspective;
+                this.canvas.style.transform = 
+                    `perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(${zoom})`;
+            }
+
+            updateFieldSize() {
+                const size = document.getElementById('fieldSize').value;
+                this.fieldParameters.size = parseInt(size);
+                if (this.currentState === 'universe') this.generateTestField();
+            }
+
+            updateMaxDistance() {
+                const distance = document.getElementById('maxDistance').value;
+                this.fieldParameters.maxDistance = parseInt(distance);
+                this.render();
+            }
+
+            generateTestField() {
+                const { size } = this.fieldParameters;
+                const nodes = [];
+                const relations = [];
+
+                // Generate hex grid nodes
+                let nodeId = 0;
+                for (let q = -size; q <= size; q++) {
+                    for (let r = -size; r <= size; r++) {
+                        if (Math.abs(q + r) <= size) {
+                            nodes.push({
+                                id: `n${nodeId++}`,
+                                position: { q, r }
+                            });
+                        }
+                    }
+                }
+
+                // Generate relations based on distance
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const a = nodes[i].position;
+                        const b = nodes[j].position;
+                        const distance = (Math.abs(a.q - b.q) + 
+                                        Math.abs(a.q + a.r - b.q - b.r) + 
+                                        Math.abs(a.r - b.r)) / 2;
+
+                        if (distance <= 3) {
+                            const visibility = distance <= 1 ? 'high' : 
+                                             distance <= 2 ? 'mid' : 'low';
+                            relations.push({
+                                a: nodes[i].id,
+                                b: nodes[j].id,
+                                visibility
+                            });
+                        }
+                    }
+                }
+
+                const fieldData = {
+                    topology: 'hexagonal',
+                    nodes,
+                    relations
+                };
+
+                this.loadModule('generated_field.json', fieldData);
+            }
+
+            clearField() {
+                this.fieldData = null;
+                this.activeModule = null;
+                this.modules.clear();
+                this.updateModuleList();
+                this.updateJSONDisplay();
+                this.updateStatusCounts();
+                this.render();
+                document.getElementById('activeModule').textContent = 'NONE';
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (!this.fieldData || !this.fieldData.nodes) {
+                    this.renderEmptyState();
+                    return;
+                }
+
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const scale = Math.min(this.canvas.width, this.canvas.height) / 400;
+
+                // Convert hex coordinates to screen positions
+                const positions = new Map();
+                this.fieldData.nodes.forEach(node => {
+                    const { q, r } = node.position;
+                    const x = centerX + scale * (q * 60 * 1.5);
+                    const y = centerY + scale * (r * 60 * Math.sqrt(3) + (q % 2) * 30 * Math.sqrt(3));
+                    positions.set(node.id, { x, y });
+                });
+
+                // Render relations
+                if (this.fieldData.relations) {
+                    this.fieldData.relations.forEach(relation => {
+                        const posA = positions.get(relation.a);
+                        const posB = positions.get(relation.b);
+                        if (posA && posB) {
+                            this.renderRelation(posA, posB, relation.visibility);
+                        }
+                    });
+                }
+
+                // Render nodes
+                this.fieldData.nodes.forEach(node => {
+                    const pos = positions.get(node.id);
+                    if (pos) {
+                        this.renderNode(pos.x, pos.y, false);
+                    }
+                });
+            }
+
+            renderEmptyState() {
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.fillStyle = '#00ffff';
+                this.ctx.font = '16px "JetBrains Mono", monospace';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('hexPHAseTWO READY', centerX, centerY - 20);
+                
+                this.ctx.font = '12px "JetBrains Mono", monospace';
+                this.ctx.fillStyle = '#aaaaaa';
+                this.ctx.fillText('Upload or generate a module to begin', centerX, centerY + 20);
+                this.ctx.restore();
+            }
+
+            renderNode(x, y, active = false) {
+                this.ctx.save();
+                
+                const radius = active ? 6 : 4;
+                const color = active ? '#00ff88' : '#00ffff';
+                
+                // Outer glow
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius * 2, 0, Math.PI * 2);
+                this.ctx.fillStyle = color + '20';
+                this.ctx.fill();
+                
+                // Main node
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = color;
+                this.ctx.fill();
+                
+                // Inner highlight
+                this.ctx.beginPath();
+                this.ctx.arc(x - radius/3, y - radius/3, radius/2, 0, Math.PI * 2);
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                this.ctx.fill();
+                
+                this.ctx.restore();
+            }
+
+            renderRelation(posA, posB, visibility) {
+                this.ctx.save();
+                
+                const alpha = {
+                    'high': 0.9,
+                    'mid': 0.6,
+                    'low': 0.3
+                }[visibility] || 0.5;
+                
+                const width = {
+                    'high': 2,
+                    'mid': 1.5,
+                    'low': 1
+                }[visibility] || 1;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(posA.x, posA.y);
+                this.ctx.lineTo(posB.x, posB.y);
+                this.ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+                this.ctx.lineWidth = width;
+                this.ctx.stroke();
+                
+                this.ctx.restore();
+            }
+
+            updateJSONDisplay() {
+                const display = document.getElementById('jsonDisplay');
+                
+                if (this.activeModule && this.modules.has(this.activeModule)) {
+                    const module = this.modules.get(this.activeModule);
+                    display.textContent = JSON.stringify(module.data, null, 2);
+                } else {
+                    display.textContent = JSON.stringify({
+                        message: "hexPHAseTWO System Status",
+                        modules_loaded: this.modules.size,
+                        current_state: this.currentState,
+                        field_parameters: this.fieldParameters
+                    }, null, 2);
+                }
+            }
+
+            updateStatusCounts() {
+                let nodeCount = 0;
+                let relationCount = 0;
+
+                if (this.fieldData) {
+                    nodeCount = this.fieldData.nodes ? this.fieldData.nodes.length : 0;
+                    relationCount = this.fieldData.relations ? this.fieldData.relations.length : 0;
+                }
+
+                document.getElementById('nodeCount').textContent = nodeCount;
+                document.getElementById('relationCount').textContent = relationCount;
+            }
+
+            setupEventListeners() {
+                // Canvas click handling
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Check if clicking on a node (simplified)
+                    if (this.fieldData && this.fieldData.nodes) {
+                        // Navigate into node perspective
+                        this.changePerspectiveSmooth('control');
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case '1':
+                            this.changePerspectiveSmooth('universe');
+                            break;
+                        case '2':
+                            this.changePerspectiveSmooth('control');
+                            break;
+                        case '3':
+                            this.changePerspectiveSmooth('module');
+                            break;
+                        case '4':
+                            this.changePerspectiveSmooth('overview');
+                            break;
+                        case 'g':
+                            this.generateTestField();
+                            break;
+                        case 'c':
+                            this.clearField();
+                            break;
+                    }
+                });
+            }
+
+            loadDefaultModules() {
+                // Load some default example modules
+                const defaultField = {
+                    topology: 'hexagonal',
+                    nodes: [
+                        { id: 'n1', position: { q: 0, r: 0 } },
+                        { id: 'n2', position: { q: 1, r: 0 } },
+                        { id: 'n3', position: { q: 0, r: 1 } }
+                    ],
+                    relations: [
+                        { a: 'n1', b: 'n2', visibility: 'high' },
+                        { a: 'n1', b: 'n3', visibility: 'mid' }
+                    ]
+                };
+
+                this.loadModule('default_example.json', defaultField);
+            }
+
+            startRenderLoop() {
+                const animate = () => {
+                    this.render();
+                    requestAnimationFrame(animate);
+                };
+                animate();
+            }
+        }
+
+        // Global functions for HTML event handlers
+        let hexSystem;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            hexSystem = new HexPhaseTwoSystem();
+        });
+
+        function changePerspective() {
+            const select = document.getElementById('perspectiveSelect');
+            hexSystem.changePerspectiveSmooth(select.value);
+        }
+
+        function updateRotation() {
+            hexSystem.updateRotation();
+        }
+
+        function updateZoom() {
+            hexSystem.updateZoom();
+        }
+
+        function updateFieldSize() {
+            hexSystem.updateFieldSize();
+        }
+
+        function updateMaxDistance() {
+            hexSystem.updateMaxDistance();
+        }
+
+        function generateTestField() {
+            hexSystem.generateTestField();
+        }
+
+        function clearField() {
+            hexSystem.clearField();
+        }
+
+        function createNewModule() {
+            const template = {
+                topology: 'hexagonal',
+                nodes: [],
+                relations: []
+            };
+            
+            const name = prompt('Module name:', 'new_module.json');
+            if (name) {
+                hexSystem.loadModule(name, template);
+            }
+        }
+
+        function exportCurrentState() {
+            if (hexSystem.activeModule && hexSystem.modules.has(hexSystem.activeModule)) {
+                const module = hexSystem.modules.get(hexSystem.activeModule);
+                downloadJSON(module.name, module.data);
+            } else {
+                alert('No active module to export');
+            }
+        }
+
+        function downloadJSON(filename = 'hexmodule.json', data = null) {
+            const content = data || hexSystem.fieldData || { message: 'No data to export' };
+            const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function validateJSON() {
+            if (hexSystem.activeModule && hexSystem.modules.has(hexSystem.activeModule)) {
+                const module = hexSystem.modules.get(hexSystem.activeModule);
+                
+                // Basic validation
+                let isValid = true;
+                let errors = [];
+
+                if (module.type === 'FIELD_STATE') {
+                    if (!module.data.topology || module.data.topology !== 'hexagonal') {
+                        isValid = false;
+                        errors.push('Invalid or missing topology');
+                    }
+                    if (!Array.isArray(module.data.nodes)) {
+                        isValid = false;
+                        errors.push('Nodes must be an array');
+                    }
+                    if (!Array.isArray(module.data.relations)) {
+                        isValid = false;
+                        errors.push('Relations must be an array');
+                    }
+                }
+
+                if (isValid) {
+                    alert('✅ Module validation passed');
+                } else {
+                    alert('❌ Validation errors:\n' + errors.join('\n'));
+                }
+            } else {
+                alert('No active module to validate');
+            }
+        }
+
+        function loadFromJSON() {
+            document.getElementById('fileInput').click();
+        }
+    </script>
+</body>
+</html>

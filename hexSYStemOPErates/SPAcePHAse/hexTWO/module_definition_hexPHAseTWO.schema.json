@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hexPHAseTWO Module Definition",
+  "type": "object",
+  "required": ["module_id", "type", "meta", "interface", "content"],
+  "properties": {
+    "module_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_.-]+$",
+      "description": "Unique identifier for the module"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "field_state",
+        "phase_state", 
+        "crossed_link",
+        "mirror_status",
+        "composite",
+        "template",
+        "transform"
+      ]
+    },
+    "meta": {
+      "type": "object",
+      "required": ["name", "version", "created"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string", 
+          "format": "date-time"
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "maxItems": 20
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "visualization",
+            "data_transform",
+            "structure_analysis", 
+            "pattern_detection",
+            "interaction",
+            "utility",
+            "test",
+            "example"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "interface": {
+      "type": "object",
+      "required": ["inputs", "outputs"],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "required"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_]+$"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "field_state",
+                  "phase_state",
+                  "node_set",
+                  "relation_set",
+                  "json_data",
+                  "text",
+                  "number",
+                  "boolean"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "default": {},
+              "validation": {
+                "type": "object",
+                "properties": {
+                  "schema": { "type": "string" },
+                  "constraints": { "type": "object" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_]+$"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "field_state",
+                  "phase_state", 
+                  "node_set",
+                  "relation_set",
+                  "json_data",
+                  "text",
+                  "number",
+                  "boolean",
+                  "perspective_change",
+                  "module_reference"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "trigger"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_]+$"
+              },
+              "trigger": {
+                "type": "string",
+                "enum": [
+                  "on_load",
+                  "on_activate",
+                  "on_perspective_change",
+                  "on_node_click",
+                  "on_data_change",
+                  "on_export",
+                  "external_only"
+                ]
+              },
+              "target": {
+                "type": "string",
+                "description": "Target perspective or module"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "content": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Direct content for simple modules"
+        },
+        {
+          "type": "object",
+          "required": ["reference"],
+          "properties": {
+            "reference": {
+              "type": "object",
+              "required": ["type", "path"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["file", "url", "inline", "computed"]
+                },
+                "path": {
+                  "type": "string"
+                },
+                "checksum": {
+                  "type": "string",
+                  "description": "Optional integrity verification"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false,
+          "description": "Reference to external content"
+        }
+      ]
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_.-]+$"
+          },
+          "uniqueItems": true
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "external": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["library", "api", "service", "file"]
+              },
+              "source": { "type": "string" },
+              "version": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "non_decisional",
+              "no_time_authority",
+              "idempotent", 
+              "crossed_link_neutral",
+              "structurally_correspondent",
+              "no_optimization"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["input_validation", "output_validation", "invariant_check", "integration_test"]
+              },
+              "data": { "type": "object" },
+              "expected": { "type": "object" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "perspective": {
+      "type": "object",
+      "properties": {
+        "default_view": {
+          "type": "string",
+          "enum": ["universe", "control", "module", "overview"]
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to", "trigger"],
+            "properties": {
+              "from": {
+                "type": "string",
+                "enum": ["universe", "control", "module", "overview"]
+              },
+              "to": {
+                "type": "string", 
+                "enum": ["universe", "control", "module", "overview"]
+              },
+              "trigger": {
+                "type": "string",
+                "enum": ["auto", "click", "load", "external"]
+              },
+              "condition": {
+                "type": "object",
+                "description": "Optional conditions for transition"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "storage": {
+      "type": "object",
+      "properties": {
+        "persistent": {
+          "type": "boolean",
+          "default": false
+        },
+        "auto_save": {
+          "type": "boolean",
+          "default": false
+        },
+        "export_format": {
+          "type": "string",
+          "enum": ["json", "binary", "text", "custom"]
+        },
+        "compression": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

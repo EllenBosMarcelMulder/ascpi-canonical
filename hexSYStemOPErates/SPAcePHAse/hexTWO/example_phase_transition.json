@@ -1,0 +1,203 @@
+{
+  "module_id": "example_phase_transition",
+  "type": "phase_state",
+  "meta": {
+    "name": "Dynamic Phase Transition",
+    "version": "1.0.0", 
+    "created": "2025-12-19T10:00:00Z",
+    "author": "hexPHAseTWO System",
+    "description": "Demonstrates perspective transitions with constraint validation",
+    "tags": ["example", "phase", "transition", "perspective"],
+    "category": "interaction"
+  },
+  "interface": {
+    "inputs": [
+      {
+        "name": "source_perspective",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "target_perspective", 
+        "type": "text",
+        "required": true
+      }
+    ],
+    "outputs": [
+      {
+        "name": "transition_result",
+        "type": "perspective_change"
+      },
+      {
+        "name": "validation_status",
+        "type": "boolean"
+      }
+    ],
+    "events": [
+      {
+        "name": "perspective_changed",
+        "trigger": "on_perspective_change",
+        "target": "universe"
+      }
+    ]
+  },
+  "content": {
+    "phase_id": "dynamic_transition_demo",
+    "closure": "structurally_open",
+    "meta": {
+      "phase_type": "custom",
+      "created": "2025-12-19T10:00:00Z",
+      "duration": 0,
+      "description": "Demonstrates smooth perspective transitions with validation"
+    },
+    "perspective_state": {
+      "current_view": "universe",
+      "transition_mode": "smooth",
+      "camera": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1000
+        },
+        "rotation": {
+          "x": 15,
+          "y": 0
+        },
+        "zoom": 1.0
+      },
+      "navigation": {
+        "mode": "guided",
+        "constraints": {
+          "min_zoom": 0.1,
+          "max_zoom": 3.0,
+          "allowed_views": ["universe", "control", "module", "overview"]
+        }
+      }
+    },
+    "internal_expansion": false,
+    "transition_rules": {
+      "triggers": [
+        {
+          "event": "node_click",
+          "target_phase": "module_focus",
+          "condition": {
+            "requires": ["active_module", "valid_node"]
+          }
+        },
+        {
+          "event": "perspective_change",
+          "target_phase": "view_transition",
+          "condition": {
+            "requires": ["valid_perspective"]
+          }
+        },
+        {
+          "event": "module_load",
+          "target_phase": "module_active",
+          "condition": {
+            "requires": ["valid_module"]
+          }
+        },
+        {
+          "event": "external_signal",
+          "target_phase": "external_control",
+          "condition": {
+            "requires": ["external_authorization"]
+          }
+        }
+      ],
+      "validation": {
+        "requires_validation": true,
+        "invariants_check": [
+          "non_decisional",
+          "no_time_authority", 
+          "crossed_link_neutral",
+          "structural_coherence"
+        ]
+      }
+    },
+    "persistence": {
+      "save_state": false,
+      "auto_export": true,
+      "storage_key": "phase_transition_state"
+    }
+  },
+  "dependencies": {
+    "schemas": [
+      "phase_state_hexPHAseTWO.schema.json"
+    ]
+  },
+  "validation": {
+    "invariants": [
+      "non_decisional",
+      "no_time_authority",
+      "crossed_link_neutral"
+    ],
+    "tests": [
+      {
+        "name": "validate_perspective_transition",
+        "type": "integration_test",
+        "data": {
+          "from_perspective": "universe",
+          "to_perspective": "module",
+          "trigger": "node_click",
+          "context": {
+            "active_module": true,
+            "valid_node": "center"
+          }
+        },
+        "expected": {
+          "transition_valid": true,
+          "perspective_changed": true,
+          "invariants_maintained": true
+        }
+      },
+      {
+        "name": "reject_internal_trigger",
+        "type": "invariant_check",
+        "data": {
+          "trigger_type": "internal_trigger",
+          "event": "auto_transition"
+        },
+        "expected": {
+          "transition_valid": false,
+          "violation_reason": "crossed_link_neutrality"
+        }
+      }
+    ]
+  },
+  "perspective": {
+    "default_view": "universe",
+    "transitions": [
+      {
+        "from": "universe",
+        "to": "control",
+        "trigger": "click",
+        "condition": {
+          "active_module": true
+        }
+      },
+      {
+        "from": "control",
+        "to": "module",
+        "trigger": "click"
+      },
+      {
+        "from": "module",
+        "to": "overview",
+        "trigger": "external"
+      },
+      {
+        "from": "overview", 
+        "to": "universe",
+        "trigger": "external"
+      }
+    ]
+  },
+  "storage": {
+    "persistent": true,
+    "auto_save": false,
+    "export_format": "json",
+    "compression": false
+  }
+}

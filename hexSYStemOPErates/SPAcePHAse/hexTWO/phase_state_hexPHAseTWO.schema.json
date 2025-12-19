@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hexPHAseTWO Phase State",
+  "type": "object",
+  "required": ["phase_id", "closure", "meta", "perspective_state"],
+  "properties": {
+    "phase_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_.-]+$",
+      "description": "Identifier only; no ordering implied"
+    },
+    "closure": {
+      "type": "string",
+      "enum": ["structurally_open", "structurally_closed", "transitioning"]
+    },
+    "meta": {
+      "type": "object",
+      "required": ["phase_type", "created"],
+      "properties": {
+        "phase_type": {
+          "type": "string",
+          "enum": ["universe", "control", "module", "overview", "custom"]
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Duration in milliseconds, 0 means permanent"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "additionalProperties": false
+    },
+    "perspective_state": {
+      "type": "object",
+      "required": ["current_view", "transition_mode"],
+      "properties": {
+        "current_view": {
+          "type": "string",
+          "enum": ["universe", "control", "module", "overview"]
+        },
+        "transition_mode": {
+          "type": "string",
+          "enum": ["instant", "smooth", "disabled"]
+        },
+        "camera": {
+          "type": "object",
+          "properties": {
+            "position": {
+              "type": "object",
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "z": { "type": "number" }
+              },
+              "required": ["x", "y", "z"],
+              "additionalProperties": false
+            },
+            "rotation": {
+              "type": "object",
+              "properties": {
+                "x": { 
+                  "type": "number", 
+                  "minimum": -90, 
+                  "maximum": 90 
+                },
+                "y": { 
+                  "type": "number", 
+                  "minimum": -180, 
+                  "maximum": 180 
+                }
+              },
+              "required": ["x", "y"],
+              "additionalProperties": false
+            },
+            "zoom": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 5.0
+            },
+            "focus_target": {
+              "type": "string",
+              "description": "Node ID to focus on"
+            }
+          },
+          "additionalProperties": false
+        },
+        "navigation": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["free", "constrained", "guided", "locked"]
+            },
+            "constraints": {
+              "type": "object",
+              "properties": {
+                "min_zoom": { "type": "number", "minimum": 0.1 },
+                "max_zoom": { "type": "number", "maximum": 10.0 },
+                "allowed_views": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["universe", "control", "module", "overview"]
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "internal_expansion": {
+      "type": "boolean",
+      "const": false
+    },
+    "transition_rules": {
+      "type": "object",
+      "properties": {
+        "triggers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "string",
+                "enum": ["node_click", "perspective_change", "module_load", "external_signal"]
+              },
+              "target_phase": {
+                "type": "string"
+              },
+              "condition": {
+                "type": "object",
+                "properties": {
+                  "requires": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "excludes": {
+                    "type": "array", 
+                    "items": { "type": "string" }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": ["event", "target_phase"],
+            "additionalProperties": false
+          }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "requires_validation": {
+              "type": "boolean",
+              "default": true
+            },
+            "invariants_check": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "non_decisional",
+                  "no_time_authority",
+                  "crossed_link_neutral",
+                  "structural_coherence"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "save_state": {
+          "type": "boolean",
+          "default": false
+        },
+        "auto_export": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage_key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

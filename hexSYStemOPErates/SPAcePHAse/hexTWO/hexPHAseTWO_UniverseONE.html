@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hexSYStemOPErates — [ .:: hexPHAseTWO_UNIversONE ::. ]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@100;200;300;400;500&display=swap');
+        
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --accent-cyan: #00ffff;
+            --accent-green: #00ff88;
+            --accent-purple: #8844ff;
+            --accent-orange: #ff6600;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #333333;
+            
+            --universe-transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --perspective-shift: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --field-pulse: all 0.3s ease-in-out;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        html, body {
+            width: 100%; 
+            height: 100%;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            overflow: hidden; 
+            font-family: 'Space Grotesk', ui-sans-serif;
+        }
+
+        .universe-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, 
+                rgba(0,255,255,0.03) 0%, 
+                rgba(136,68,255,0.02) 35%,
+                rgba(255,102,0,0.01) 70%,
+                transparent 100%);
+            perspective: 2000px;
+            overflow: hidden;
+        }
+
+        .field-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: var(--universe-transition);
+        }
+
+        /* Perspective States */
+        .field-canvas.universe-view {
+            transform: perspective(2000px) rotateX(15deg) rotateY(0deg) scale(1);
+        }
+
+        .field-canvas.control-view {
+            transform: perspective(1200px) rotateX(45deg) rotateY(-15deg) scale(1.2);
+        }
+
+        .field-canvas.module-view {
+            transform: perspective(800px) rotateX(0deg) rotateY(25deg) scale(1.5);
+        }
+
+        .field-canvas.overview-view {
+            transform: perspective(2500px) rotateX(60deg) rotateY(0deg) scale(0.7);
+        }
+
+        /* Perspective transition animations */
+        .field-canvas.transitioning {
+            filter: blur(3px);
+            opacity: 0.6;
+        }
+
+        /* Interface Overlay */
+        .universe-interface {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1000;
+            display: grid;
+            grid-template-areas: 
+                "status . navigation"
+                "controls . info"
+                "modules . console";
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 120px 1fr 180px;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .interface-panel {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+        }
+
+        .status-panel {
+            grid-area: status;
+            background: linear-gradient(135deg, 
+                rgba(0,255,255,0.1) 0%, 
+                rgba(10,10,10,0.9) 100%);
+            border-color: var(--accent-cyan);
+        }
+
+        .navigation-panel {
+            grid-area: navigation;
+            background: linear-gradient(135deg, 
+                rgba(136,68,255,0.1) 0%, 
+                rgba(10,10,10,0.9) 100%);
+            border-color: var(--accent-purple);
+        }
+
+        .controls-panel {
+            grid-area: controls;
+            background: linear-gradient(135deg, 
+                rgba(0,255,136,0.1) 0%, 
+                rgba(10,10,10,0.9) 100%);
+            border-color: var(--accent-green);
+        }
+
+        .info-panel {
+            grid-area: info;
+            background: linear-gradient(135deg, 
+                rgba(255,102,0,0.1) 0%, 
+                rgba(10,10,10,0.9) 100%);
+            border-color: var(--accent-orange);
+        }
+
+        .modules-panel {
+            grid-area: modules;
+        }
+
+        .console-panel {
+            grid-area: console;
+        }
+
+        .panel-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .panel-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .perspective-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            margin: 0.25rem 0;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: var(--perspective-shift);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            width: 100%;
+            text-align: left;
+        }
+
+        .perspective-button:hover {
+            background: rgba(136, 68, 255, 0.2);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 15px rgba(136, 68, 255, 0.3);
+            transform: translateX(3px);
+        }
+
+        .perspective-button.active {
+            background: rgba(136, 68, 255, 0.3);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 20px rgba(136, 68, 255, 0.5);
+        }
+
+        .control-slider {
+            width: 100%;
+            margin: 0.5rem 0;
+            appearance: none;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .control-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .module-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: var(--field-pulse);
+        }
+
+        .module-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .module-item.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .module-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .module-type {
+            font-size: 0.6rem;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Field Rendering Styles */
+        .hex-node {
+            position: absolute;
+            border-radius: 50%;
+            transition: var(--field-pulse);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .hex-node.standard {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            box-shadow: 
+                0 0 10px var(--accent-cyan),
+                inset 0 0 5px rgba(255,255,255,0.3);
+        }
+
+        .hex-node.anchor {
+            width: 12px;
+            height: 12px;
+            background: var(--accent-green);
+            box-shadow: 
+                0 0 15px var(--accent-green),
+                inset 0 0 8px rgba(255,255,255,0.4);
+        }
+
+        .hex-node.gateway {
+            width: 16px;
+            height: 16px;
+            background: var(--accent-orange);
+            box-shadow: 
+                0 0 20px var(--accent-orange),
+                inset 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .hex-node.processor {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-purple);
+            box-shadow: 
+                0 0 12px var(--accent-purple),
+                inset 0 0 6px rgba(255,255,255,0.35);
+        }
+
+        .hex-node:hover {
+            transform: scale(1.5);
+            z-index: 100;
+        }
+
+        .hex-node.focused {
+            transform: scale(2.0);
+            z-index: 200;
+            animation: pulse 2s infinite;
+        }
+
+        .hex-relation {
+            position: absolute;
+            opacity: 0.6;
+            transition: var(--field-pulse);
+            pointer-events: none;
+        }
+
+        .hex-relation.high { 
+            opacity: 0.9; 
+            filter: drop-shadow(0 0 5px currentColor);
+        }
+        
+        .hex-relation.mid { 
+            opacity: 0.7; 
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+        
+        .hex-relation.low { 
+            opacity: 0.4;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 15px currentColor,
+                    0 0 30px currentColor,
+                    inset 0 0 8px rgba(255,255,255,0.5);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 25px currentColor,
+                    0 0 50px currentColor,
+                    inset 0 0 12px rgba(255,255,255,0.7);
+            }
+        }
+
+        @keyframes perspective-shift {
+            0% { 
+                filter: blur(0px); 
+                opacity: 1; 
+            }
+            50% { 
+                filter: blur(4px); 
+                opacity: 0.4; 
+            }
+            100% { 
+                filter: blur(0px); 
+                opacity: 1; 
+            }
+        }
+
+        .perspective-shifting {
+            animation: perspective-shift 0.8s ease-out;
+        }
+
+        /* Field Grid Background */
+        .field-canvas::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(0,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(136,68,255,0.1) 0%, transparent 50%),
+                linear-gradient(45deg, 
+                    transparent 24%, 
+                    rgba(255,255,255,0.01) 25%, 
+                    rgba(255,255,255,0.01) 26%, 
+                    transparent 27%, 
+                    transparent 74%, 
+                    rgba(255,255,255,0.01) 75%, 
+                    rgba(255,255,255,0.01) 76%, 
+                    transparent 77%);
+            background-size: 60px 60px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .universe-interface {
+                grid-template-columns: 250px 1fr 250px;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .universe-interface {
+                grid-template-areas: 
+                    "status"
+                    "navigation"
+                    "info";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+            
+            .controls-panel,
+            .modules-panel,
+            .console-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="universe-container">
+        <canvas id="hexCanvas" class="field-canvas universe-view"></canvas>
+        
+        <div class="universe-interface">
+            <!-- Status Panel -->
+            <div class="interface-panel status-panel">
+                <div class="panel-title" style="color: var(--accent-cyan);">
+                    System Status
+                </div>
+                <div class="panel-content">
+                    <div class="status-row">
+                        <span class="status-label">State:</span>
+                        <span class="status-value" id="systemState">UNIVERSE</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Phase:</span>
+                        <span class="status-value">hexPHAseTWO</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Module:</span>
+                        <span class="status-value" id="activeModule">NONE</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Nodes:</span>
+                        <span class="status-value" id="nodeCount">0</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Relations:</span>
+                        <span class="status-value" id="relationCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Panel -->
+            <div class="interface-panel navigation-panel">
+                <div class="panel-title" style="color: var(--accent-purple);">
+                    Perspective Navigation
+                </div>
+                <div class="panel-content">
+                    <button class="perspective-button active" data-perspective="universe">
+                        Universe View
+                    </button>
+                    <button class="perspective-button" data-perspective="control">
+                        Control View
+                    </button>
+                    <button class="perspective-button" data-perspective="module">
+                        Module View
+                    </button>
+                    <button class="perspective-button" data-perspective="overview">
+                        Overview
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="interface-panel controls-panel">
+                <div class="panel-title" style="color: var(--accent-green);">
+                    Field Controls
+                </div>
+                <div class="panel-content">
+                    <div style="margin-bottom: 1rem;">
+                        <div style="margin-bottom: 0.5rem;">Rotation X:</div>
+                        <input type="range" class="control-slider" id="rotationX" 
+                               min="-90" max="90" value="15">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <div style="margin-bottom: 0.5rem;">Rotation Y:</div>
+                        <input type="range" class="control-slider" id="rotationY" 
+                               min="-180" max="180" value="0">
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 0.5rem;">Zoom:</div>
+                        <input type="range" class="control-slider" id="zoomLevel" 
+                               min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="interface-panel info-panel">
+                <div class="panel-title" style="color: var(--accent-orange);">
+                    Field Information
+                </div>
+                <div class="panel-content">
+                    <div class="status-row">
+                        <span class="status-label">Topology:</span>
+                        <span class="status-value">Hexagonal</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Max Distance:</span>
+                        <span class="status-value" id="maxDistance">120</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Focus Node:</span>
+                        <span class="status-value" id="focusNode">NONE</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Invariants:</span>
+                        <span class="status-value" style="color: var(--accent-green);">✓ VALID</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modules Panel -->
+            <div class="interface-panel modules-panel">
+                <div class="panel-title" style="color: var(--accent-green);">
+                    Module Library
+                </div>
+                <div class="panel-content" id="modulesList">
+                    <!-- Modules will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Console Panel -->
+            <div class="interface-panel console-panel">
+                <div class="panel-title" style="color: var(--accent-cyan);">
+                    JSON Console
+                </div>
+                <div class="panel-content">
+                    <pre id="jsonConsole" style="font-size: 0.6rem; line-height: 1.2; overflow-y: auto; max-height: 120px;">
+{
+  "status": "hexPHAseTWO_UNIversONE Ready",
+  "perspective": "universe",
+  "modules_loaded": 0
+}
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class HexUniverseEngine {
+            constructor() {
+                this.canvas = document.getElementById('hexCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.currentPerspective = 'universe';
+                this.focusedNode = null;
+                this.fieldData = null;
+                this.modules = new Map();
+                this.activeModuleId = null;
+                
+                this.perspectiveConfig = {
+                    universe: { rotX: 15, rotY: 0, scale: 1.0, transition: '2000px' },
+                    control: { rotX: 45, rotY: -15, scale: 1.2, transition: '1200px' },
+                    module: { rotX: 0, rotY: 25, scale: 1.5, transition: '800px' },
+                    overview: { rotX: 60, rotY: 0, scale: 0.7, transition: '2500px' }
+                };
+                
+                this.initializeEngine();
+            }
+
+            initializeEngine() {
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.loadDefaultModules();
+                this.startRenderLoop();
+                this.updateInterface();
+            }
+
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                };
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+            }
+
+            setupEventListeners() {
+                // Perspective buttons
+                document.querySelectorAll('.perspective-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const perspective = button.dataset.perspective;
+                        this.changePerspective(perspective);
+                    });
+                });
+
+                // Manual controls
+                document.getElementById('rotationX').addEventListener('input', (e) => {
+                    this.applyManualTransform();
+                });
+                
+                document.getElementById('rotationY').addEventListener('input', (e) => {
+                    this.applyManualTransform();
+                });
+                
+                document.getElementById('zoomLevel').addEventListener('input', (e) => {
+                    this.applyManualTransform();
+                });
+
+                // Canvas interactions
+                this.canvas.addEventListener('click', (e) => {
+                    this.handleCanvasClick(e);
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeyPress(e);
+                });
+            }
+
+            changePerspective(newPerspective, smooth = true) {
+                if (newPerspective === this.currentPerspective) return;
+
+                // Update button states
+                document.querySelectorAll('.perspective-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-perspective="${newPerspective}"]`).classList.add('active');
+
+                if (smooth) {
+                    // Add transition class
+                    this.canvas.classList.add('transitioning');
+                    
+                    setTimeout(() => {
+                        this.currentPerspective = newPerspective;
+                        this.canvas.className = `field-canvas ${newPerspective}-view`;
+                        document.getElementById('systemState').textContent = newPerspective.toUpperCase();
+                        
+                        // Update manual controls to match perspective
+                        const config = this.perspectiveConfig[newPerspective];
+                        document.getElementById('rotationX').value = config.rotX;
+                        document.getElementById('rotationY').value = config.rotY;
+                        document.getElementById('zoomLevel').value = config.scale;
+                        
+                        setTimeout(() => {
+                            this.canvas.classList.remove('transitioning');
+                        }, 100);
+                    }, 400);
+                } else {
+                    this.currentPerspective = newPerspective;
+                    this.canvas.className = `field-canvas ${newPerspective}-view`;
+                }
+
+                this.updateInterface();
+            }
+
+            applyManualTransform() {
+                const rotX = document.getElementById('rotationX').value;
+                const rotY = document.getElementById('rotationY').value;
+                const zoom = document.getElementById('zoomLevel').value;
+                
+                this.canvas.style.transform = 
+                    `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${zoom})`;
+            }
+
+            handleCanvasClick(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                // Check if clicking on a node
+                const clickedNode = this.getNodeAtPosition(x, y);
+                
+                if (clickedNode) {
+                    this.focusNode(clickedNode);
+                    
+                    // Auto perspective change based on current view
+                    if (this.currentPerspective === 'universe') {
+                        this.changePerspective('control');
+                    } else if (this.currentPerspective === 'control') {
+                        this.changePerspective('module');
+                    }
+                }
+            }
+
+            handleKeyPress(event) {
+                switch(event.key) {
+                    case '1':
+                        this.changePerspective('universe');
+                        break;
+                    case '2':
+                        this.changePerspective('control');
+                        break;
+                    case '3':
+                        this.changePerspective('module');
+                        break;
+                    case '4':
+                        this.changePerspective('overview');
+                        break;
+                    case 'Escape':
+                        this.clearFocus();
+                        break;
+                }
+            }
+
+            focusNode(nodeId) {
+                this.focusedNode = nodeId;
+                document.getElementById('focusNode').textContent = nodeId || 'NONE';
+                this.updateInterface();
+            }
+
+            clearFocus() {
+                this.focusedNode = null;
+                document.getElementById('focusNode').textContent = 'NONE';
+                this.changePerspective('universe');
+            }
+
+            getNodeAtPosition(x, y) {
+                if (!this.fieldData || !this.fieldData.nodes) return null;
+                
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const scale = Math.min(this.canvas.width, this.canvas.height) / 600;
+                
+                for (const node of this.fieldData.nodes) {
+                    const { q, r } = node.position;
+                    const nodeX = centerX + scale * (q * 60 * 1.5);
+                    const nodeY = centerY + scale * (r * 60 * Math.sqrt(3) + (q % 2) * 30 * Math.sqrt(3));
+                    
+                    const distance = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
+                    if (distance < 20) { // Click tolerance
+                        return node.id;
+                    }
+                }
+                
+                return null;
+            }
+
+            loadModule(moduleData) {
+                const moduleId = moduleData.module_id || `module_${Date.now()}`;
+                this.modules.set(moduleId, moduleData);
+                
+                if (moduleData.type === 'field_state' && moduleData.content) {
+                    this.fieldData = moduleData.content;
+                    this.activeModuleId = moduleId;
+                    
+                    // Auto-switch to module view if module perspective is defined
+                    if (moduleData.content.perspective?.default_view) {
+                        this.changePerspective(moduleData.content.perspective.default_view);
+                    }
+                }
+                
+                this.updateModulesList();
+                this.updateInterface();
+            }
+
+            updateModulesList() {
+                const list = document.getElementById('modulesList');
+                list.innerHTML = '';
+                
+                this.modules.forEach((module, id) => {
+                    const item = document.createElement('div');
+                    item.className = 'module-item';
+                    if (id === this.activeModuleId) item.classList.add('active');
+                    
+                    item.innerHTML = `
+                        <div class="module-name">${module.meta?.name || module.module_id}</div>
+                        <div class="module-type">${module.type}</div>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        this.activateModule(id);
+                    });
+                    
+                    list.appendChild(item);
+                });
+            }
+
+            activateModule(moduleId) {
+                const module = this.modules.get(moduleId);
+                if (!module) return;
+                
+                this.activeModuleId = moduleId;
+                
+                if (module.type === 'field_state' && module.content) {
+                    this.fieldData = module.content;
+                }
+                
+                this.updateModulesList();
+                this.updateInterface();
+            }
+
+            async loadDefaultModules() {
+                try {
+                    // Load the example modules we created
+                    const modules = [
+                        '/home/claude/example_field_basic.json',
+                        '/home/claude/example_complex_network.json',
+                        '/home/claude/example_phase_transition.json'
+                    ];
+                    
+                    // For demo purposes, create some built-in modules
+                    const basicField = {
+                        module_id: 'demo_basic',
+                        type: 'field_state',
+                        meta: { name: 'Demo Basic Field', version: '1.0.0' },
+                        content: {
+                            topology: 'hexagonal',
+                            meta: { phase: 'hexPHAseTWO' },
+                            nodes: [
+                                { id: 'center', position: { q: 0, r: 0 } },
+                                { id: 'n1', position: { q: 1, r: 0 } },
+                                { id: 'n2', position: { q: 0, r: 1 } },
+                                { id: 'n3', position: { q: -1, r: 1 } }
+                            ],
+                            relations: [
+                                { a: 'center', b: 'n1', visibility: 'high' },
+                                { a: 'center', b: 'n2', visibility: 'high' },
+                                { a: 'center', b: 'n3', visibility: 'high' }
+                            ]
+                        }
+                    };
+                    
+                    this.loadModule(basicField);
+                    
+                } catch (error) {
+                    console.log('Demo mode: using built-in modules');
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (!this.fieldData || !this.fieldData.nodes) {
+                    this.renderEmptyState();
+                    return;
+                }
+
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const scale = Math.min(this.canvas.width, this.canvas.height) / 600;
+
+                // Calculate node positions
+                const positions = new Map();
+                this.fieldData.nodes.forEach(node => {
+                    const { q, r } = node.position;
+                    const x = centerX + scale * (q * 60 * 1.5);
+                    const y = centerY + scale * (r * 60 * Math.sqrt(3) + (q % 2) * 30 * Math.sqrt(3));
+                    positions.set(node.id, { x, y, node });
+                });
+
+                // Render relations
+                if (this.fieldData.relations) {
+                    this.fieldData.relations.forEach(relation => {
+                        const posA = positions.get(relation.a);
+                        const posB = positions.get(relation.b);
+                        if (posA && posB) {
+                            this.renderRelation(posA, posB, relation);
+                        }
+                    });
+                }
+
+                // Render nodes
+                positions.forEach((pos, nodeId) => {
+                    this.renderNode(pos.x, pos.y, pos.node, nodeId === this.focusedNode);
+                });
+            }
+
+            renderEmptyState() {
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.4;
+                this.ctx.fillStyle = '#00ffff';
+                this.ctx.font = '24px "Space Grotesk"';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('hexPHAseTWO_UNIversONE', centerX, centerY - 40);
+                
+                this.ctx.font = '14px "JetBrains Mono"';
+                this.ctx.fillStyle = '#aaaaaa';
+                this.ctx.fillText('Load a module to visualize field data', centerX, centerY + 20);
+                this.ctx.restore();
+            }
+
+            renderNode(x, y, node, isFocused = false) {
+                this.ctx.save();
+                
+                const nodeType = node.properties?.type || 'standard';
+                const customColor = node.properties?.visual?.color;
+                const customSize = node.properties?.visual?.size || 1.0;
+                
+                let radius, color, glowSize;
+                
+                switch (nodeType) {
+                    case 'gateway':
+                        radius = 8 * customSize;
+                        color = customColor || '#ff6600';
+                        glowSize = 20;
+                        break;
+                    case 'processor':
+                        radius = 5 * customSize;
+                        color = customColor || '#8844ff';
+                        glowSize = 15;
+                        break;
+                    case 'anchor':
+                        radius = 6 * customSize;
+                        color = customColor || '#00ff88';
+                        glowSize = 18;
+                        break;
+                    default:
+                        radius = 4 * customSize;
+                        color = customColor || '#00ffff';
+                        glowSize = 12;
+                }
+                
+                if (isFocused) {
+                    radius *= 2;
+                    glowSize *= 2;
+                }
+                
+                // Outer glow
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, glowSize, 0, Math.PI * 2);
+                this.ctx.fillStyle = color + '20';
+                this.ctx.fill();
+                
+                // Main node
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = color;
+                this.ctx.fill();
+                
+                // Inner highlight
+                this.ctx.beginPath();
+                this.ctx.arc(x - radius/3, y - radius/3, radius/2, 0, Math.PI * 2);
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                this.ctx.fill();
+                
+                this.ctx.restore();
+            }
+
+            renderRelation(posA, posB, relation) {
+                this.ctx.save();
+                
+                const visibility = relation.visibility || 'mid';
+                const customColor = relation.properties?.visual?.color;
+                const customWidth = relation.properties?.visual?.width || 1;
+                const style = relation.properties?.visual?.style || 'solid';
+                
+                const alpha = { 'high': 0.9, 'mid': 0.6, 'low': 0.3 }[visibility] || 0.5;
+                const width = { 'high': 2, 'mid': 1.5, 'low': 1 }[visibility] * customWidth;
+                const color = customColor || '#00ffff';
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(posA.x, posA.y);
+                this.ctx.lineTo(posB.x, posB.y);
+                this.ctx.strokeStyle = color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                this.ctx.lineWidth = width;
+                
+                if (style === 'dashed') {
+                    this.ctx.setLineDash([5, 5]);
+                } else if (style === 'dotted') {
+                    this.ctx.setLineDash([2, 3]);
+                } else {
+                    this.ctx.setLineDash([]);
+                }
+                
+                this.ctx.stroke();
+                this.ctx.restore();
+            }
+
+            updateInterface() {
+                // Update status counts
+                let nodeCount = 0;
+                let relationCount = 0;
+                
+                if (this.fieldData) {
+                    nodeCount = this.fieldData.nodes?.length || 0;
+                    relationCount = this.fieldData.relations?.length || 0;
+                }
+                
+                document.getElementById('nodeCount').textContent = nodeCount;
+                document.getElementById('relationCount').textContent = relationCount;
+                document.getElementById('activeModule').textContent = 
+                    this.activeModuleId ? this.modules.get(this.activeModuleId).meta?.name || this.activeModuleId : 'NONE';
+                
+                // Update JSON console
+                const consoleData = {
+                    perspective: this.currentPerspective,
+                    active_module: this.activeModuleId,
+                    focused_node: this.focusedNode,
+                    node_count: nodeCount,
+                    relation_count: relationCount
+                };
+                
+                document.getElementById('jsonConsole').textContent = 
+                    JSON.stringify(consoleData, null, 2);
+            }
+
+            startRenderLoop() {
+                const animate = () => {
+                    this.render();
+                    requestAnimationFrame(animate);
+                };
+                animate();
+            }
+        }
+
+        // Initialize the engine when DOM is loaded
+        let hexEngine;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            hexEngine = new HexUniverseEngine();
+        });
+    </script>
+</body>
+</html>

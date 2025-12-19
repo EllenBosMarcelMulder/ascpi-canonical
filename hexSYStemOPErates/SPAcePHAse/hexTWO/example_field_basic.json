@@ -1,0 +1,250 @@
+{
+  "module_id": "example_field_basic",
+  "type": "field_state",
+  "meta": {
+    "name": "Basic Hexagonal Field",
+    "version": "1.0.0",
+    "created": "2025-12-19T10:00:00Z",
+    "author": "hexPHAseTWO System",
+    "description": "Simple 3x3 hexagonal field for testing basic functionality",
+    "tags": ["example", "basic", "test"],
+    "category": "example"
+  },
+  "interface": {
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "field_visualization",
+        "type": "field_state"
+      }
+    ],
+    "events": [
+      {
+        "name": "on_activate",
+        "trigger": "on_activate",
+        "target": "module"
+      }
+    ]
+  },
+  "content": {
+    "topology": "hexagonal",
+    "meta": {
+      "phase": "hexPHAseTWO",
+      "version": "1.0.0",
+      "created": "2025-12-19T10:00:00Z",
+      "description": "Basic hexagonal field with 7 nodes"
+    },
+    "perspective": {
+      "default_view": "module",
+      "rotation": {
+        "x": 15,
+        "y": 0
+      },
+      "zoom": 1.2
+    },
+    "nodes": [
+      {
+        "id": "center",
+        "position": { "q": 0, "r": 0 },
+        "properties": {
+          "type": "anchor",
+          "visual": {
+            "color": "#00ff88",
+            "size": 1.5,
+            "opacity": 0.9
+          }
+        }
+      },
+      {
+        "id": "n1",
+        "position": { "q": 1, "r": 0 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.8
+          }
+        }
+      },
+      {
+        "id": "n2",
+        "position": { "q": 0, "r": 1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.8
+          }
+        }
+      },
+      {
+        "id": "n3",
+        "position": { "q": -1, "r": 1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.8
+          }
+        }
+      },
+      {
+        "id": "n4",
+        "position": { "q": -1, "r": 0 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.8
+          }
+        }
+      },
+      {
+        "id": "n5",
+        "position": { "q": 0, "r": -1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.8
+          }
+        }
+      },
+      {
+        "id": "n6",
+        "position": { "q": 1, "r": -1 },
+        "properties": {
+          "type": "standard",
+          "visual": {
+            "color": "#00ffff",
+            "size": 1.0,
+            "opacity": 0.8
+          }
+        }
+      }
+    ],
+    "relations": [
+      {
+        "a": "center",
+        "b": "n1",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 1.0,
+          "visual": {
+            "style": "solid",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "center",
+        "b": "n2",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 1.0,
+          "visual": {
+            "style": "solid",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "center",
+        "b": "n3",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 1.0,
+          "visual": {
+            "style": "solid",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "center",
+        "b": "n4",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 1.0,
+          "visual": {
+            "style": "solid",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "center",
+        "b": "n5",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 1.0,
+          "visual": {
+            "style": "solid",
+            "width": 2.0
+          }
+        }
+      },
+      {
+        "a": "center",
+        "b": "n6",
+        "visibility": "high",
+        "properties": {
+          "type": "structural",
+          "weight": 1.0,
+          "visual": {
+            "style": "solid",
+            "width": 2.0
+          }
+        }
+      }
+    ],
+    "validation": {
+      "invariants": [
+        "non_decisional",
+        "no_time_authority",
+        "idempotent",
+        "crossed_link_neutral",
+        "structurally_correspondent"
+      ],
+      "constraints": {
+        "max_nodes": 50,
+        "max_relations": 200,
+        "max_distance": 10
+      }
+    }
+  },
+  "validation": {
+    "invariants": [
+      "non_decisional",
+      "no_time_authority",
+      "idempotent",
+      "crossed_link_neutral",
+      "structurally_correspondent"
+    ]
+  },
+  "perspective": {
+    "default_view": "module",
+    "transitions": [
+      {
+        "from": "universe",
+        "to": "module",
+        "trigger": "load"
+      }
+    ]
+  },
+  "storage": {
+    "persistent": false,
+    "auto_save": false,
+    "export_format": "json"
+  }
+}

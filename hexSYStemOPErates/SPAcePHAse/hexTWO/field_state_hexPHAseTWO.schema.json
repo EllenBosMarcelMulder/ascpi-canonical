@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hexPHAseTWO Field State",
+  "type": "object",
+  "required": ["topology", "nodes", "relations", "meta"],
+  "properties": {
+    "topology": {
+      "const": "hexagonal"
+    },
+    "meta": {
+      "type": "object",
+      "required": ["phase", "version", "created"],
+      "properties": {
+        "phase": {
+          "const": "hexPHAseTWO"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "maxItems": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "perspective": {
+      "type": "object",
+      "properties": {
+        "default_view": {
+          "type": "string",
+          "enum": ["universe", "control", "module", "overview"]
+        },
+        "rotation": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "y": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "additionalProperties": false
+        },
+        "zoom": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 5.0
+        },
+        "focus_node": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "position"],
+        "properties": {
+          "id": { 
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "position": {
+            "type": "object",
+            "required": ["q", "r"],
+            "properties": {
+              "q": { "type": "integer" },
+              "r": { "type": "integer" }
+            },
+            "additionalProperties": false
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["standard", "anchor", "gateway", "processor"]
+              },
+              "data": {
+                "type": "object"
+              },
+              "visual": {
+                "type": "object",
+                "properties": {
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  },
+                  "size": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 5.0
+                  },
+                  "opacity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["a", "b", "visibility"],
+        "properties": {
+          "a": { 
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "b": { 
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": ["low", "mid", "high"]
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["structural", "data", "control", "temporal"]
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "bidirectional": {
+                "type": "boolean",
+                "default": true
+              },
+              "visual": {
+                "type": "object",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": ["solid", "dashed", "dotted", "gradient"]
+                  },
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  },
+                  "width": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 10.0
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "modules": {
+      "type": "object",
+      "properties": {
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "interfaces": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9_-]+$": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["input", "output", "bidirectional"]
+                },
+                "node_id": {
+                  "type": "string"
+                },
+                "data_type": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "node_id"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "non_decisional",
+              "no_time_authority", 
+              "idempotent",
+              "crossed_link_neutral",
+              "structurally_correspondent",
+              "no_optimization"
+            ]
+          }
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "max_nodes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_relations": {
+              "type": "integer", 
+              "minimum": 0
+            },
+            "max_distance": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
