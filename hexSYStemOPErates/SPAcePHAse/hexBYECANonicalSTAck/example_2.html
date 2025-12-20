@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ .:: hexBYE ::. ] — 3D Topologische Visualisatie v3.1</title>
+    <style>
+        :root {
+            --void-black: #000000;
+            --terminal-green: #00ff41;
+            --forensic-cyan: #00ffff;
+            --warning-amber: #ffaa00;
+            --ghost-gray: #333333;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--void-black);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            cursor: grab;
+        }
+        
+        canvas:active { cursor: grabbing; }
+        
+        .ui-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            pointer-events: none;
+            z-index: 50;
+            background: rgba(0,0,0,0.7);
+            padding: 1rem;
+            border: 1px solid var(--ghost-gray);
+        }
+        
+        .ui-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--forensic-cyan);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .ui-stats {
+            font-size: 9px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .ui-stats span { color: var(--terminal-green); }
+        .ui-stats .warning { color: var(--warning-amber); }
+        
+        .status-tag {
+            font-size: 9px;
+            border: 1px solid var(--terminal-green);
+            padding: 2px 8px;
+            color: var(--terminal-green);
+            text-transform: uppercase;
+            margin-top: 0.75rem;
+            display: inline-block;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-tag.canonical {
+            border-color: var(--forensic-cyan);
+            color: var(--forensic-cyan);
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 50;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .ctrl-btn {
+            background: transparent;
+            border: 1px solid var(--ghost-gray);
+            color: var(--terminal-green);
+            padding: 0.4rem 0.8rem;
+            font-family: inherit;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .ctrl-btn:hover {
+            border-color: var(--terminal-green);
+            background: rgba(0,255,65,0.1);
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 280px;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid var(--ghost-gray);
+            padding: 1rem;
+            font-size: 9px;
+            z-index: 50;
+        }
+        
+        .info-panel h3 {
+            color: var(--warning-amber);
+            font-size: 10px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .info-panel p {
+            line-height: 1.5;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .axiom-list {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+        }
+        
+        .axiom-list li {
+            margin-bottom: 0.3rem;
+            color: var(--terminal-green);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui-overlay">
+        <div class="ui-title">hexBYE_3D_TOPO_v3.1</div>
+        <div class="ui-stats">
+            STATUS: <span id="engine-status">INITIALIZING</span><br>
+            NODES: <span id="node-count">0</span><br>
+            RELATIONS: <span id="relation-count">0</span><br>
+            COHERENTIE: <span id="coherence-val">0.00</span><br>
+            PROJECTIE: <span id="projection-mode">TOPOLOGISCH</span><br>
+            <span class="warning">Z-BRON: STRUCTUREEL (niet fysiek)</span>
+        </div>
+        <div class="status-tag canonical">Axioma-Gesloten</div>
+    </div>
+    
+    <div class="info-panel">
+        <h3>Projectie Axioma's</h3>
+        <p>Deze visualisatie toont de <em>topologische structuur</em> van het hex-veld, 
+           niet een fysieke 3D-reconstructie.</p>
+        <p>De Z-waarde is een <strong>functie van connectiviteit</strong>, 
+           niet van gemeten diepte.</p>
+        <ul class="axiom-list">
+            <li>z = f(degree, cluster_id)</li>
+            <li>Schaal = canvas-relatief</li>
+            <li>w-component = topologisch</li>
+            <li>Geen "emergent" diepte</li>
+        </ul>
+    </div>
+
+    <canvas id="topo-canvas"></canvas>
+    
+    <div class="controls">
+        <button class="ctrl-btn" onclick="engine.setDensity(3)">SPARSE</button>
+        <button class="ctrl-btn" onclick="engine.setDensity(5)">MEDIUM</button>
+        <button class="ctrl-btn" onclick="engine.setDensity(8)">DENSE</button>
+        <button class="ctrl-btn" onclick="engine.resetView()">RESET</button>
+        <button class="ctrl-btn" onclick="engine.toggleMode()">MODE</button>
+    </div>
+
+    <script>
+        /**
+         * hexBYE 3D Topologische Visualisatie Engine v3.1
+         * 
+         * KERNPRINCIPE: Dit is GEEN 3D-reconstructie van fysieke diepte.
+         * Dit is een topologische visualisatie waar z = f(structuur).
+         * 
+         * Opgelost:
+         * - Schaal-conflict: schaal is nu canvas-relatief, niet pixel-absoluut
+         * - Emergent 3D paradox: z is expliciet structureel, niet "emergent"
+         * - API-breuk: uniforme node/relation structuur
+         * - W-component: correct perspectief zonder fysieke pretentie
+         */
+
+        const AXIOMS = Object.freeze({
+            // Hexagonale constanten (onveranderlijk)
+            HEX_SQRT3: Math.sqrt(3),
+            HEX_HALF_SQRT3: Math.sqrt(3) / 2,
+            
+            // Projectie constanten
+            HORIZON_DEPTH: 20.0,      // Waar perspectief naar 0 gaat
+            MIN_W: 0.1,               // Minimum w om deling door ~0 te voorkomen
+            
+            // Visualisatie
+            TAU: Math.PI * 2,
+            
+            // Z-berekening (STRUCTUREEL, niet fysiek)
+            Z_LAYER_OFFSET: 1.5,      // Afstand tussen topologische lagen
+            Z_DEGREE_FACTOR: 0.3      // Hoe connectiviteit z beïnvloedt
+        });
+
+        class TopologicalEngine {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                
+                // Veld data
+                this.nodes = [];
+                this.relations = [];
+                this.nodeMap = new Map();  // id -> node voor snelle lookup
+                
+                // View state
+                this.rotation = 0.4;
+                this.tilt = 0.5;
+                this.zoom = 1.0;
+                this.layer = 0;          // Huidige topologische laag
+                
+                // Interaction state
+                this.isDragging = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                
+                // Modes
+                this.renderMode = 'standard';  // standard | wireframe | heatmap
+                
+                this.setupInteraction();
+                this.resize();
+                
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+                // Schaal is ALTIJD canvas-relatief (lost axioma 3.2 op)
+                this.unit = Math.min(this.canvas.width, this.canvas.height) / 12;
+            }
+
+            setupInteraction() {
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!this.isDragging) return;
+                    this.rotation += (e.clientX - this.lastX) * 0.008;
+                    this.tilt += (e.clientY - this.lastY) * 0.008;
+                    // Clamp tilt om gimbal lock te voorkomen
+                    this.tilt = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, this.tilt));
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
+                });
+
+                window.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                });
+
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    this.zoom *= e.deltaY > 0 ? 0.95 : 1.05;
+                    this.zoom = Math.max(0.3, Math.min(3.0, this.zoom));
+                });
+            }
+
+            /**
+             * Genereer hex-veld met expliciete topologie
+             * Geen "beslissingen" - pure structurele generatie
+             */
+            generateField(density = 5) {
+                this.nodes = [];
+                this.relations = [];
+                this.nodeMap.clear();
+                
+                let nodeId = 0;
+                
+                // Genereer hex grid
+                for (let q = -density; q <= density; q++) {
+                    for (let r = -density; r <= density; r++) {
+                        // Hex constraint: |q + r| <= density voor zeshoekige vorm
+                        if (Math.abs(q + r) > density) continue;
+                        
+                        const id = `n${nodeId++}`;
+                        const node = {
+                            id: id,
+                            q: q,
+                            r: r,
+                            // Z is STRUCTUREEL: afstand van centrum bepaalt "laag"
+                            z: this.calculateStructuralZ(q, r),
+                            degree: 0,  // Wordt berekend na relatie-generatie
+                            cluster: Math.floor((q + density) / 3)  // Simpele clustering
+                        };
+                        
+                        this.nodes.push(node);
+                        this.nodeMap.set(id, node);
+                    }
+                }
+                
+                // Genereer relaties (alleen directe hex-buren)
+                this.nodes.forEach(node => {
+                    // Hex buurcoördinaten
+                    const neighbors = [
+                        [1, 0], [-1, 0],   // Horizontaal
+                        [0, 1], [0, -1],   // Diagonaal 1
+                        [1, -1], [-1, 1]   // Diagonaal 2
+                    ];
+                    
+                    neighbors.forEach(([dq, dr]) => {
+                        const neighborNode = this.nodes.find(n => 
+                            n.q === node.q + dq && n.r === node.r + dr
+                        );
+                        
+                        if (neighborNode && node.id < neighborNode.id) {
+                            this.relations.push({
+                                a: node.id,
+                                b: neighborNode.id,
+                                visibility: 3  // Direct adjacent = maximum visibility
+                            });
+                            node.degree++;
+                            neighborNode.degree++;
+                        }
+                    });
+                });
+                
+                // Update z gebaseerd op connectiviteit
+                this.nodes.forEach(node => {
+                    node.z += node.degree * AXIOMS.Z_DEGREE_FACTOR;
+                });
+                
+                this.updateStats();
+            }
+
+            /**
+             * STRUCTURELE Z-berekening
+             * Z is GEEN fysieke diepte, maar topologische positie
+             */
+            calculateStructuralZ(q, r) {
+                // Afstand van centrum in hex-metriek
+                const hexDist = (Math.abs(q) + Math.abs(r) + Math.abs(q + r)) / 2;
+                // Z = functie van topologische afstand, niet fysieke diepte
+                return -hexDist * 0.5;
+            }
+
+            /**
+             * Projectie: hex(q,r,z) -> screen(x,y)
+             * 
+             * KRITIEK: De w-component is TOPOLOGISCH, niet fysiek.
+             * Dit geeft een 3D-achtige weergave zonder te claimen
+             * dat we echte diepte "reconstrueren".
+             */
+            project(q, r, z) {
+                // Stap 1: Hex naar Cartesiaans (2D vlak)
+                let x = 1.5 * q;
+                let y = AXIOMS.HEX_HALF_SQRT3 * q + AXIOMS.HEX_SQRT3 * r;
+                
+                // Stap 2: Voeg structurele z toe (laag-offset)
+                let pz = z - (this.layer * AXIOMS.Z_LAYER_OFFSET);
+                
+                // Stap 3: Rotatie rond Y-as
+                const cosR = Math.cos(this.rotation);
+                const sinR = Math.sin(this.rotation);
+                const x1 = x * cosR - pz * sinR;
+                const z1 = x * sinR + pz * cosR;
+                
+                // Stap 4: Rotatie rond X-as (tilt)
+                const cosT = Math.cos(this.tilt);
+                const sinT = Math.sin(this.tilt);
+                const y1 = y * cosT - z1 * sinT;
+                const z2 = y * sinT + z1 * cosT;
+                
+                // Stap 5: Perspectief divisie
+                // w = 1 + z/horizon (topologisch, niet fysiek!)
+                const w = 1.0 + (z2 / AXIOMS.HORIZON_DEPTH);
+                
+                if (w < AXIOMS.MIN_W) {
+                    return null;  // Achter de camera
+                }
+                
+                return {
+                    x: (x1 / w) * this.zoom,
+                    y: (y1 / w) * this.zoom,
+                    z: z2,  // Voor depth sorting
+                    scale: 1.0 / w,
+                    opacity: Math.max(0, Math.min(1, 1.0 - (z2 / AXIOMS.HORIZON_DEPTH)))
+                };
+            }
+
+            render() {
+                const ctx = this.ctx;
+                
+                // Clear
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Project alle nodes
+                const projectedNodes = this.nodes.map(node => ({
+                    node: node,
+                    proj: this.project(node.q, node.r, node.z)
+                })).filter(pn => pn.proj !== null);
+                
+                // Sorteer op z voor correcte overdraw (painter's algorithm)
+                projectedNodes.sort((a, b) => a.proj.z - b.proj.z);
+                
+                // Teken relaties eerst (achter nodes)
+                if (this.renderMode !== 'heatmap') {
+                    this.relations.forEach(rel => {
+                        const nodeA = projectedNodes.find(pn => pn.node.id === rel.a);
+                        const nodeB = projectedNodes.find(pn => pn.node.id === rel.b);
+                        
+                        if (!nodeA || !nodeB) return;
+                        
+                        const avgOpacity = (nodeA.proj.opacity + nodeB.proj.opacity) / 2;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(
+                            this.centerX + nodeA.proj.x * this.unit,
+                            this.centerY + nodeA.proj.y * this.unit
+                        );
+                        ctx.lineTo(
+                            this.centerX + nodeB.proj.x * this.unit,
+                            this.centerY + nodeB.proj.y * this.unit
+                        );
+                        
+                        ctx.strokeStyle = `rgba(0, 255, 65, ${avgOpacity * 0.3})`;
+                        ctx.lineWidth = avgOpacity * 1.5;
+                        ctx.stroke();
+                    });
+                }
+                
+                // Teken nodes
+                projectedNodes.forEach(({ node, proj }) => {
+                    const screenX = this.centerX + proj.x * this.unit;
+                    const screenY = this.centerY + proj.y * this.unit;
+                    const size = Math.max(2, 4 * proj.scale * this.zoom);
+                    
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, size, 0, AXIOMS.TAU);
+                    
+                    if (this.renderMode === 'heatmap') {
+                        // Heatmap: kleur op basis van degree
+                        const hue = 180 - (node.degree * 20);
+                        ctx.fillStyle = `hsla(${hue}, 100%, 50%, ${proj.opacity * 0.8})`;
+                    } else {
+                        ctx.fillStyle = `rgba(0, 255, 255, ${proj.opacity * 0.7})`;
+                    }
+                    ctx.fill();
+                    
+                    // Wireframe mode: voeg hex-outline toe
+                    if (this.renderMode === 'wireframe' && proj.scale > 0.6) {
+                        ctx.strokeStyle = `rgba(0, 255, 65, ${proj.opacity * 0.5})`;
+                        ctx.lineWidth = 0.5;
+                        this.drawHexOutline(ctx, screenX, screenY, size * 2.5);
+                    }
+                });
+            }
+
+            drawHexOutline(ctx, cx, cy, radius) {
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (AXIOMS.TAU / 6) * i - Math.PI / 6;
+                    const x = cx + radius * Math.cos(angle);
+                    const y = cy + radius * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            updateStats() {
+                document.getElementById('engine-status').textContent = 'ACTIVE';
+                document.getElementById('node-count').textContent = this.nodes.length;
+                document.getElementById('relation-count').textContent = this.relations.length;
+                
+                // Coherentie = gemiddelde connectiviteit / max mogelijke
+                const avgDegree = this.nodes.reduce((s, n) => s + n.degree, 0) / this.nodes.length;
+                const coherence = (avgDegree / 6).toFixed(2);  // Max 6 buren in hex
+                document.getElementById('coherence-val').textContent = coherence;
+            }
+
+            setDensity(d) {
+                this.generateField(d);
+            }
+
+            resetView() {
+                this.rotation = 0.4;
+                this.tilt = 0.5;
+                this.zoom = 1.0;
+                this.layer = 0;
+            }
+
+            toggleMode() {
+                const modes = ['standard', 'wireframe', 'heatmap'];
+                const currentIdx = modes.indexOf(this.renderMode);
+                this.renderMode = modes[(currentIdx + 1) % modes.length];
+                document.getElementById('projection-mode').textContent = 
+                    this.renderMode.toUpperCase();
+            }
+
+            /**
+             * Importeer hexBYE field state
+             * Uniforme API - werkt met zowel capture als transitie output
+             */
+            importFieldState(fieldState) {
+                if (!fieldState || !fieldState.nodes) {
+                    console.error('Invalid field state');
+                    return;
+                }
+                
+                this.nodes = [];
+                this.relations = [];
+                this.nodeMap.clear();
+                
+                // Importeer nodes
+                fieldState.nodes.forEach(node => {
+                    const imported = {
+                        id: node.id,
+                        q: node.position?.q ?? node.q ?? 0,
+                        r: node.position?.r ?? node.r ?? 0,
+                        z: this.calculateStructuralZ(
+                            node.position?.q ?? node.q ?? 0,
+                            node.position?.r ?? node.r ?? 0
+                        ),
+                        degree: 0,
+                        cluster: node.properties?.cluster ?? 0,
+                        original: node  // Bewaar origineel voor debugging
+                    };
+                    this.nodes.push(imported);
+                    this.nodeMap.set(imported.id, imported);
+                });
+                
+                // Importeer relaties
+                if (fieldState.relations) {
+                    fieldState.relations.forEach(rel => {
+                        const nodeA = this.nodeMap.get(rel.a);
+                        const nodeB = this.nodeMap.get(rel.b);
+                        
+                        if (nodeA && nodeB) {
+                            this.relations.push({
+                                a: rel.a,
+                                b: rel.b,
+                                visibility: rel.visibility ?? 1
+                            });
+                            nodeA.degree++;
+                            nodeB.degree++;
+                        }
+                    });
+                }
+                
+                // Update z op basis van degree
+                this.nodes.forEach(node => {
+                    node.z += node.degree * AXIOMS.Z_DEGREE_FACTOR;
+                });
+                
+                this.updateStats();
+            }
+        }
+
+        // Initialisatie
+        const canvas = document.getElementById('topo-canvas');
+        const engine = new TopologicalEngine(canvas);
+        
+        // Start met een demo veld
+        engine.generateField(5);
+
+        // Render loop
+        function animate() {
+            engine.render();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Expose voor debugging en externe imports
+        window.hexByeEngine = engine;
+        window.importHexBye = (json) => {
+            const data = typeof json === 'string' ? JSON.parse(json) : json;
+            engine.importFieldState(data);
+        };
+
+        console.log('hexBYE 3D Topological Engine v3.1 initialized');
+        console.log('Use window.importHexBye(jsonData) to load field states');
+    </script>
+</body>
+</html>
