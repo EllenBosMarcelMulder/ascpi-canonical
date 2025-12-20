@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ .:: hexBYE ::. ] — 3D Fase-Reconstructie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --void-black: #000000;
+            --terminal-green: #00ff41;
+            --forensic-cyan: #00ffff;
+        }
+        body {
+            background: var(--void-black);
+            color: #fff;
+            font-family: 'ui-monospace', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+        .ui-overlay {
+            position: absolute; top: 1rem; left: 1rem;
+            pointer-events: none; z-index: 50;
+        }
+        .status-tag {
+            font-size: 10px; border: 1px solid var(--terminal-green);
+            padding: 2px 6px; color: var(--terminal-green);
+            text-transform: uppercase; margin-top: 0.5rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui-overlay">
+        <h1 class="text-xs font-bold text-cyan-400">hexBYE_3D_ENGINE_v3.0</h1>
+        <div id="engine-stats" class="text-[9px] mt-2 opacity-80">
+            S_RECONSTRUCTIE: <span id="recon-status" class="text-white">STANDBY</span><br>
+            C_COHERENTIE: <span id="coherence-val" class="text-green-400">0.00</span><br>
+            P_FACETTEN: <span id="facet-count" class="text-white">0</span>
+        </div>
+        <div class="status-tag">Canoniek Gesloten</div>
+    </div>
+
+    <canvas id="reconstruction-canvas"></canvas>
+
+    <script>
+        /**
+         * CANONIEKE IMPLEMENTATIE 3.0
+         * Lost het 3D-projectie probleem op door de schaalaxioma's 
+         * direct in de vertex-shader logica (JS-equivalent) te integreren.
+         */
+
+        const CONFIG = {
+            IDENTITEIT: 1.0,
+            HEX_SYMMETRIE: Math.sqrt(3),
+            SLUITING: Math.PI * 2,
+            HORIZON: 15.0,
+            WEERSTAND: 0.4
+        };
+
+        class ReconstructieEngine {
+            constructor() {
+                this.nodes = [];
+                this.relations = [];
+                this.L = 0; // Diepte-laag
+                this.rotation = 0.4;
+                this.tilt = 0.5;
+                this.zoom = 1.2;
+                this.isProcessing = false;
+            }
+
+            /**
+             * Genereert een deterministisch hex-veld zonder beslispaden
+             */
+            generateField(density = 4) {
+                this.nodes = [];
+                for (let q = -density; q <= density; q++) {
+                    for (let r = -density; r <= density; r++) {
+                        // Alleen valide hex-coördinaten binnen de 6-fase ring
+                        this.nodes.push({ q, r, s: 0 });
+                    }
+                }
+                this.calculateCoherence();
+            }
+
+            calculateCoherence() {
+                // Coherentie is een statische maat van de topologie (Canoniek 4)
+                const val = (this.nodes.length / 100).toFixed(2);
+                document.getElementById('coherence-val').textContent = val;
+                document.getElementById('facet-count').textContent = this.nodes.length;
+            }
+
+            project(q, r, s) {
+                // Isomorfe projectie naar 3D (RP² mapping)
+                let x = 1.5 * q;
+                let y = (CONFIG.HEX_SYMMETRIE / 2) * q + CONFIG.HEX_SYMMETRIE * r;
+                let z = s - (this.L * 1.5);
+
+                // Rotatie-artefacten (bewust non-canoniek)
+                const cosR = Math.cos(this.rotation), sinR = Math.sin(this.rotation);
+                let x1 = x * cosR - z * sinR;
+                let z1 = x * sinR + z * cosR;
+                
+                const cosT = Math.cos(this.tilt), sinT = Math.sin(this.tilt);
+                let y2 = y * cosT - z1 * sinT;
+                let z2 = y * sinT + z1 * cosT;
+
+                const w = 1.0 + (z2 / CONFIG.HORIZON);
+                if (w < 0.1) return null;
+
+                return {
+                    x: (x1 / w) * this.zoom,
+                    y: (y2 / w) * this.zoom,
+                    scale: 1.0 / w,
+                    opacity: Math.max(0, 1.0 - (z2 / CONFIG.HORIZON))
+                };
+            }
+        }
+
+        const engine = new ReconstructieEngine();
+        const canvas = document.getElementById('reconstruction-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Interactie mappen naar transitie-engine (Canoniek)
+        let isDragging = false;
+        let lastX, lastY;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            engine.rotation += (e.clientX - lastX) * 0.01;
+            engine.tilt += (e.clientY - lastY) * 0.01;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const unit = Math.min(canvas.width, canvas.height) / 10;
+
+            // Teken de hex-nodes
+            engine.nodes.forEach(node => {
+                const p = engine.project(node.q, node.r, node.s);
+                if (!p) return;
+
+                const screenX = centerX + p.x * unit;
+                const screenY = centerY + p.y * unit;
+                const size = 3 * p.scale * engine.zoom;
+
+                ctx.fillStyle = `rgba(0, 255, 255, ${p.opacity * 0.6})`;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, size, 0, CONFIG.SLUITING);
+                ctx.fill();
+
+                // Cross-link visibiliteit (Canoniek 6)
+                if (p.scale > 0.8) {
+                   ctx.strokeStyle = `rgba(0, 255, 65, ${p.opacity * 0.2})`;
+                   ctx.lineWidth = 0.5;
+                   ctx.strokeRect(screenX - size*2, screenY - size*2, size*4, size*4);
+                }
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        // Start de engine
+        engine.generateField(6);
+        document.getElementById('recon-status').textContent = 'SYNC_COMPLETE';
+        draw();
+
+    </script>
+</body>
+</html>
