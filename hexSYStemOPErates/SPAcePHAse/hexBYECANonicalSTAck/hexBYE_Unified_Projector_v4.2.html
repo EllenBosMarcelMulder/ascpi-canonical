@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ .:: hexBYE ::. ] — Unified Projector v4.0</title>
+    <style>
+        :root {
+            --void-black: #000000;
+            --terminal-green: #00ff41;
+            --forensic-cyan: #00ffff;
+            --warning-amber: #ffaa00;
+            --danger-orange: #ff6600;
+            --danger-red: #ff3333;
+            --ghost-gray: #333333;
+            --dim-gray: #1a1a1a;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--void-black);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            cursor: grab;
+        }
+        
+        canvas:active { cursor: grabbing; }
+        
+        /* ============================================
+           UI OVERLAY - LEFT PANEL
+           ============================================ */
+        .ui-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            pointer-events: none;
+            z-index: 50;
+            background: rgba(0,0,0,0.85);
+            padding: 1rem;
+            border: 1px solid var(--ghost-gray);
+            min-width: 200px;
+        }
+        
+        .ui-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--forensic-cyan);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .ui-stats {
+            font-size: 9px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .ui-stats span { color: var(--terminal-green); }
+        .ui-stats .val-amber { color: var(--warning-amber); }
+        .ui-stats .val-orange { color: var(--danger-orange); }
+        
+        .mode-indicator {
+            font-size: 10px;
+            padding: 4px 10px;
+            margin-top: 0.75rem;
+            display: inline-block;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        .mode-indicator.canonical {
+            border: 2px solid var(--terminal-green);
+            color: var(--terminal-green);
+            background: rgba(0, 255, 65, 0.1);
+        }
+        
+        .mode-indicator.visibility {
+            border: 2px solid var(--warning-amber);
+            color: var(--warning-amber);
+            background: rgba(255, 170, 0, 0.1);
+        }
+        
+        .mode-indicator.experimental {
+            border: 2px solid var(--danger-orange);
+            color: var(--danger-orange);
+            background: rgba(255, 102, 0, 0.1);
+        }
+
+        /* ============================================
+           MODE SELECTION PANEL
+           ============================================ */
+        .mode-panel {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid var(--ghost-gray);
+            padding: 1rem;
+            width: 300px;
+        }
+        
+        .mode-panel h3 {
+            font-size: 10px;
+            color: var(--forensic-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--ghost-gray);
+        }
+        
+        .mode-btn {
+            display: block;
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--ghost-gray);
+            color: #888;
+            font-family: inherit;
+            font-size: 9px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .mode-btn .mode-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .mode-btn .mode-desc {
+            font-size: 8px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+        
+        .mode-btn .mode-tag {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 7px;
+            padding: 2px 5px;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+        
+        /* Canonical mode button */
+        .mode-btn.canonical {
+            border-color: var(--terminal-green);
+            color: var(--terminal-green);
+        }
+        .mode-btn.canonical .mode-tag {
+            background: var(--terminal-green);
+            color: var(--void-black);
+        }
+        .mode-btn.canonical.active {
+            background: rgba(0, 255, 65, 0.15);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+        
+        /* Visibility mode button */
+        .mode-btn.visibility {
+            border-color: var(--warning-amber);
+            color: var(--warning-amber);
+        }
+        .mode-btn.visibility .mode-tag {
+            background: var(--warning-amber);
+            color: var(--void-black);
+        }
+        .mode-btn.visibility.active {
+            background: rgba(255, 170, 0, 0.15);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+        }
+        
+        /* Experimental mode button */
+        .mode-btn.experimental {
+            border-color: var(--danger-orange);
+            color: var(--danger-orange);
+        }
+        .mode-btn.experimental .mode-tag {
+            background: var(--danger-orange);
+            color: var(--void-black);
+        }
+        .mode-btn.experimental.active {
+            background: rgba(255, 102, 0, 0.15);
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.3);
+        }
+        
+        .mode-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* ============================================
+           WARNING BANNER (NON-CANONICAL)
+           ============================================ */
+        .warning-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 8px 20px;
+            font-size: 10px;
+            text-align: center;
+            letter-spacing: 0.05em;
+            z-index: 100;
+            display: none;
+        }
+        
+        .warning-banner.visibility-warning {
+            background: linear-gradient(90deg, 
+                rgba(255, 170, 0, 0.9) 0%, 
+                rgba(255, 170, 0, 0.7) 50%, 
+                rgba(255, 170, 0, 0.9) 100%);
+            color: var(--void-black);
+        }
+        
+        .warning-banner.experimental-warning {
+            background: linear-gradient(90deg, 
+                rgba(255, 102, 0, 0.95) 0%, 
+                rgba(255, 60, 0, 0.8) 50%, 
+                rgba(255, 102, 0, 0.95) 100%);
+            color: #fff;
+        }
+        
+        .warning-banner.active { display: block; }
+        
+        .warning-banner strong { font-weight: bold; }
+
+        /* ============================================
+           BOTTOM CONTROLS
+           ============================================ */
+        .controls {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 50;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-width: 400px;
+        }
+        
+        .ctrl-btn {
+            background: transparent;
+            border: 1px solid var(--ghost-gray);
+            color: var(--terminal-green);
+            padding: 0.4rem 0.8rem;
+            font-family: inherit;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .ctrl-btn:hover {
+            border-color: var(--terminal-green);
+            background: rgba(0,255,65,0.1);
+        }
+        
+        .ctrl-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+           AXIOM INFO PANEL
+           ============================================ */
+        .axiom-panel {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 260px;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid var(--ghost-gray);
+            padding: 0.8rem;
+            font-size: 8px;
+            z-index: 50;
+        }
+        
+        .axiom-panel h4 {
+            font-size: 9px;
+            color: var(--forensic-cyan);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .axiom-panel ul {
+            list-style: none;
+            line-height: 1.5;
+        }
+        
+        .axiom-panel li {
+            color: var(--terminal-green);
+            padding-left: 10px;
+            position: relative;
+        }
+        
+        .axiom-panel li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--ghost-gray);
+        }
+        
+        .axiom-panel li.warning {
+            color: var(--warning-amber);
+        }
+        
+        .axiom-panel li.danger {
+            color: var(--danger-orange);
+        }
+        
+        .axiom-panel .axiom-divider {
+            border-top: 1px dashed var(--ghost-gray);
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NON-CANONICAL WARNING BANNERS -->
+    <div id="visibilityWarning" class="warning-banner visibility-warning">
+        <strong>⚠ NON-CANONICAL MODE</strong> — This visualization includes visibility-derived input. Structural invariants are not guaranteed.
+    </div>
+    
+    <div id="experimentalWarning" class="warning-banner experimental-warning">
+        <strong>⚠ EXPERIMENTAL MODE</strong> — Photo-derived input active. No claims of physical depth. Results are illustrative only.
+    </div>
+
+    <!-- LEFT PANEL: STATUS -->
+    <div class="ui-overlay">
+        <div class="ui-title">hexBYE_UNIFIED_PROJECTOR_v4.0</div>
+        <div class="ui-stats">
+            ENGINE: <span id="engine-status">INITIALIZING</span><br>
+            MODE: <span id="current-mode">—</span><br>
+            NODES: <span id="node-count">0</span><br>
+            RELATIONS: <span id="relation-count">0</span><br>
+            COHERENCE: <span id="coherence-val">0.00</span><br>
+            Z-SOURCE: <span id="z-source">—</span>
+        </div>
+        <div id="modeIndicator" class="mode-indicator canonical">CANONICAL</div>
+    </div>
+    
+    <!-- RIGHT PANEL: MODE SELECTION -->
+    <div class="mode-panel">
+        <h3>Projection Mode</h3>
+        
+        <button id="btnCanonical" class="mode-btn canonical active" onclick="projector.setMode('CANONICAL_TOPOLOGY')">
+            <div class="mode-name">Canonical Topology</div>
+            <div class="mode-desc">z = f(structure) • no visibility input</div>
+            <span class="mode-tag">CANONICAL</span>
+        </button>
+        
+        <button id="btnVisibility" class="mode-btn visibility" onclick="projector.setMode('VISIBILITY_LAYER')">
+            <div class="mode-name">Visibility Layer</div>
+            <div class="mode-desc">Augmented with visibility_field data</div>
+            <span class="mode-tag">NON-CANONICAL</span>
+        </button>
+        
+        <button id="btnExperimental" class="mode-btn experimental" onclick="projector.setMode('PHOTO_EXPERIMENTAL')">
+            <div class="mode-name">Photo Experimental</div>
+            <div class="mode-desc">Photo-derived depth estimation</div>
+            <span class="mode-tag">EXPERIMENTAL</span>
+        </button>
+    </div>
+
+    <!-- BOTTOM LEFT: CONTROLS -->
+    <div class="controls">
+        <button class="ctrl-btn" onclick="projector.setDensity(3)">SPARSE</button>
+        <button class="ctrl-btn" onclick="projector.setDensity(5)">MEDIUM</button>
+        <button class="ctrl-btn" onclick="projector.setDensity(8)">DENSE</button>
+        <button class="ctrl-btn" onclick="projector.resetView()">RESET</button>
+        <button class="ctrl-btn" onclick="projector.toggleRenderStyle()">STYLE</button>
+        <button id="btnLoadVisibility" class="ctrl-btn" onclick="loadVisibilityDemo()" disabled>LOAD VIS</button>
+        <button id="btnLoadPhoto" class="ctrl-btn" onclick="loadPhotoDemo()" disabled>LOAD PHOTO</button>
+    </div>
+
+    <!-- BOTTOM RIGHT: AXIOM INFO -->
+    <div class="axiom-panel">
+        <h4 id="axiomTitle">Canonical Axioms</h4>
+        <ul id="axiomList">
+            <li>z = f(degree, hex_distance)</li>
+            <li>Scale = canvas-relative</li>
+            <li>w-component = topological</li>
+            <li>No visibility input</li>
+        </ul>
+        <div class="axiom-divider"></div>
+        <ul id="axiomGuarantees">
+            <li>Structural invariants: GUARANTEED</li>
+            <li>Reproducibility: GUARANTEED</li>
+        </ul>
+    </div>
+
+    <canvas id="projector-canvas"></canvas>
+
+    <script>
+        /**
+         * ============================================================================
+         * hexBYE UNIFIED PROJECTOR v4.0
+         * ============================================================================
+         * 
+         * ARCHITECTURE:
+         * - Single projection engine (no duplicated math)
+         * - Mode selection over fixed projector core
+         * - Canonical behavior is provably unchanged
+         * 
+         * MODES:
+         * 1. CANONICAL_TOPOLOGY  - Pure structural z, no external input
+         * 2. VISIBILITY_LAYER    - Augmented with visibility_field
+         * 3. PHOTO_EXPERIMENTAL  - Photo-derived depth (illustrative only)
+         * 
+         * CANONICAL BOUNDARIES are marked with:
+         * // ═══ CANONICAL BOUNDARY ═══
+         * 
+         * Code inside canonical boundaries MUST NOT:
+         * - Branch based on mode
+         * - Access visibility or photo data
+         * - Modify behavior based on external input
+         * 
+         * ============================================================================
+         */
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // IMMUTABLE AXIOMS (shared by all modes - never modified)
+        // ═══════════════════════════════════════════════════════════════════════════
+        const AXIOMS = Object.freeze({
+            // Hexagonal geometry constants
+            HEX_SQRT3: Math.sqrt(3),
+            HEX_HALF_SQRT3: Math.sqrt(3) / 2,
+            
+            // Projection constants
+            HORIZON_DEPTH: 20.0,
+            MIN_W: 0.1,
+            TAU: Math.PI * 2,
+            
+            // Structural z calculation constants
+            Z_LAYER_OFFSET: 1.5,
+            Z_DEGREE_FACTOR: 0.3,
+            Z_DISTANCE_FACTOR: 0.5
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // MODE DEFINITIONS
+        // ═══════════════════════════════════════════════════════════════════════════
+        const MODES = Object.freeze({
+            CANONICAL_TOPOLOGY: {
+                id: 'CANONICAL_TOPOLOGY',
+                name: 'Canonical Topology',
+                isCanonical: true,
+                zSource: 'STRUCTURAL',
+                color: 'canonical',
+                usesVisibility: false,
+                usesPhoto: false
+            },
+            VISIBILITY_LAYER: {
+                id: 'VISIBILITY_LAYER',
+                name: 'Visibility Layer',
+                isCanonical: false,
+                zSource: 'STRUCTURAL + VISIBILITY',
+                color: 'visibility',
+                usesVisibility: true,
+                usesPhoto: false
+            },
+            PHOTO_EXPERIMENTAL: {
+                id: 'PHOTO_EXPERIMENTAL',
+                name: 'Photo Experimental',
+                isCanonical: false,
+                zSource: 'PHOTO-DERIVED (illustrative)',
+                color: 'experimental',
+                usesVisibility: false,
+                usesPhoto: true
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // UNIFIED PROJECTOR ENGINE
+        // ═══════════════════════════════════════════════════════════════════════════
+        class UnifiedProjector {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                
+                // ─── Core State ───
+                this.nodes = [];
+                this.relations = [];
+                this.nodeMap = new Map();
+                
+                // ─── View State ───
+                this.rotation = 0.4;
+                this.tilt = 0.5;
+                this.zoom = 1.0;
+                this.layer = 0;
+                
+                // ─── Interaction State ───
+                this.isDragging = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                
+                // ─── Mode State ───
+                this.currentMode = MODES.CANONICAL_TOPOLOGY;
+                this.renderStyle = 'standard'; // standard | wireframe | heatmap
+                
+                // ─── Non-Canonical Data (isolated) ───
+                // These are NEVER accessed in canonical mode
+                this.visibilityField = null;   // For VISIBILITY_LAYER
+                this.photoDepthMap = null;      // For PHOTO_EXPERIMENTAL
+                
+                this.setupInteraction();
+                this.resize();
+                this.updateUI();
+                
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+                // Scale is ALWAYS canvas-relative (axiom compliance)
+                this.unit = Math.min(this.canvas.width, this.canvas.height) / 12;
+            }
+
+            setupInteraction() {
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!this.isDragging) return;
+                    this.rotation += (e.clientX - this.lastX) * 0.008;
+                    this.tilt += (e.clientY - this.lastY) * 0.008;
+                    this.tilt = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, this.tilt));
+                    this.lastX = e.clientX;
+                    this.lastY = e.clientY;
+                });
+
+                window.addEventListener('mouseup', () => this.isDragging = false);
+
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    this.zoom *= e.deltaY > 0 ? 0.95 : 1.05;
+                    this.zoom = Math.max(0.3, Math.min(3.0, this.zoom));
+                });
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // MODE MANAGEMENT
+            // ═══════════════════════════════════════════════════════════════════════
+            setMode(modeId) {
+                const mode = MODES[modeId];
+                if (!mode) {
+                    console.error(`Unknown mode: ${modeId}`);
+                    return;
+                }
+                
+                this.currentMode = mode;
+                this.updateUI();
+                
+                // Recalculate z values for all nodes based on new mode
+                this.recalculateZ();
+                
+                console.log(`Mode changed to: ${mode.name} (canonical: ${mode.isCanonical})`);
+            }
+
+            updateUI() {
+                const mode = this.currentMode;
+                
+                // Update mode indicator
+                const indicator = document.getElementById('modeIndicator');
+                indicator.className = `mode-indicator ${mode.color}`;
+                indicator.textContent = mode.isCanonical ? 'CANONICAL' : 'NON-CANONICAL';
+                
+                // Update stats
+                document.getElementById('current-mode').textContent = mode.name;
+                document.getElementById('current-mode').className = `val-${mode.color === 'canonical' ? '' : mode.color === 'visibility' ? 'amber' : 'orange'}`;
+                document.getElementById('z-source').textContent = mode.zSource;
+                
+                // Update warning banners
+                document.getElementById('visibilityWarning').classList.toggle('active', mode.id === 'VISIBILITY_LAYER');
+                document.getElementById('experimentalWarning').classList.toggle('active', mode.id === 'PHOTO_EXPERIMENTAL');
+                
+                // Update mode buttons
+                document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`btn${mode.id === 'CANONICAL_TOPOLOGY' ? 'Canonical' : mode.id === 'VISIBILITY_LAYER' ? 'Visibility' : 'Experimental'}`).classList.add('active');
+                
+                // Update axiom panel
+                this.updateAxiomPanel();
+                
+                // Enable/disable data load buttons
+                document.getElementById('btnLoadVisibility').disabled = !mode.usesVisibility;
+                document.getElementById('btnLoadPhoto').disabled = !mode.usesPhoto;
+            }
+
+            updateAxiomPanel() {
+                const mode = this.currentMode;
+                const title = document.getElementById('axiomTitle');
+                const list = document.getElementById('axiomList');
+                const guarantees = document.getElementById('axiomGuarantees');
+                
+                if (mode.isCanonical) {
+                    title.textContent = 'Canonical Axioms';
+                    list.innerHTML = `
+                        <li>z = f(degree, hex_distance)</li>
+                        <li>Scale = canvas-relative</li>
+                        <li>w-component = topological</li>
+                        <li>No visibility input</li>
+                    `;
+                    guarantees.innerHTML = `
+                        <li>Structural invariants: GUARANTEED</li>
+                        <li>Reproducibility: GUARANTEED</li>
+                    `;
+                } else if (mode.id === 'VISIBILITY_LAYER') {
+                    title.textContent = 'Visibility Mode';
+                    list.innerHTML = `
+                        <li class="warning">z = f(structure) + visibility_offset</li>
+                        <li>Scale = canvas-relative</li>
+                        <li class="warning">Visibility data influences depth</li>
+                        <li class="warning">Non-deterministic without same input</li>
+                    `;
+                    guarantees.innerHTML = `
+                        <li class="warning">Structural invariants: NOT GUARANTEED</li>
+                        <li class="warning">Reproducibility: INPUT-DEPENDENT</li>
+                    `;
+                } else {
+                    title.textContent = 'Experimental Mode';
+                    list.innerHTML = `
+                        <li class="danger">z = photo_derived_estimate</li>
+                        <li>Scale = canvas-relative</li>
+                        <li class="danger">Photo luminance → pseudo-depth</li>
+                        <li class="danger">Illustrative only, not physical</li>
+                    `;
+                    guarantees.innerHTML = `
+                        <li class="danger">Structural invariants: NOT GUARANTEED</li>
+                        <li class="danger">Physical accuracy: NONE</li>
+                    `;
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // Z CALCULATION
+            // This is where mode-specific behavior is isolated
+            // ═══════════════════════════════════════════════════════════════════════
+            
+            /**
+             * Calculate z for a node based on current mode
+             * 
+             * CRITICAL: The canonical calculation is isolated and cannot be
+             * influenced by non-canonical data paths.
+             */
+            calculateZ(node) {
+                // ═══ CANONICAL BOUNDARY START ═══
+                // This calculation is ALWAYS performed, regardless of mode
+                const canonicalZ = this._calculateCanonicalZ(node.q, node.r, node.degree);
+                // ═══ CANONICAL BOUNDARY END ═══
+                
+                // Mode-specific augmentation (outside canonical boundary)
+                if (this.currentMode.id === 'CANONICAL_TOPOLOGY') {
+                    // Pure canonical - return structural z only
+                    return canonicalZ;
+                }
+                
+                if (this.currentMode.id === 'VISIBILITY_LAYER') {
+                    // Augment with visibility data if available
+                    const visOffset = this._getVisibilityOffset(node);
+                    return canonicalZ + visOffset;
+                }
+                
+                if (this.currentMode.id === 'PHOTO_EXPERIMENTAL') {
+                    // Replace with photo-derived estimate (but keep canonical as fallback)
+                    const photoZ = this._getPhotoDepth(node);
+                    return photoZ !== null ? photoZ : canonicalZ;
+                }
+                
+                return canonicalZ;
+            }
+
+            /**
+             * ═══ CANONICAL Z CALCULATION ═══
+             * This method is the canonical core. It MUST NOT:
+             * - Access this.visibilityField
+             * - Access this.photoDepthMap
+             * - Branch based on this.currentMode
+             * - Accept any external input beyond structural properties
+             */
+            _calculateCanonicalZ(q, r, degree = 0) {
+                // Hex distance from origin (pure structural property)
+                const hexDist = (Math.abs(q) + Math.abs(r) + Math.abs(q + r)) / 2;
+                
+                // Z is a function of structure only
+                const baseZ = -hexDist * AXIOMS.Z_DISTANCE_FACTOR;
+                const degreeOffset = degree * AXIOMS.Z_DEGREE_FACTOR;
+                
+                return baseZ + degreeOffset;
+            }
+
+            /**
+             * NON-CANONICAL: Get visibility-derived z offset
+             * Only called in VISIBILITY_LAYER mode
+             */
+            _getVisibilityOffset(node) {
+                if (!this.visibilityField || !this.visibilityField.nodeOffsets) {
+                    return 0;
+                }
+                
+                const offset = this.visibilityField.nodeOffsets.get(node.id);
+                return offset !== undefined ? offset * 0.5 : 0;
+            }
+
+            /**
+             * NON-CANONICAL: Get photo-derived depth estimate
+             * Only called in PHOTO_EXPERIMENTAL mode
+             */
+            _getPhotoDepth(node) {
+                if (!this.photoDepthMap || !this.photoDepthMap.estimates) {
+                    return null;
+                }
+                
+                const estimate = this.photoDepthMap.estimates.get(node.id);
+                return estimate !== undefined ? estimate : null;
+            }
+
+            /**
+             * Recalculate z for all nodes (after mode change or data load)
+             */
+            recalculateZ() {
+                this.nodes.forEach(node => {
+                    node.z = this.calculateZ(node);
+                });
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // FIELD GENERATION
+            // ═══════════════════════════════════════════════════════════════════════
+            
+            generateField(density = 5) {
+                this.nodes = [];
+                this.relations = [];
+                this.nodeMap.clear();
+                
+                let nodeId = 0;
+                
+                for (let q = -density; q <= density; q++) {
+                    for (let r = -density; r <= density; r++) {
+                        if (Math.abs(q + r) > density) continue;
+                        
+                        const id = `n${nodeId++}`;
+                        const node = {
+                            id: id,
+                            q: q,
+                            r: r,
+                            z: 0,  // Will be calculated
+                            degree: 0,
+                            cluster: Math.floor((q + density) / 3)
+                        };
+                        
+                        this.nodes.push(node);
+                        this.nodeMap.set(id, node);
+                    }
+                }
+                
+                // Generate relations
+                const neighbors = [[1,0], [-1,0], [0,1], [0,-1], [1,-1], [-1,1]];
+                
+                this.nodes.forEach(node => {
+                    neighbors.forEach(([dq, dr]) => {
+                        const neighbor = this.nodes.find(n => 
+                            n.q === node.q + dq && n.r === node.r + dr
+                        );
+                        
+                        if (neighbor && node.id < neighbor.id) {
+                            this.relations.push({
+                                a: node.id,
+                                b: neighbor.id,
+                                visibility: 3
+                            });
+                            node.degree++;
+                            neighbor.degree++;
+                        }
+                    });
+                });
+                
+                // Calculate z for all nodes
+                this.recalculateZ();
+                this.updateStats();
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // PROJECTION (Single Pipeline - No Mode Branching)
+            // ═══════════════════════════════════════════════════════════════════════
+            
+            /**
+             * ═══ CANONICAL PROJECTION ═══
+             * This is the single projection pipeline.
+             * It uses node.z which was calculated by calculateZ().
+             * The projection math itself is mode-independent.
+             */
+            project(q, r, z) {
+                // ═══ CANONICAL BOUNDARY START ═══
+                // All projection math is identical regardless of mode
+                
+                // Step 1: Hex to Cartesian
+                let x = 1.5 * q;
+                let y = AXIOMS.HEX_HALF_SQRT3 * q + AXIOMS.HEX_SQRT3 * r;
+                
+                // Step 2: Apply layer offset
+                let pz = z - (this.layer * AXIOMS.Z_LAYER_OFFSET);
+                
+                // Step 3: Y-axis rotation
+                const cosR = Math.cos(this.rotation);
+                const sinR = Math.sin(this.rotation);
+                const x1 = x * cosR - pz * sinR;
+                const z1 = x * sinR + pz * cosR;
+                
+                // Step 4: X-axis rotation (tilt)
+                const cosT = Math.cos(this.tilt);
+                const sinT = Math.sin(this.tilt);
+                const y1 = y * cosT - z1 * sinT;
+                const z2 = y * sinT + z1 * cosT;
+                
+                // Step 5: Perspective division
+                const w = 1.0 + (z2 / AXIOMS.HORIZON_DEPTH);
+                
+                if (w < AXIOMS.MIN_W) return null;
+                
+                return {
+                    x: (x1 / w) * this.zoom,
+                    y: (y1 / w) * this.zoom,
+                    z: z2,
+                    scale: 1.0 / w,
+                    opacity: Math.max(0, Math.min(1, 1.0 - (z2 / AXIOMS.HORIZON_DEPTH)))
+                };
+                // ═══ CANONICAL BOUNDARY END ═══
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // RENDERING
+            // ═══════════════════════════════════════════════════════════════════════
+            
+            render() {
+                const ctx = this.ctx;
+                const mode = this.currentMode;
+                
+                // Clear
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Project nodes
+                const projected = this.nodes.map(node => ({
+                    node: node,
+                    proj: this.project(node.q, node.r, node.z)
+                })).filter(pn => pn.proj !== null);
+                
+                // Depth sort
+                projected.sort((a, b) => a.proj.z - b.proj.z);
+                
+                // Draw relations
+                this.relations.forEach(rel => {
+                    const nodeA = projected.find(pn => pn.node.id === rel.a);
+                    const nodeB = projected.find(pn => pn.node.id === rel.b);
+                    if (!nodeA || !nodeB) return;
+                    
+                    const avgOpacity = (nodeA.proj.opacity + nodeB.proj.opacity) / 2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        this.centerX + nodeA.proj.x * this.unit,
+                        this.centerY + nodeA.proj.y * this.unit
+                    );
+                    ctx.lineTo(
+                        this.centerX + nodeB.proj.x * this.unit,
+                        this.centerY + nodeB.proj.y * this.unit
+                    );
+                    
+                    // Color based on mode
+                    if (mode.isCanonical) {
+                        ctx.strokeStyle = `rgba(0, 255, 65, ${avgOpacity * 0.3})`;
+                    } else if (mode.id === 'VISIBILITY_LAYER') {
+                        ctx.strokeStyle = `rgba(255, 170, 0, ${avgOpacity * 0.3})`;
+                    } else {
+                        ctx.strokeStyle = `rgba(255, 102, 0, ${avgOpacity * 0.3})`;
+                    }
+                    ctx.lineWidth = avgOpacity * 1.5;
+                    ctx.stroke();
+                });
+                
+                // Draw nodes
+                projected.forEach(({ node, proj }) => {
+                    const screenX = this.centerX + proj.x * this.unit;
+                    const screenY = this.centerY + proj.y * this.unit;
+                    const size = Math.max(2, 4 * proj.scale * this.zoom);
+                    
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, size, 0, AXIOMS.TAU);
+                    
+                    // Node color based on mode and render style
+                    if (this.renderStyle === 'heatmap') {
+                        const hue = mode.isCanonical ? 180 - (node.degree * 20) : 
+                                   mode.id === 'VISIBILITY_LAYER' ? 40 - (node.degree * 5) : 
+                                   20 - (node.degree * 3);
+                        ctx.fillStyle = `hsla(${hue}, 100%, 50%, ${proj.opacity * 0.8})`;
+                    } else {
+                        if (mode.isCanonical) {
+                            ctx.fillStyle = `rgba(0, 255, 255, ${proj.opacity * 0.7})`;
+                        } else if (mode.id === 'VISIBILITY_LAYER') {
+                            ctx.fillStyle = `rgba(255, 200, 100, ${proj.opacity * 0.7})`;
+                        } else {
+                            ctx.fillStyle = `rgba(255, 150, 80, ${proj.opacity * 0.7})`;
+                        }
+                    }
+                    ctx.fill();
+                    
+                    // Wireframe overlay
+                    if (this.renderStyle === 'wireframe' && proj.scale > 0.6) {
+                        ctx.strokeStyle = mode.isCanonical ? 
+                            `rgba(0, 255, 65, ${proj.opacity * 0.5})` :
+                            `rgba(255, 170, 0, ${proj.opacity * 0.5})`;
+                        ctx.lineWidth = 0.5;
+                        this.drawHexOutline(ctx, screenX, screenY, size * 2.5);
+                    }
+                });
+            }
+
+            drawHexOutline(ctx, cx, cy, radius) {
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (AXIOMS.TAU / 6) * i - Math.PI / 6;
+                    const x = cx + radius * Math.cos(angle);
+                    const y = cy + radius * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            updateStats() {
+                document.getElementById('engine-status').textContent = 'ACTIVE';
+                document.getElementById('node-count').textContent = this.nodes.length;
+                document.getElementById('relation-count').textContent = this.relations.length;
+                
+                const avgDegree = this.nodes.reduce((s, n) => s + n.degree, 0) / this.nodes.length;
+                document.getElementById('coherence-val').textContent = (avgDegree / 6).toFixed(2);
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // EXTERNAL DATA LOADING (Non-Canonical)
+            // ═══════════════════════════════════════════════════════════════════════
+            
+            /**
+             * Load visibility field data
+             * Only affects rendering in VISIBILITY_LAYER mode
+             */
+            loadVisibilityField(data) {
+                if (this.currentMode.id !== 'VISIBILITY_LAYER') {
+                    console.warn('Visibility data loaded but mode is not VISIBILITY_LAYER');
+                }
+                
+                this.visibilityField = {
+                    source: data.source || 'unknown',
+                    nodeOffsets: new Map()
+                };
+                
+                // Generate offsets from visibility data
+                if (data.data) {
+                    this.nodes.forEach((node, i) => {
+                        // Example: use visibility intensity as offset
+                        const offset = (data.data[i % data.data.length] || [0])[0] / 255;
+                        this.visibilityField.nodeOffsets.set(node.id, offset);
+                    });
+                }
+                
+                this.recalculateZ();
+                console.log('Visibility field loaded');
+            }
+
+            /**
+             * Load photo-derived depth map
+             * Only affects rendering in PHOTO_EXPERIMENTAL mode
+             */
+            loadPhotoDepthMap(data) {
+                if (this.currentMode.id !== 'PHOTO_EXPERIMENTAL') {
+                    console.warn('Photo data loaded but mode is not PHOTO_EXPERIMENTAL');
+                }
+                
+                this.photoDepthMap = {
+                    source: data.source || 'unknown',
+                    estimates: new Map()
+                };
+                
+                // Generate pseudo-depth from luminance
+                if (data.luminance) {
+                    this.nodes.forEach((node, i) => {
+                        const lum = data.luminance[i % data.luminance.length] || 128;
+                        // Darker = further (illustrative only)
+                        const pseudoDepth = -(lum / 255) * 5;
+                        this.photoDepthMap.estimates.set(node.id, pseudoDepth);
+                    });
+                }
+                
+                this.recalculateZ();
+                console.log('Photo depth map loaded (illustrative only)');
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════
+            // UTILITY METHODS
+            // ═══════════════════════════════════════════════════════════════════════
+            
+            setDensity(d) {
+                this.generateField(d);
+            }
+
+            resetView() {
+                this.rotation = 0.4;
+                this.tilt = 0.5;
+                this.zoom = 1.0;
+                this.layer = 0;
+            }
+
+            toggleRenderStyle() {
+                const styles = ['standard', 'wireframe', 'heatmap'];
+                const idx = styles.indexOf(this.renderStyle);
+                this.renderStyle = styles[(idx + 1) % styles.length];
+            }
+
+            /**
+             * Import hexBYE field state (compatible with capture output)
+             */
+            importFieldState(fieldState) {
+                if (!fieldState || !fieldState.nodes) {
+                    console.error('Invalid field state');
+                    return;
+                }
+                
+                this.nodes = [];
+                this.relations = [];
+                this.nodeMap.clear();
+                
+                fieldState.nodes.forEach(node => {
+                    const imported = {
+                        id: node.id,
+                        q: node.position?.q ?? node.q ?? 0,
+                        r: node.position?.r ?? node.r ?? 0,
+                        z: 0,
+                        degree: 0,
+                        cluster: node.properties?.cluster ?? 0
+                    };
+                    this.nodes.push(imported);
+                    this.nodeMap.set(imported.id, imported);
+                });
+                
+                if (fieldState.relations) {
+                    fieldState.relations.forEach(rel => {
+                        const nodeA = this.nodeMap.get(rel.a);
+                        const nodeB = this.nodeMap.get(rel.b);
+                        
+                        if (nodeA && nodeB) {
+                            this.relations.push({
+                                a: rel.a,
+                                b: rel.b,
+                                visibility: rel.visibility ?? 1
+                            });
+                            nodeA.degree++;
+                            nodeB.degree++;
+                        }
+                    });
+                }
+                
+                // Check for visibility_field in imported data
+                if (fieldState.visibility_field && this.currentMode.id === 'VISIBILITY_LAYER') {
+                    this.loadVisibilityField(fieldState.visibility_field);
+                }
+                
+                this.recalculateZ();
+                this.updateStats();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        const canvas = document.getElementById('projector-canvas');
+        const projector = new UnifiedProjector(canvas);
+        
+        // Generate initial field
+        projector.generateField(5);
+
+        // Render loop
+        function animate() {
+            projector.render();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Demo data loaders
+        function loadVisibilityDemo() {
+            // Simulate visibility data
+            const demoData = {
+                source: 'demo',
+                data: Array.from({ length: 100 }, () => [Math.random() * 255])
+            };
+            projector.loadVisibilityField(demoData);
+        }
+
+        function loadPhotoDemo() {
+            // Simulate photo luminance data
+            const demoData = {
+                source: 'demo',
+                luminance: Array.from({ length: 100 }, () => Math.random() * 255)
+            };
+            projector.loadPhotoDepthMap(demoData);
+        }
+
+        // Expose for external use
+        window.hexByeProjector = projector;
+        window.importHexBye = (json) => {
+            const data = typeof json === 'string' ? JSON.parse(json) : json;
+            projector.importFieldState(data);
+        };
+
+        console.log('hexBYE Unified Projector v4.0 initialized');
+        console.log('Modes: CANONICAL_TOPOLOGY | VISIBILITY_LAYER | PHOTO_EXPERIMENTAL');
+        console.log('Use window.hexByeProjector.setMode(mode) to switch');
+    </script>
+</body>
+</html>
