@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ .:: hexBYE ::. ] — Unified Projector v4.4 (Canon-Clean)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --void-black: #000000;
+            --terminal-green: #00ff41;
+            --forensic-cyan: #00ffff;
+            --warning-amber: #ffaa00;
+        }
+        body {
+            background: var(--void-black);
+            color: #fff;
+            font-family: 'ui-monospace', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+        canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+        canvas:active { cursor: grabbing; }
+        .ui-overlay {
+            position: absolute; top: 1rem; left: 1rem;
+            pointer-events: none; z-index: 50;
+        }
+        .status-tag {
+            font-size: 10px; border: 1px solid var(--terminal-green);
+            padding: 2px 6px; color: var(--terminal-green);
+            text-transform: uppercase; margin-top: 0.5rem;
+            display: inline-block; pointer-events: auto;
+        }
+        .control-panel {
+            position: absolute; bottom: 1.5rem; left: 1.5rem;
+            background: rgba(0,0,0,0.8); border: 1px solid #333;
+            padding: 1rem; z-index: 100; pointer-events: auto;
+        }
+        .btn {
+            background: transparent; border: 1px solid var(--forensic-cyan);
+            color: var(--forensic-cyan); padding: 4px 10px;
+            font-size: 10px; cursor: pointer; margin-right: 5px;
+        }
+        .btn:hover { background: var(--forensic-cyan); color: #000; }
+        #log-feed {
+            font-size: 9px; color: #888; margin-top: 8px;
+            max-height: 80px; overflow-y: auto; width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui-overlay">
+        <h1 class="text-xs font-bold text-cyan-400">hexBYE_3D_PROJECTOR_v4.4_CANON_CLEAN</h1>
+        <div id="engine-stats" class="text-[9px] mt-2 opacity-80">
+            S_STATUS: <span id="recon-status" class="text-white">STABLE</span><br>
+            C_COHERENTIE: <span id="coherence-val" class="text-green-400">1.00 (STRICT)</span><br>
+            P_NODES: <span id="node-count" class="text-white">0</span><br>
+            R_COORD: <span id="reg-pos" class="text-amber-400">0, 0</span>
+        </div>
+        <div class="status-tag">Canon-Clean Implementation</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="flex">
+            <button class="btn" onclick="triggerImport()">IMPORT CANONICAL JSON</button>
+            <button class="btn" onclick="triggerExport()">EXPORT CANONICAL JSON</button>
+        </div>
+        <div id="log-feed">SYSTEM READY // CANONICAL MODE</div>
+    </div>
+
+    <canvas id="projector-canvas"></canvas>
+
+    <script>
+        /**
+         * ========================================================================
+         * CANONIEKE KERNEL — IMPLICIETE TOPOLOGIE & INVARIANTEN
+         * ========================================================================
+         */
+        const AXIOMS = Object.freeze({
+            HEX_SYMMETRIE: Math.sqrt(3),
+            HORIZON: 20.0,
+            DEFAULT_RADIUS: 5
+        });
+
+        class ProjectorEngine {
+            constructor() {
+                this.nodes = new Map(); // Canonieke staat: Map<"q,r", {q,r}>
+                this.rotation = 0.5;
+                this.tilt = 0.6;
+                this.zoom = 2.0;
+                this.modules = new Map();
+            }
+
+            // Puur topologische afstand (Canon)
+            hexDistance(q1, r1, q2, r2) {
+                return (Math.abs(q1 - q2) + Math.abs(r1 - r2) + Math.abs(q1 + r1 - q2 - r2)) / 2;
+            }
+
+            // Invariant-check: Is de relatie topologisch toegestaan?
+            isValidRelation(q1, r1, q2, r2) {
+                return this.hexDistance(q1, r1, q2, r2) === 1;
+            }
+
+            generateField(radius = AXIOMS.DEFAULT_RADIUS) {
+                this.nodes.clear();
+                for (let q = -radius; q <= radius; q++) {
+                    for (let r = Math.max(-radius, -q - radius); r <= Math.min(radius, -q + radius); r++) {
+                        this.nodes.set(`${q},${r}`, { q, r });
+                    }
+                }
+                this._log(`Canonical field generated. Radius: ${radius}`);
+            }
+
+            /**
+             * NON-CANONICAL PROJECTION AID
+             * Z-waarde is uitsluitend een projectie-artefact op basis van topologie.
+             * Bevat geen hashes, geen randomness, geen interpretatie.
+             */
+            _calculateProjectionZ(q, r) {
+                const d = this.hexDistance(0, 0, q, r);
+                return -(d * 0.25); // Puur topologische gradiënt vanuit centrum
+            }
+
+            project(q, r) {
+                const z = this._calculateProjectionZ(q, r);
+                let x = 1.5 * q;
+                let y = (AXIOMS.HEX_SYMMETRIE / 2) * q + AXIOMS.HEX_SYMMETRIE * r;
+                
+                const cosR = Math.cos(this.rotation), sinR = Math.sin(this.rotation);
+                let x1 = x * cosR - z * sinR;
+                let z1 = x * sinR + z * cosR;
+                
+                const cosT = Math.cos(this.tilt), sinT = Math.sin(this.tilt);
+                let y2 = y * cosT - z1 * sinT;
+                let z2 = y * sinT + z1 * cosT;
+                
+                const w = 1.0 + (z2 / AXIOMS.HORIZON);
+                if (w < 0.1) return null;
+                
+                return {
+                    x: (x1 / w) * this.zoom,
+                    y: (y2 / w) * this.zoom,
+                    scale: 1.0 / w,
+                    opacity: Math.max(0, 1.0 - (z2 / AXIOMS.HORIZON))
+                };
+            }
+
+            _log(msg) {
+                const feed = document.getElementById('log-feed');
+                if (feed) {
+                    const line = document.createElement('div');
+                    line.textContent = `> ${msg}`;
+                    feed.prepend(line);
+                }
+            }
+
+            // ========================================================================
+            // ADAPTER-LAAG (NON-CANONICAL)
+            // ========================================================================
+
+            registerModule(mod) {
+                if (!mod.id || !mod.type) return false;
+                this.modules.set(mod.id, mod);
+                this._log(`Module: ${mod.id} geregistreerd.`);
+                return true;
+            }
+
+            importJSON(jsonString) {
+                try {
+                    const data = JSON.parse(jsonString);
+                    const importer = Array.from(this.modules.values()).find(m => m.type === 'importer');
+                    
+                    if (importer && importer.canReadJSON(data)) {
+                        const result = importer.apply(this, data);
+                        if (result.success) {
+                            this.nodes.clear();
+                            result.nodes.forEach(n => this.nodes.set(`${n.q},${n.r}`, n));
+                            this._log(`Import succes: ${result.nodes.length} nodes geladen.`);
+                            if (result.warning) this._log(`WAARSCHUWING: ${result.warning}`);
+                        } else {
+                            this._log(`IMPORT AFGEWEZEN: ${result.error}`);
+                        }
+                    }
+                } catch (e) {
+                    this._log(`FATALE FOUT: Ongeldig JSON formaat.`);
+                }
+            }
+
+            exportJSON() {
+                const exporter = Array.from(this.modules.values()).find(m => m.type === 'exporter');
+                if (exporter && exporter.canWriteJSON()) {
+                    return exporter.apply(this);
+                }
+                return null;
+            }
+        }
+
+        const engine = new ProjectorEngine();
+
+        /**
+         * MODULE: CANONIEKE IMPORTER
+         * Valideert structurele integriteit en topologische verbondenheid.
+         */
+        engine.registerModule({
+            id: 'CanonicalImporter',
+            type: 'importer',
+            canReadJSON: (data) => data && Array.isArray(data.nodes),
+            apply: (engine, data) => {
+                const validNodes = [];
+                const seen = new Set();
+                
+                for (const n of data.nodes) {
+                    if (!Number.isInteger(n.q) || !Number.isInteger(n.r)) {
+                        return { success: false, error: "Niet-integer coördinaten gedetecteerd." };
+                    }
+                    const key = `${n.q},${n.r}`;
+                    if (seen.has(key)) continue; 
+                    seen.add(key);
+                    validNodes.push({ q: n.q, r: n.r });
+                }
+
+                if (validNodes.length === 0) return { success: false, error: "Geen geldige nodes gevonden." };
+
+                // Optioneel B: Controle op aaneengeslotenheid (Flood fill test)
+                const visited = new Set();
+                const stack = [validNodes[0]];
+                const nodeMap = new Set(validNodes.map(n => `${n.q},${n.r}`));
+                
+                while (stack.length > 0) {
+                    const current = stack.pop();
+                    const key = `${current.q},${current.r}`;
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+
+                    // Buren check
+                    const neighbors = [ [1,0], [1,-1], [0,-1], [-1,0], [-1,1], [0,1] ];
+                    for (const [dq, dr] of neighbors) {
+                        const nKey = `${current.q + dq},${current.r + dr}`;
+                        if (nodeMap.has(nKey) && !visited.has(nKey)) {
+                            stack.push({q: current.q + dq, r: current.r + dr});
+                        }
+                    }
+                }
+
+                let warning = null;
+                if (visited.size !== validNodes.length) {
+                    warning = "Geïmporteerde topologie bevat losse fragmenten.";
+                }
+
+                return { success: true, nodes: validNodes, warning: warning };
+            }
+        });
+
+        /**
+         * MODULE: CANONIEKE EXPORTER
+         * Schrijft uitsluitend topologische data weg met expliciete relatie-declaratie.
+         */
+        engine.registerModule({
+            id: 'CanonicalExporter',
+            type: 'exporter',
+            canWriteJSON: () => true,
+            apply: (engine) => {
+                const output = {
+                    topology: "hexagonal",
+                    relations: "implicit_hex_distance_1", // Optioneel A: Expliciet declaratief
+                    nodes: Array.from(engine.nodes.values()).map(n => ({
+                        q: n.q,
+                        r: n.r
+                    }))
+                };
+                return JSON.stringify(output, null, 2);
+            }
+        });
+
+        // ========================================================================
+        // RENDER-LUS & INTERACTIE
+        // ========================================================================
+
+        const canvas = document.getElementById('projector-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function triggerImport() {
+            const input = prompt("Plak de Canonieke JSON:");
+            if (input) engine.importJSON(input);
+        }
+
+        function triggerExport() {
+            const json = engine.exportJSON();
+            if (json) {
+                const blob = new Blob([json], {type: "application/json"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `hex_canon_v4.4_${Date.now()}.json`;
+                a.click();
+                engine._log("Canonieke JSON geëxporteerd.");
+            }
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        let isDragging = false, lastX, lastY;
+        canvas.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            engine.rotation += (e.clientX - lastX) * 0.005;
+            engine.tilt += (e.clientY - lastY) * 0.005;
+            lastX = e.clientX; lastY = e.clientY;
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const unit = Math.min(canvas.width, canvas.height) / 12;
+
+            const sortedNodes = Array.from(engine.nodes.values());
+            
+            sortedNodes.forEach(node => {
+                const p = engine.project(node.q, node.r);
+                if (!p) return;
+
+                const sX = centerX + p.x * unit;
+                const sY = centerY + p.y * unit;
+                
+                // Render node
+                ctx.fillStyle = `hsla(180, 100%, 50%, ${p.opacity * 0.9})`;
+                ctx.beginPath();
+                ctx.arc(sX, sY, 3 * p.scale, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Render relaties
+                if (p.scale > 0.5) {
+                    ctx.strokeStyle = `rgba(0, 255, 65, ${p.opacity * 0.2})`;
+                    [ [1,0], [0,1], [-1,1] ].forEach(off => {
+                        const neighbor = engine.nodes.get(`${node.q + off[0]},${node.r + off[1]}`);
+                        if (neighbor) {
+                            const pn = engine.project(neighbor.q, neighbor.r);
+                            if (pn) {
+                                ctx.beginPath(); ctx.moveTo(sX, sY);
+                                ctx.lineTo(centerX + pn.x * unit, centerY + pn.y * unit);
+                                ctx.stroke();
+                            }
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('node-count').textContent = engine.nodes.size;
+            requestAnimationFrame(draw);
+        }
+
+        engine.generateField();
+        draw();
+
+    </script>
+</body>
+</html>
