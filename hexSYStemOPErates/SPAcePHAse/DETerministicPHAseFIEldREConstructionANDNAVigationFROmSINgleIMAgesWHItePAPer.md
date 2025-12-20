@@ -493,3 +493,139 @@ A single image contains a closed, physically constrained solution space.
 By respecting optics, phase physics, symmetry, and determinism, that space can be reconstructed without interpretation or learning.
 
 What remains is not meaning — but structure.
+
+# WHITE PAPER — PART TWO
+
+## Faceted Phase Closure, Emergent Space, and Field-Native Vision
+
+**In continuation of**
+*Deterministic Phase-Field Reconstruction from Single Images — A Non-Decisional, Physics-Constrained Framework* (Part One),
+this Part Two presents a full theoretical deepening of the framework, demonstrating how spatial dimensionality itself emerges from phase-invariant closure across faceted visibility domains.
+
+---
+
+## 1. Why Global Reconstruction Is Conceptually Invalid
+
+Any attempt to reconstruct space globally from a single image requires:
+
+* implicit priors
+* semantic assumptions
+* optimization criteria
+
+Such assumptions contradict the non-decisional, physics-first stance of Part One.
+
+Therefore, any valid extension must preserve:
+
+* local determinism
+* global ignorance
+* invariant-driven structure
+
+---
+
+## 2. Faceted Visibility as an Epistemic Constraint
+
+The visible domain Ω ⊂ R² is epistemically incomplete by definition.
+
+By decomposing Ω into faceted domains Ωᵢ, the framework makes this incompleteness **explicit**.
+
+Each facet:
+
+* is locally sufficient
+* is globally insufficient
+
+This mirrors the structure of physical observation itself.
+
+---
+
+## 3. Phase Fields as Primary Spatial Carriers
+
+Phase Φ is treated as the primary spatial carrier, not intensity or geometry.
+
+Φ = (2π / λ) · ℓ_optical
+
+Phase continuity, not coordinate distance, governs spatial coherence.
+
+This reframes space as a **constraint-satisfying field**, not a coordinate system.
+
+---
+
+## 4. Cyclic Phase Groups and Spatial Degeneracy
+
+The 18-phase cyclic group formalizes the inherent degeneracy of spatial interpretation under phase ambiguity.
+
+Rather than resolving this ambiguity, the framework **enumerates it fully**.
+
+Spatial uniqueness is neither assumed nor required.
+
+---
+
+## 5. Faceted Phase Closure and Manifold Emergence
+
+When phase-consistent chains persist across faceted domains, they form:
+
+* surface manifolds (2D phase-closures in 3D)
+* volumetric bundles (overlapping invariant regions)
+
+These manifolds are emergent properties of the field, not imposed geometries.
+
+---
+
+## 6. Navigation Without Representation
+
+Navigation within the resulting solution space does not require a world model.
+
+Motion corresponds to maintaining coherence across adjacent phase-closed regions.
+
+This is field-native navigation, not map-based navigation.
+
+---
+
+## 7. Relation to Biological Vision (Structural, Non-Analogical)
+
+Compound vision systems operate under the same constraints:
+
+* local sensing
+* no central model
+* coherence-based spatial stability
+
+The framework thus aligns with known physically viable perception strategies without borrowing biological mechanisms.
+
+---
+
+## 8. Computational Implications
+
+Faceted phase closure allows:
+
+* spatial factorization
+* bounded memory usage
+* progressive execution
+* parallelizable computation
+
+without altering the epistemic content of the method.
+
+---
+
+## 9. Epistemological Consequences
+
+This framework implies:
+
+* space is not reconstructed, but constrained
+* perception is not interpretation, but exclusion
+* structure arises from what cannot vary
+
+This places the method outside classical vision paradigms.
+
+---
+
+## 10. Final Statement
+
+Part Two establishes that three-dimensional space is not an input, nor a target, but an **emergent invariant** of deterministic phase-field closure across faceted visibility domains.
+
+The framework remains:
+
+> non-decisional
+> non-semantic
+> non-AI
+> physically constrained
+
+and fully consistent with Part One.
