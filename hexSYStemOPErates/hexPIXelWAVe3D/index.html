@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+
+    <!-- === SOCIAL / FACEBOOK PREVIEW METADATA === -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ASCπ / hexOS / hexPIXelWAVe3D">
+    <meta property="og:description" content="A quantum mechanica perceptual system based on re-discovered ancient Egyptian knowledge. Real-time phase-driven navigation and visual coherence.">
+    <meta property="og:image" content="hexEGYptOS.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="nl_NL">
+
+    <!-- Twitter Card metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+
+    <title>hexPIXelWAVe3D Perceptual Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- FIXED: Use CDN instead of local three.min.js for hosting stability -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; color: #0ff;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden; touch-action: none;
+        }
+        #ui {
+            position: fixed; top: 15px; left: 15px; z-index: 100;
+            background: rgba(5, 10, 15, 0.95); padding: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 4px;
+            display: flex; flex-direction: column; gap: 12px; width: 260px;
+            pointer-events: auto; backdrop-filter: blur(8px);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        select, button, input {
+            background: #111; color: #0ff; border: 1px solid rgba(0, 255, 255, 0.4);
+            padding: 6px; font-family: 'Courier New', monospace; font-size: 11px;
+            cursor: pointer; outline: none; width: 100%;
+        }
+        button.active { background: #0ff; color: #000; font-weight: bold; }
+        #hud {
+            position: fixed; bottom: 20px; right: 20px; text-align: right;
+            font-family: 'Courier New', monospace; font-size: 11px;
+            pointer-events: none; color: #0ff; text-shadow: 0 0 5px #0ff;
+        }
+        #debug {
+            position: fixed; bottom: 20px; left: 20px; 
+            font-family: 'Courier New', monospace; font-size: 10px;
+            color: rgba(0, 255, 255, 0.7); pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <div class="control-group">
+        <label>Systeem Status</label>
+        <button id="pauseBtn">PAUSE (Stilstand)</button>
+    </div>
+
+    <div class="control-group">
+        <label>Navigatie Modus</label>
+        <select id="navMode">
+            <option value="free">6-DoF Free Exploration</option>
+            <option value="trajectory" selected>Multi-Node Trajectory</option>
+            <option value="p2p">Point-to-Point Travel</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>Flicker / Stabiliteit</label>
+        <select id="flickerMode">
+            <option value="off">OFF (Coherent)</option>
+            <option value="normal" selected>NORMAL (Gedempt)</option>
+            <option value="raw">RAW (Experimenteel)</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>Interferentie Lagen</label>
+        <input type="range" id="layersRange" min="3" max="7" value="5" step="1">
+    </div>
+
+    <div class="control-group">
+        <label>Focus / Optica</label>
+        <input type="range" id="focalDist" min="1" max="60" value="25">
+    </div>
+</div>
+
+<div id="hud">
+    VELOCITY: <span id="v_val">0.00</span> m/s<br>
+    PHASE: <span id="p_val">0.00</span> rad<br>
+    MODE: <span id="m_val">TRAJECTORY</span>
+</div>
+
+<div id="debug">
+    DeltaT: <span id="dt_val">0.00</span>ms<br>
+    CamPos: <span id="pos_val">0,0,15</span>
+</div>
+
+<script>
+/**
+ * PERCEPTUAL ENGINE ARCHITECTUUR - hexPIXelWAVe3D
+ */
+
+const STATE = {
+    paused: false,
+    phase: 0,
+    omega: 0,
+    drift: 1.5,
+    lastT: 0,
+    
+    intent: {
+        euler: new THREE.Euler(0, 0, 0, 'YXZ'),
+        zoom: 70,
+        targetPos: new THREE.Vector3(0, 0, 40),
+        isDragging: false
+    },
+    
+    nav: {
+        mode: 'trajectory',
+        prevCamPos: new THREE.Vector3(),
+        actualVelocity: 0,
+        p2pCurve: null,
+        p2pT: 0,
+        trajectoryT: 0,
+        spline: null
+    }
+};
+
+let scene, camera, renderer, mainMaterial, anchors = [];
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 2000);
+    
+    try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+    } catch(e) {
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+    }
+    
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const fs = `
+        precision highp float;
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vWorldPos;
+        
+        uniform float uPhase;
+        uniform float uIntensity;
+        uniform int uLayers;
+        uniform int uFlicker;
+        uniform vec3 uCamPos;
+        uniform float uFocalDist;
+
+        vec3 getSellmeier(float basePh) {
+            return vec3(
+                cos(basePh + 0.12),
+                cos(basePh),
+                cos(basePh - 0.12)
+            );
+        }
+
+        void main() {
+            vec3 viewDir = normalize(uCamPos - vWorldPos);
+            float dist = distance(uCamPos, vWorldPos);
+            float focus = 1.0 - smoothstep(0.0, 40.0, abs(dist - uFocalDist));
+
+            vec3 col = vec3(0.0);
+            for(int i = 0; i < 7; i++) {
+                if(i >= uLayers) break;
+                float l = float(i) + 1.0;
+                vec2 p = vUv * (8.0 * l) + (uPhase * 0.05 / l);
+                vec2 g = fract(p) - 0.5;
+                float d = max(abs(g.x), abs(g.y));
+                
+                float jitter = (uFlicker == 1) ? sin(uPhase * 60.0) * 0.12 : 
+                               (uFlicker == 0) ? sin(uPhase * 12.0) * 0.02 : 0.0;
+                
+                vec3 chroma = getSellmeier(uPhase * l + d * 8.0 + jitter);
+                col += chroma * smoothstep(0.48, 0.42 * focus, d) * (1.1/l);
+            }
+            
+            float fresnel = pow(1.0 - dot(vNormal, viewDir), 2.5);
+            col += fresnel * col * 1.2;
+            gl_FragColor = vec4(col * (0.6 + uIntensity), 1.0);
+        }
+    `;
+
+    const vs = `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vWorldPos;
+        void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vec4 wp = modelMatrix * vec4(position, 1.0);
+            vWorldPos = wp.xyz;
+            gl_Position = projectionMatrix * viewMatrix * wp;
+        }
+    `;
+
+    mainMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            uPhase: { value: 0 },
+            uIntensity: { value: 0 },
+            uLayers: { value: 5 },
+            uFlicker: { value: 0 },
+            uCamPos: { value: new THREE.Vector3() },
+            uFocalDist: { value: 25 }
+        },
+        vertexShader: vs, fragmentShader: fs,
+        side: THREE.BackSide
+    });
+
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(100, 128, 128), mainMaterial));
+
+    const aGeo = new THREE.IcosahedronGeometry(2, 2);
+    for(let i=0; i<15; i++) {
+        const m = new THREE.Mesh(aGeo, mainMaterial.clone());
+        m.material.side = THREE.FrontSide;
+        m.position.set((Math.random()-0.5)*120, (Math.random()-0.5)*120, (Math.random()-0.5)*120);
+        scene.add(m);
+        anchors.push(m);
+    }
+
+    const splinePoints = anchors.slice(0, 8).map(a => a.position.clone());
+    splinePoints.push(splinePoints[0]);
+    STATE.nav.spline = new THREE.CatmullRomCurve3(splinePoints);
+
+    setupInput();
+}
+
+function setupInput() {
+    window.addEventListener('mousedown', (e) => {
+        if(e.target.closest('#ui')) return;
+        STATE.intent.isDragging = true;
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const hit = raycaster.intersectObjects(anchors);
+        if(hit.length > 0) startP2P(hit[0].object.position);
+    });
+
+    window.addEventListener('mouseup', () => STATE.intent.isDragging = false);
+    window.addEventListener('mousemove', (e) => {
+        if(STATE.intent.isDragging) {
+            STATE.intent.euler.y -= e.movementX * 0.002;
+            STATE.intent.euler.x -= e.movementY * 0.002;
+        }
+    });
+
+    window.addEventListener('wheel', (e) => {
+        const delta = e.deltaY * 0.05;
+        const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+        STATE.intent.targetPos.addScaledVector(dir, -delta);
+    }, { passive: true });
+
+    document.getElementById('pauseBtn').onclick = () => {
+        STATE.paused = !STATE.paused;
+        document.getElementById('pauseBtn').classList.toggle('active', STATE.paused);
+        document.getElementById('pauseBtn').textContent = STATE.paused ? 'RESUME (Herstart)' : 'PAUSE (Stilstand)';
+    };
+
+    document.getElementById('navMode').onchange = (e) => STATE.nav.mode = e.target.value;
+}
+
+function startP2P(target) {
+    const start = camera.position.clone();
+    const mid = start.clone().lerp(target, 0.5).add(new THREE.Vector3(0, 10, 0));
+    STATE.nav.p2pCurve = new THREE.QuadraticBezierCurve3(start, mid, target);
+    STATE.nav.p2pT = 0;
+    STATE.nav.mode = 'p2p';
+    document.getElementById('navMode').value = 'p2p';
+}
+
+function updateNav(dt) {
+    if(STATE.paused) return;
+    STATE.nav.prevCamPos.copy(camera.position);
+
+    if(STATE.nav.mode === 'free') {
+        camera.position.lerp(STATE.intent.targetPos, 0.08);
+        camera.quaternion.setFromEuler(STATE.intent.euler);
+    } 
+    else if(STATE.nav.mode === 'trajectory') {
+        STATE.nav.trajectoryT += dt * 0.04;
+        if(STATE.nav.trajectoryT > 1) STATE.nav.trajectoryT = 0;
+        const p = STATE.nav.spline.getPoint(STATE.nav.trajectoryT);
+        camera.position.lerp(p, 0.1);
+        camera.lookAt(STATE.nav.spline.getPoint((STATE.nav.trajectoryT + 0.01) % 1));
+    }
+    else if(STATE.nav.mode === 'p2p' && STATE.nav.p2pCurve) {
+        STATE.nav.p2pT += dt * 0.4;
+        if(STATE.nav.p2pT >= 1) {
+            STATE.nav.p2pT = 1;
+            STATE.nav.mode = 'free';
+            document.getElementById('navMode').value = 'free';
+            STATE.intent.targetPos.copy(camera.position);
+        }
+        camera.position.copy(STATE.nav.p2pCurve.getPoint(STATE.nav.p2pT));
+        camera.lookAt(STATE.nav.p2pCurve.v2);
+    }
+
+    const displacement = camera.position.distanceTo(STATE.nav.prevCamPos);
+    STATE.nav.actualVelocity = dt > 0 ? displacement / dt : 0;
+    STATE.omega = STATE.drift + (STATE.nav.actualVelocity * 0.5);
+    STATE.phase += STATE.omega * dt;
+}
+
+function animate(t) {
+    if(!STATE.lastT) STATE.lastT = t;
+    const dt = Math.min((t - STATE.lastT) * 0.001, 0.1);
+    STATE.lastT = t;
+
+    updateNav(dt);
+
+    camera.fov = STATE.intent.zoom;
+    camera.updateProjectionMatrix();
+
+    const fMode = document.getElementById('flickerMode').value;
+    const uFlicker = fMode === 'raw' ? 1 : (fMode === 'off' ? -1 : 0);
+    const uLayers = parseInt(document.getElementById('layersRange').value);
+    const uFocal = parseFloat(document.getElementById('focalDist').value);
+
+    mainMaterial.uniforms.uPhase.value = STATE.phase;
+    mainMaterial.uniforms.uIntensity.value = STATE.paused ? 0.2 : (0.5 + STATE.nav.actualVelocity * 0.05);
+    mainMaterial.uniforms.uLayers.value = uLayers;
+    mainMaterial.uniforms.uFlicker.value = uFlicker;
+    mainMaterial.uniforms.uCamPos.value.copy(camera.position);
+    mainMaterial.uniforms.uFocalDist.value = uFocal;
+
+    anchors.forEach(a => {
+        a.material.uniforms.uPhase.value = STATE.phase;
+        a.material.uniforms.uCamPos.value.copy(camera.position);
+        a.material.uniforms.uFocalDist.value = uFocal;
+        a.rotation.y += dt * 0.4;
+    });
+
+    document.getElementById('v_val').innerText = STATE.nav.actualVelocity.toFixed(2);
+    document.getElementById('p_val').innerText = STATE.phase.toFixed(2);
+    document.getElementById('m_val').innerText = STATE.nav.mode.toUpperCase();
+    document.getElementById('dt_val').innerText = (dt * 1000).toFixed(1);
+    document.getElementById('pos_val').innerText = `${camera.position.x.toFixed(0)},${camera.position.y.toFixed(0)},${camera.position.z.toFixed(0)}`;
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+}
+
+window.onload = () => {
+    init();
+    requestAnimationFrame(animate);
+};
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
