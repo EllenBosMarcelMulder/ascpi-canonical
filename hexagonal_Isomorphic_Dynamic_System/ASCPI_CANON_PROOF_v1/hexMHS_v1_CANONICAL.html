@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hexMHS v1 — Modulair Runtime Systeem</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0a0a0f;
+            --panel: #12121a;
+            --border: #2a2a3a;
+            --text: #e0e0e8;
+            --dim: #6a6a7a;
+            --accent: #4a9eff;
+            --success: #4aff9f;
+            --warning: #ffaa4a;
+            --error: #ff4a6a;
+            --hex-center: #3a5a8a;
+            --hex-ring: #2a4a6a;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+        
+        .system-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background: var(--bg);
+        }
+        
+        .header {
+            background: var(--panel);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        .header h1 span { color: var(--accent); }
+        
+        .header-status {
+            display: flex;
+            gap: 30px;
+            font-size: 12px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--dim);
+        }
+        
+        .status-dot.active { background: var(--success); }
+        .status-dot.warning { background: var(--warning); }
+        .status-dot.error { background: var(--error); }
+        
+        .control-bar {
+            background: var(--panel);
+            padding: 16px 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2px;
+        }
+        
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover { border-color: var(--accent); }
+        .btn.active { background: var(--accent); color: var(--bg); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        
+        .control-status {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--dim);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .pipeline-hex-area {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+        }
+        
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .pipeline-stage {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        
+        .pipeline-stage.active { border-color: var(--success); }
+        .pipeline-stage-title { 
+            font-size: 11px; 
+            color: var(--accent); 
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .pipeline-stage-status { font-size: 10px; color: var(--dim); }
+        
+        .pipeline-arrow {
+            color: var(--accent);
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .hex-topology-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+        
+        .log-area {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+        }
+        
+        .log-header {
+            font-size: 12px;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .log-content {
+            font-size: 10px;
+            line-height: 1.6;
+            max-height: none;
+            overflow: visible;
+        }
+        
+        .log-entry {
+            margin-bottom: 6px;
+            opacity: 1;
+        }
+        
+        .log-entry:nth-last-child(n+20) {
+            opacity: 0.3;
+        }
+        
+        .log-entry:nth-last-child(n+50) {
+            display: none;
+        }
+        
+        .log-time { color: var(--dim); margin-right: 8px; }
+        .log-level-info { color: var(--text); }
+        .log-level-warn { color: var(--warning); }
+        .log-level-error { color: var(--error); }
+        .log-level-success { color: var(--success); }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .status-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+        }
+        
+        .status-card-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .status-card-content {
+            font-size: 11px;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .status-card-content div {
+            margin-bottom: 8px;
+        }
+        
+        .status-value {
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .hex-node {
+            fill: var(--hex-ring);
+            stroke: var(--accent);
+            stroke-width: 1;
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+        
+        .hex-node.center { fill: var(--hex-center); }
+        .hex-node.active { fill: var(--success); }
+        .hex-node.warning { fill: var(--warning); }
+        .hex-node.error { fill: var(--error); }
+        
+        .hex-label {
+            fill: var(--text);
+            font-size: 9px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+        }
+        
+        .ascpi-section {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .ascpi-section.collapsed {
+            height: 60px;
+        }
+        
+        .ascpi-header {
+            padding: 16px 20px;
+            background: rgba(74, 158, 255, 0.1);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ascpi-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .ascpi-toggle {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ascpi-content {
+            padding: 20px;
+            display: block;
+        }
+        
+        .ascpi-section.collapsed .ascpi-content {
+            display: none;
+        }
+        
+        .ascpi-instructions {
+            font-size: 11px;
+            color: var(--dim);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+        
+        .ascpi-instructions strong {
+            color: var(--accent);
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .ascpi-textarea {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px;
+            font-family: inherit;
+            font-size: 12px;
+            resize: vertical;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+        
+        .ascpi-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .ascpi-status {
+            padding: 12px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 4px;
+            font-size: 11px;
+            min-height: 60px;
+            border: 1px solid var(--border);
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-grid {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .control-bar {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .btn {
+                flex: 1;
+                min-width: 80px;
+            }
+            
+            .main-content,
+            .status-grid {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="system-container">
+        <header class="header">
+            <h1><span>hexMHS</span> v1 — Modulair Runtime Systeem</h1>
+            <div class="header-status">
+                <div class="status-item">
+                    <div class="status-dot" id="canonStatus"></div>
+                    <span>Canon</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot" id="runtimeStatus"></div>
+                    <span>Runtime</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot" id="ascpiStatus"></div>
+                    <span>ASCPI</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="control-bar">
+            <button class="btn" id="btnASCPI">ASCPI</button>
+            <button class="btn" id="btnStart">START</button>
+            <button class="btn" id="btnStep">STEP</button>
+            <button class="btn" id="btnFiveSteps">5 STEPS</button>
+            <button class="btn" id="btnStop">STOP</button>
+            <button class="btn" id="btnFreeze" title="Freeze canon - onomkeerbaar">FREEZE</button>
+            <button class="btn" id="btnReset">RESET</button>
+            <div class="control-status">
+                Steps: <span id="stepCounter">0</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="pipeline-hex-area">
+                <div class="pipeline-flow">
+                    <div class="pipeline-stage" id="fileStage">
+                        <div class="pipeline-stage-title">File</div>
+                        <div class="pipeline-stage-status">Ready</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-stage" id="mathStage">
+                        <div class="pipeline-stage-title">Math</div>
+                        <div class="pipeline-stage-status">Idle</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-stage" id="energyStage">
+                        <div class="pipeline-stage-title">Energy</div>
+                        <div class="pipeline-stage-status">Idle</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-stage" id="svgStage">
+                        <div class="pipeline-stage-title">SVG</div>
+                        <div class="pipeline-stage-status">Idle</div>
+                    </div>
+                </div>
+                
+                <div class="hex-topology-container">
+                    <svg id="hexSvg" width="100%" height="400" viewBox="0 0 400 400"></svg>
+                </div>
+            </div>
+            
+            <div class="log-area">
+                <div class="log-header">Runtime Log</div>
+                <div class="log-content" id="runtimeLog"></div>
+            </div>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-card-header">Hex Topologie — 7 Nodes</div>
+                <div class="status-card-content">
+                    <div>Ring 0: <span class="status-value" id="ring0Count">1</span>/1</div>
+                    <div>Ring 1: <span class="status-value" id="ring1Count">6</span>/6</div>
+                    <div>Total: <span class="status-value" id="totalModules">7</span></div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-card-header">Module Status</div>
+                <div class="status-card-content" id="moduleStatus">
+                    <div>Loading...</div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-card-header">Canon State</div>
+                <div class="status-card-content">
+                    <div>Status: <span class="status-value" id="canonState">UNFROZEN</span></div>
+                    <div>Hash: <span class="status-value" id="canonHash">—</span></div>
+                    <div>ASCPI Modules: <span class="status-value" id="ascpiModuleCount">0</span></div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-card-header">hexBYE Observer</div>
+                <div class="status-card-content">
+                    <div>Status: <span class="status-value">OBSERVATION ONLY</span></div>
+                    <div>Write-back: <span class="status-value">DISABLED</span></div>
+                    <div>Nodes: <span class="status-value" id="hexbyeNodes">—</span></div>
+                    <div>Density: <span class="status-value" id="hexbyeDensity">—</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ascpi-section collapsed" id="ascpiSection">
+            <div class="ascpi-header" onclick="toggleASCPISection()">
+                <span class="ascpi-title">ASCPI Native Language — Canon Source Declaration</span>
+                <button class="ascpi-toggle" id="ascpiToggle">▼</button>
+            </div>
+            <div class="ascpi-content">
+                <div class="ascpi-instructions">
+                    <strong>HOW TO DECLARE CANON:</strong>
+                    1. Write ASCPI Native Language ONLY - JavaScript is NOT a programming language in this system<br>
+                    2. Modules exist ONLY through ASCPI source declaration - no other method allowed<br>
+                    3. Use canonical tokens: hexMOD hexBIN hexACT hexCIR hexCLO hexOBS hexPHA | adj &lt;-&gt; | V0-V5 A-C | close<br>
+                    4. Example: hexMODule MyModule → hexACT > hexCIR > hexCLO → close<br>
+                    5. ASCPI is declaration, not instruction - JavaScript is only bookkeeper<br><br>
+                    <strong>Canonical Syntax:</strong> hexMOD hexBIN hexACT hexCIR hexCLO hexOBS hexPHA | adj &lt;-&gt; | V0-V5 A-C | close
+                </div>
+                <textarea class="ascpi-textarea" id="ascpiSource" placeholder="hexMODule CustomModule
+hexACT > hexCIR > hexCLO  
+hexBIN adj hexMOD
+close"></textarea>
+                <div class="ascpi-controls">
+                    <button class="btn" id="ascpiValidate">VALIDATE</button>
+                    <button class="btn" id="ascpiLoad" title="Declare canon in runtime">DECLARE CANON</button>
+                    <button class="btn" id="ascpiClear">CLEAR</button>
+                </div>
+                <div class="ascpi-status" id="ascpiStatusText">
+                    Ready for ASCPI Native Language input. Only canonical tokens allowed.
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============================================================================
+// hexMHS v1 — ASCPI Native Language Leading Runtime System  
+// ============================================================================
+// CANON HIERARCHY (DEFINITIEF EN ONOMKEERBAAR):
+//   1. ASCPI Native Language = CONSTITUTIEVE FORMELE TAAL (Module M = (Φ, Σ, Δ))
+//   2. JavaScript = BOEKHOUDER ALLEEN (past Δ toe, bepaalt het niet)
+//   3. Tijd = canonieke stepCount (geen klok, geen frames, geen timers)
+//   4. Modules ontstaan UITSLUITEND via ASCPI Native Language
+//   5. JavaScript is GEEN programmeertaal in dit systeem
+//   6. ASCPI is constitutief, JavaScript is drager
+// ============================================================================
+// FORMELE INVARIANT:
+//   ∀ t: Runtime(t+1) = Advance(M, t) where M′.Σ = Δ(M.Σ, AST, t)
+//   JavaScript mag Δ niet veranderen, alleen toepassen
+// ============================================================================
+// ASCPI MODULE DEFINITIE:
+//   Module M = (Φ, Σ, Δ)
+//   Φ = fase-ruimte (hexACT, hexCIR, hexCLO, etc.)  
+//   Σ = canonieke toestand (niet numeriek)
+//   Δ = fase-transitie-wet: (Φ_k, Σ) → (Φ_{k+1}, Σ′)
+// ============================================================================
+// BELANGRIJKE REGELS:
+// - Modules kunnen ALLEEN gemaakt worden door ASCPI source te schrijven
+// - JavaScript dient ASCPI structuren, creëert ze nooit
+// - Tijd bestaat uit expliciete canonieke transities (stepCount)
+// - Canon freeze is onomkeerbaar en juridisch definitief
+// - Hexagon topologie wordt afgedwongen door runtime (max 7 nodes)
+// - Runtime voert alleen Advance(M, t) → M′ uit
+// ============================================================================
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+const TAU = 2 * Math.PI;
+
+// ============================================================================
+// CANON — ASCPI NATIVE LANGUAGE SPECIFICATION (FROZEN)
+// ============================================================================
+
+// ============================================================================
+// FORMAL TRANSITION LAW — AST → TRANSITIE-WET
+// ============================================================================
+
+const ASCPITransitionLaw = {
+    // Advance(M, t) → M′
+    // M′.Σ = Δ(M.Σ, AST, t)
+    // JavaScript may NOT determine Δ, only apply it
+    advance: function(module, stepCount) {
+        const M = module;
+        const t = stepCount;
+        
+        // Prepare current state for transition
+        const currentState = {
+            ...M.Σ,
+            current_phase: M._current_phase
+        };
+        
+        // M′.Σ = Δ(M.Σ, AST, t) — phase-based transition
+        const newState = this.applyTransitionOperator(currentState, M.Δ, M.ascpi_ast, t);
+        
+        // Create M′ (new module state) 
+        const M_prime = {
+            ...M,
+            Σ: newState,
+            _current_phase: newState.current_phase,
+            _canonical_state: this.computeCanonicalState(newState),
+            _last_transition: t
+        };
+        
+        return M_prime;
+    },
+
+    // Apply Δ(M.Σ, AST, t) — pure phase-based transition
+    applyTransitionOperator: function(currentState, Delta, ast, t) {
+        if (!Delta || Delta.type !== 'phase_transition_law') {
+            return currentState; // No valid transition operator
+        }
+        
+        // Use canonical transition function: (Φ_k, Σ) → (Φ_{k+1}, Σ′)
+        // JavaScript applies Δ but does NOT determine it
+        const result = Delta.transition(currentState.current_phase, currentState);
+        
+        return {
+            ...result.nextState,
+            current_phase: result.nextPhase,
+            last_transition_step: t,
+            constraints_active: Delta.constraints
+        };
+    },
+
+    // Compute canonical state from Σ and current phase
+    computeCanonicalState: function(state) {
+        // Canonical state computation without interpretation
+        const stateComponents = [
+            state.current_phase || 'none',
+            state.activation_active ? 'act' : 'noact',
+            state.circulation_active ? 'cir' : 'nocir',
+            state.closure_active ? 'clo' : 'noclo',
+            state.observation_active ? 'obs' : 'noobs',
+            state.adjacency_active ? 'adj' : 'noadj',
+            state.cycle_complete ? 'complete' : 'incomplete'
+        ];
+        
+        return stateComponents.join('_');
+    }
+};
+
+const ASCPINativeLanguage = {
+    CANONICAL_TOKENS: {
+        MODULE: 'hexMODule',
+        TOKENS: ['hexMOD', 'hexBIN', 'hexUNB', 'hexOBS', 'hexPHA', 'hexCYC', 'hexCLO', 'hexDIR', 'hexREL', 'hexRAT', 'hexEXP', 'hexACT', 'hexCIR'],
+        OPERATORS: ['>', '<', '='],
+        RELATIONS: ['adj', '<->'],
+        PHASES: ['A', 'B', 'C'],
+        DIRECTIONS: ['V0', 'V1', 'V2', 'V3', 'V4', 'V5'],
+        CLOSURE: 'close'
+    },
+
+    FORBIDDEN: ['getallen', 'variabelen', 'if', 'else', 'loops', 'functies', 'semantiek'],
+
+    // LANGUAGE FINGERPRINT - CLOSED SYSTEM
+    getLanguageHash: function() {
+        const languageSpec = {
+            alphabet: this.CANONICAL_TOKENS,
+            forbidden: this.FORBIDDEN,
+            version: '1.0_FROZEN',
+            grammar_rules: 'hexMODule_IDENTIFIER_expressions_close'
+        };
+        const specString = JSON.stringify(languageSpec, Object.keys(languageSpec).sort());
+        return this.simpleHash(specString);
+    },
+
+    simpleHash: function(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return Math.abs(hash).toString(16);
+    },
+
+    tokenize: function(source) {
+        const tokens = [];
+        const patterns = [
+            { type: 'MODULE', regex: /^hexMODule/ },
+            { type: 'HEX_TOKEN', regex: /^(hexACT|hexCIR|hexCLO|hexBIN|hexUNB|hexOBS|hexPHA|hexCYC|hexDIR|hexREL|hexRAT|hexEXP|hexMOD)/ },
+            { type: 'RELATION', regex: /^(adj|<->)/ },
+            { type: 'OPERATOR', regex: /^[><=>]/ },
+            { type: 'PHASE', regex: /^[ABC]/ },
+            { type: 'DIRECTION', regex: /^V[0-5]/ },
+            { type: 'CLOSURE', regex: /^close/ },
+            { type: 'IDENTIFIER', regex: /^[A-Za-z][A-Za-z0-9]*/ },
+            { type: 'WHITESPACE', regex: /^[ \t]+/ },
+            { type: 'NEWLINE', regex: /^\n/ }
+        ];
+
+        let pos = 0;
+        let line = 1;
+
+        while (pos < source.length) {
+            let matched = false;
+
+            for (const pattern of patterns) {
+                const match = source.slice(pos).match(pattern.regex);
+                if (match) {
+                    const value = match[0];
+                    
+                    if (pattern.type !== 'WHITESPACE') {
+                        tokens.push({
+                            type: pattern.type,
+                            value: value,
+                            line: line
+                        });
+                    }
+
+                    if (pattern.type === 'NEWLINE') line++;
+                    pos += value.length;
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched) {
+                throw new Error(`ASCPI Error: Invalid character '${source[pos]}' at line ${line}. Only canonical alphabet permitted.`);
+            }
+        }
+
+        tokens.push({ type: 'EOF', value: '', line: line });
+        return tokens;
+    },
+
+    parse: function(source) {
+        const tokens = this.tokenize(source);
+        let pos = 0;
+        const modules = [];
+
+        const current = () => tokens[pos] || { type: 'EOF', value: '' };
+        const advance = () => tokens[pos++];
+
+        while (current().type !== 'EOF') {
+            if (current().type === 'MODULE') {
+                advance();
+                
+                if (current().type === 'IDENTIFIER') {
+                    const moduleName = current().value;
+                    advance();
+
+                    const expressions = [];
+                    while (current().type !== 'CLOSURE' && current().type !== 'EOF') {
+                        if (current().type !== 'NEWLINE') {
+                            expressions.push({
+                                type: current().type,
+                                value: current().value
+                            });
+                        }
+                        advance();
+                    }
+
+                    if (current().type === 'CLOSURE') {
+                        advance();
+                    }
+
+                    modules.push({
+                        type: 'ascpi_module',
+                        name: moduleName,
+                        expressions: expressions
+                    });
+                } else {
+                    advance();
+                }
+            } else {
+                advance();
+            }
+        }
+
+        return {
+            type: 'ascpi_system',
+            version: '1.0_FROZEN',
+            modules: modules
+        };
+    },
+
+    createCanonicalModule: function(moduleAST) {
+        // FORMAL ASCPI MODULE DEFINITION: Module M = (Φ, Σ, Δ)
+        // Φ = fase-ruimte (hexACT, hexCIR, hexCLO)
+        // Σ = canonieke toestand (niet numeriek) 
+        // Δ = transitie-operator afgeleid uit AST
+        
+        if (!moduleAST || !moduleAST.expressions || moduleAST.expressions.length === 0) {
+            throw new Error(`ASCPI Error: Cannot create empty module. Module must have ASCPI expressions.`);
+        }
+        
+        if (!moduleAST.name) {
+            throw new Error(`ASCPI Error: Module must have name declaration.`);
+        }
+
+        const canonicalModule = {
+            id: moduleAST.name,
+            _canonical: true,
+            _language: 'ASCPI_Native_v1.0_FROZEN',
+            _source_frozen: false,
+            
+            topology: { node: null, ring: null },
+            frozen: false,
+            
+            // FORMAL COMPONENTS - REQUIRED
+            Φ: this.extractPhaseSpace(moduleAST),      // Fase-ruimte
+            Σ: this.extractCanonicalState(moduleAST),  // Canonieke toestand
+            Δ: this.extractTransitionOperator(moduleAST), // Transitie-operator
+            
+            ascpi_ast: Object.freeze(moduleAST),
+            _current_phase: null,
+            _canonical_state: 'initial'
+        };
+        
+        // Validate formal components exist
+        if (canonicalModule.Φ.length === 0) {
+            throw new Error(`ASCPI Error: Module ${moduleAST.name} has empty phase space Φ. Module must contain phase tokens.`);
+        }
+        
+        if (!canonicalModule.Δ.phase_map || Object.keys(canonicalModule.Δ.phase_map).length === 0) {
+            throw new Error(`ASCPI Error: Module ${moduleAST.name} has no phase transitions in Δ. Module must contain valid phase transition law.`);
+        }
+
+        return canonicalModule;
+    },
+
+    // Extract Φ (Phase Space) from AST
+    extractPhaseSpace: function(moduleAST) {
+        const phases = [];
+        for (const expr of moduleAST.expressions) {
+            if (expr.type === 'HEX_TOKEN' && 
+                ['hexACT', 'hexCIR', 'hexCLO', 'hexOBS', 'hexPHA', 'hexMOD'].includes(expr.value)) {
+                phases.push(expr.value);
+            }
+        }
+        return phases;
+    },
+
+    // Extract Σ (Canonical State) from AST  
+    extractCanonicalState: function(moduleAST) {
+        const state = {
+            phase_position: null,
+            relation_active: false,
+            observation_active: false,
+            binding_state: 'unbound',
+            ast_length: moduleAST.expressions.length
+        };
+        
+        // State derived purely from AST structure, no interpretation
+        for (const expr of moduleAST.expressions) {
+            if (expr.type === 'RELATION') {
+                state.relation_active = true;
+            }
+            if (expr.value === 'hexOBS') {
+                state.observation_active = true;
+            }
+            if (expr.value === 'hexBIN') {
+                state.binding_state = 'bound';
+            }
+        }
+        
+        return state;
+    },
+
+    // Extract Δ (Transition Operator) from AST - PHASE-BASED TRANSITION LAW
+    extractTransitionOperator: function(moduleAST) {
+        // Δ = fase-transitie-wet: (Φ_k, Σ) → (Φ_{k+1}, Σ′)
+        // NIET: token_i → token_{i+1} (mechanische opvolging)
+        // MAAR: fase-transitie op basis van AST-constraints
+        // AST levert constraints (wat mogelijk is), Φ bepaalt wat gebeurt
+        // JavaScript past alleen toe, bepaalt niets
+        
+        const phaseTransitions = {};
+        const constraints = new Set();
+        
+        // Extract constraints from AST (what is possible)
+        for (const expr of moduleAST.expressions) {
+            if (expr.type === 'HEX_TOKEN') {
+                constraints.add(expr.value);
+            }
+            if (expr.type === 'RELATION') {
+                constraints.add('relation_' + expr.value);
+            }
+            if (expr.type === 'DIRECTION') {
+                constraints.add('direction_' + expr.value);
+            }
+        }
+        
+        // Create phase transitions for ANY available phase tokens
+        const availablePhases = Array.from(constraints).filter(c => 
+            ['hexACT', 'hexCIR', 'hexCLO', 'hexOBS', 'hexMOD', 'hexPHA', 'hexBIN'].includes(c)
+        );
+        
+        if (availablePhases.length === 0) {
+            throw new Error(`ASCPI Error: No valid phase tokens found in module ${moduleAST.name}`);
+        }
+        
+        // Create transitions between available phases
+        for (let i = 0; i < availablePhases.length; i++) {
+            const currentPhase = availablePhases[i];
+            const nextPhase = availablePhases[(i + 1) % availablePhases.length];
+            
+            phaseTransitions[currentPhase] = {
+                to: nextPhase,
+                condition: `${currentPhase}_complete`,
+                state_change: (sigma) => ({ ...sigma, [`${currentPhase}_active`]: true })
+            };
+        }
+        
+        // Relations and observations affect state but not phase progression
+        const stateModifiers = [];
+        if (constraints.has('relation_adj')) {
+            stateModifiers.push((sigma) => ({ ...sigma, adjacency_active: true }));
+        }
+        if (constraints.has('relation_<->')) {
+            stateModifiers.push((sigma) => ({ ...sigma, bidirectional_active: true }));
+        }
+        if (constraints.has('hexOBS')) {
+            stateModifiers.push((sigma) => ({ ...sigma, observation_active: true }));
+        }
+        
+        return {
+            type: 'phase_transition_law',
+            phase_map: phaseTransitions,
+            constraints: Array.from(constraints),
+            state_modifiers: stateModifiers,
+            available_phases: availablePhases,
+            // Canonical transition function: (Φ_k, Σ) → (Φ_{k+1}, Σ′)
+            transition: function(currentPhase, currentState) {
+                if (!currentPhase || !phaseTransitions[currentPhase]) {
+                    // Start with first available phase if no current phase
+                    const firstPhase = availablePhases[0];
+                    return {
+                        nextPhase: firstPhase || null,
+                        nextState: currentState
+                    };
+                }
+                
+                const transition = phaseTransitions[currentPhase];
+                let newState = { ...currentState };
+                
+                // Apply state change from phase transition
+                if (transition.state_change) {
+                    newState = transition.state_change(newState);
+                }
+                
+                // Apply state modifiers from AST constraints
+                for (const modifier of stateModifiers) {
+                    newState = modifier(newState);
+                }
+                
+                return {
+                    nextPhase: transition.to,
+                    nextState: newState
+                };
+            }
+        };
+    },
+
+    validate: function(source) {
+        try {
+            console.log('ASCPI validate() called with source:', source.substring(0, 100) + '...');
+            const ast = this.parse(source);
+            console.log('ASCPI parse successful, AST:', ast);
+            
+            const sourceText = source.toLowerCase();
+            for (const forbidden of this.FORBIDDEN) {
+                if (sourceText.includes(forbidden)) {
+                    return {
+                        valid: false,
+                        error: `Forbidden element detected: ${forbidden}`,
+                        canon_violation: true
+                    };
+                }
+            }
+
+            return {
+                valid: true,
+                ast: ast,
+                modules: ast.modules.length,
+                canon_compliant: true
+            };
+        } catch (e) {
+            console.error('ASCPI validate() error:', e);
+            return {
+                valid: false,
+                error: e.message,
+                canon_violation: false
+            };
+        }
+    }
+};
+
+// ============================================================================
+// RUNTIME — PHASE ADVANCEMENT LAYER (ASCPI SERVANT, NOT MASTER)
+// ============================================================================
+
+class ASCPINativeRuntime {
+    constructor() {
+        this.modules = new Map();
+        this.connections = new Map();
+        this.loadOrder = [];
+        this.stepCount = 0;
+        this.running = false;
+        this.context = {};
+        this.logs = [];
+        
+        // CANON FREEZE STATE
+        this._canonFrozen = false;
+        this._canonHash = null;
+        this._frozenAt = null;
+        
+        // ASCPI NATIVE LANGUAGE STATE
+        this._ascpiModules = new Map();
+        this._ascpiSources = new Map();
+        
+        // TOPOLOGY ENFORCEMENT - MANDATORY PART OF RUNTIME
+        this.topology = this.initializeTopology();
+    }
+
+    // TOPOLOGY INITIALIZATION - RUNTIME OWNS TOPOLOGY
+    initializeTopology() {
+        // HARD CONSTRAINT: Exactly 7 nodes (hexagon + center)
+        return {
+            nodes: [
+                { id: 0, ring: 0, occupied: false, module: null }, // Center
+                { id: 1, ring: 1, occupied: false, module: null },
+                { id: 2, ring: 1, occupied: false, module: null },
+                { id: 3, ring: 1, occupied: false, module: null },
+                { id: 4, ring: 1, occupied: false, module: null },
+                { id: 5, ring: 1, occupied: false, module: null },
+                { id: 6, ring: 1, occupied: false, module: null }
+            ],
+            maxModules: 7,
+            maxModulesPerNode: 1
+        };
+    }
+
+    // TOPOLOGY ENFORCEMENT: CHECK BEFORE LOAD
+    canLoadModule() {
+        const occupiedNodes = this.topology.nodes.filter(n => n.occupied).length;
+        if (occupiedNodes >= this.topology.maxModules) {
+            return { allowed: false, reason: 'TOPOLOGY_VIOLATION: All 7 nodes occupied' };
+        }
+        
+        const freeNode = this.topology.nodes.find(n => !n.occupied);
+        if (!freeNode) {
+            return { allowed: false, reason: 'TOPOLOGY_VIOLATION: No free nodes available' };
+        }
+        
+        return { allowed: true, nodeId: freeNode.id };
+    }
+
+    // MODULE LOADING - TOPOLOGY ENFORCEMENT REQUIRED
+    load(module) {
+        if (this._canonFrozen) {
+            this.log('warn', `BLOCKED: Cannot declare ASCPI canon after canon freeze`);
+            return false;
+        }
+
+        // ASCPI IS ONLY WAY TO CREATE MODULES
+        if (!module.id) {
+            throw new Error(`Invalid module: missing id`);
+        }
+        
+        if (!module._canonical || !module._language?.includes('ASCPI')) {
+            throw new Error(`BLOCKED: Only ASCPI Native Language modules allowed. Module must be created via ASCPI source declaration.`);
+        }
+        
+        if (!module.Φ || !module.Σ || !module.Δ) {
+            throw new Error(`BLOCKED: Module missing formal components (Φ, Σ, Δ). Must be created via ASCPI createCanonicalModule.`);
+        }
+        
+        if (!module.ascpi_ast || !module.ascpi_ast.expressions) {
+            throw new Error(`BLOCKED: Module missing ASCPI AST. Modules can only exist through ASCPI source declaration.`);
+        }
+
+        const topologyCheck = this.canLoadModule();
+        if (!topologyCheck.allowed) {
+            this.log('error', `MODULE LOAD BLOCKED: ${topologyCheck.reason}`);
+            return false;
+        }
+
+        const node = this.topology.nodes.find(n => n.id === topologyCheck.nodeId);
+        node.occupied = true;
+        node.module = module.id;
+
+        module.topology.node = topologyCheck.nodeId;
+        module.topology.ring = node.ring;
+
+        this.modules.set(module.id, module);
+        this.loadOrder.push(module.id);
+
+        if (module._canonical && module._language?.includes('ASCPI')) {
+            this._ascpiModules.set(module.id, module);
+        }
+
+        this.log('info', `ASCPI module declared: ${module.id} → Node ${topologyCheck.nodeId} [Φ:${module.Φ.length} Δ:${Object.keys(module.Δ.phase_map || {}).length} phases]`);
+        return true;
+    }
+
+    // TOPOLOGY STATE ACCESS
+    getTopologyState() {
+        return {
+            occupiedNodes: this.topology.nodes.filter(n => n.occupied).length,
+            totalNodes: this.topology.nodes.length,
+            freeNodes: this.topology.nodes.filter(n => !n.occupied).length,
+            allocation: this.topology.nodes.filter(n => n.occupied).map(n => ({ nodeId: n.id, module: n.module }))
+        };
+    }
+
+    // CANON FREEZE - ONOMKEERBAAR
+    // =====================================================================
+    // FREEZE-ONOMKEERBAARHEID - JURIDISCH EN TECHNISCH DEFINITIEF
+    // =====================================================================
+    // - Na freeze: GEEN nieuwe ASCPI modules mogelijk
+    // - Na freeze: GEEN runtime wijzigingen toegestaan
+    // - Hash wordt forensisch bewijs van canon state
+    // - Deterministische hash voor WIPO/prior-art doeleinden
+    // - Eenmalige actie - kan NOOIT ongedaan gemaakt worden
+    // =====================================================================
+    freezeCanon() {
+        if (this._canonFrozen) {
+            this.log('warn', 'Canon already frozen');
+            return false;
+        }
+
+        const state = {
+            modules: Array.from(this.modules.keys()).sort(),
+            connections: Array.from(this.connections.entries()).map(([key, value]) => [key, Array.from(value)]).sort(),
+            loadOrder: [...this.loadOrder],
+            ascpi_sources: Object.fromEntries(Array.from(this._ascpiSources.entries()).sort()),
+            ascpi_modules: Array.from(this._ascpiModules.keys()).sort(),
+            language_hash: ASCPINativeLanguage.getLanguageHash()
+        };
+
+        const deterministicJSON = JSON.stringify(state, Object.keys(state).sort());
+        this._canonHash = this.simpleHash(deterministicJSON);
+        this._frozenAt = new Date().toISOString();
+        this._canonFrozen = true;
+        this._languageHash = state.language_hash;
+
+        for (const [moduleId, module] of this.modules) {
+            if (module._canonical) {
+                module._source_frozen = true;
+                module.frozen = true;
+            }
+        }
+
+        this.log('success', `CANON FROZEN: ${this._canonHash}`);
+        this.log('success', `LANGUAGE FROZEN: ${this._languageHash}`);
+        this.log('success', `ASCPI modules frozen: ${this._ascpiModules.size}`);
+        return true;
+    }
+
+    // SIMPLE DETERMINISTIC HASH
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return Math.abs(hash).toString(16);
+    }
+
+
+
+    // DECLARE ASCPI CANON
+    // =====================================================================
+    // MODULES ONTSTAAN UITSLUITEND VIA ASCPI NATIVE LANGUAGE
+    // =====================================================================
+    // - JavaScript is GEEN programmeertaal in dit systeem
+    // - JavaScript is alleen uitvoeringslaag voor ASCPI structuren
+    // - Modules kunnen ALLEEN gedeclareerd worden door ASCPI source te schrijven
+    // - Runtime accepteert geen handgeschreven JS modules
+    // - ASCPI is declaratief, niet interactief
+    // =====================================================================
+    loadASCPIModule(source) {
+        if (this._canonFrozen) {
+            this.log('warn', `BLOCKED: Cannot declare ASCPI canon after canon freeze`);
+            return false;
+        }
+
+        try {
+            this.log('debug', 'Starting ASCPI validation...');
+            const validation = ASCPINativeLanguage.validate(source);
+            
+            if (!validation.valid) {
+                this.log('error', `ASCPI Validation Error: ${validation.error}`);
+                console.error('ASCPI Validation failed:', validation);
+                return false;
+            }
+
+            this.log('debug', `ASCPI validation succeeded, ${validation.modules} modules found`);
+            
+            for (const moduleAST of validation.ast.modules) {
+                this.log('debug', `Declaring canonical module: ${moduleAST.name}`);
+                const canonicalModule = ASCPINativeLanguage.createCanonicalModule(moduleAST);
+                this._ascpiSources.set(moduleAST.name, source);
+                const loadResult = this.load(canonicalModule);
+                
+                if (loadResult) {
+                    this.log('success', `ASCPI module declared: ${moduleAST.name}`);
+                } else {
+                    this.log('error', `Failed to declare ASCPI module: ${moduleAST.name}`);
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (e) {
+            this.log('error', `ASCPI Declaration Error: ${e.message}`);
+            console.error('ASCPI Declaration Exception:', e);
+            return false;
+        }
+    }
+
+    // CANONICAL STEP - EXACT ONE TRANSITION
+    // =====================================================================
+    // step() executes exactly one canonical transition: Advance(M, t) → M′
+    // Results in demonstrably different module state
+    // Deterministically repeatable
+    // =====================================================================
+    step() {
+        if (this.loadOrder.length === 0) {
+            this.log('warn', 'No modules to step through');
+            return null;
+        }
+
+        const canonicalStep = {
+            stepNumber: this.stepCount,
+            timestamp: Date.now(), 
+            moduleSequence: [...this.loadOrder]
+        };
+
+        // Select current module structurally
+        if (!this._currentModule) {
+            this._currentModule = this.loadOrder[0];
+        }
+        
+        const moduleId = this._currentModule;
+        const module = this.modules.get(moduleId);
+
+        if (module && module.Δ && module.Δ.type === 'phase_transition_law') {
+            // FORMAL TRANSITION: Advance(M, t) → M′
+            const M_prime = ASCPITransitionLaw.advance(module, this.stepCount);
+            
+            // Replace module with M′ (new state)
+            this.modules.set(moduleId, M_prime);
+            
+            // Verify state change occurred
+            const stateChanged = M_prime._canonical_state !== module._canonical_state;
+            const phaseChanged = M_prime._current_phase !== module._current_phase;
+            
+            if (stateChanged || phaseChanged) {
+                this.log('debug', `Canonical Transition ${canonicalStep.stepNumber}: ${moduleId} [${module._canonical_state}] → [${M_prime._canonical_state}]`);
+            } else {
+                this.log('debug', `Canonical Transition ${canonicalStep.stepNumber}: ${moduleId} (state stable)`);
+            }
+            
+            // Return transition result
+            const result = {
+                moduleId: moduleId,
+                canonicalStep: canonicalStep,
+                nextStep: this.stepCount + 1,
+                stateChanged: stateChanged,
+                fromState: module._canonical_state,
+                toState: M_prime._canonical_state,
+                currentPhase: M_prime._current_phase
+            };
+            
+            // Advance to next module structurally
+            const currentModuleIdx = this.loadOrder.indexOf(this._currentModule);
+            const nextModuleIdx = currentModuleIdx < this.loadOrder.length - 1 ? currentModuleIdx + 1 : 0;
+            this._currentModule = this.loadOrder[nextModuleIdx];
+            
+            this.stepCount++;
+            
+            return result;
+        } else {
+            this.log('warn', `Module ${moduleId} has no phase transition law Δ`);
+            this.stepCount++;
+            return null;
+        }
+    }
+
+    // CANONICAL EXECUTION CONTROL (NO TIMER DEPENDENCY)
+    executeCanonicalSteps(count = 1) {
+        const results = [];
+        for (let i = 0; i < count; i++) {
+            if (this.running) {
+                const result = this.step();
+                if (result) {
+                    results.push(result);
+                }
+            }
+        }
+        return results;
+    }
+
+    // RUNTIME CONTROL
+    start() {
+        if (this.running) return;
+        this.running = true;
+        this.log('info', 'Runtime started');
+    }
+
+    stop() {
+        this.running = false;
+        this.log('info', 'Runtime stopped');
+    }
+
+    reset() {
+        if (this._canonFrozen) {
+            this.log('warn', 'Cannot reset: Canon is frozen');
+            return false;
+        }
+        
+        this.stop();
+        this.stepCount = 0;
+        this.context = {};
+        this.log('info', 'Runtime reset');
+        return true;
+    }
+
+    // LOGGING
+    log(level, message) {
+        const entry = {
+            time: Date.now(),
+            level: level,
+            message: message
+        };
+        this.logs.push(entry);
+        
+        // Keep last 100 entries
+        if (this.logs.length > 100) {
+            this.logs.splice(0, 1);
+        }
+    }
+
+    // STATE ACCESS
+    getState() {
+        return {
+            running: this.running,
+            stepCount: this.stepCount,
+            moduleCount: this.modules.size,
+            ascpiModuleCount: this._ascpiModules.size,
+            canonFrozen: this._canonFrozen,
+            canonHash: this._canonHash,
+            languageHash: this._languageHash || ASCPINativeLanguage.getLanguageHash()
+        };
+    }
+}
+
+// ============================================================================
+// HEXAGON TOPOLOGY — VISUALIZATION LAYER (RUNTIME ENFORCES STRUCTURE)
+// ============================================================================
+
+class HexagonVisualization {
+    constructor(svgElement) {
+        this.svg = svgElement;
+        this.render();
+    }
+
+    // VISUALIZATION: Render current runtime topology state
+    updateFromRuntime(runtime) {
+        const topologyState = runtime.getTopologyState();
+        this.render(topologyState);
+        
+        // Update status display
+        const ring0Count = topologyState.allocation.filter(a => a.nodeId === 0).length;
+        const ring1Count = topologyState.allocation.filter(a => a.nodeId !== 0).length;
+        
+        document.getElementById('ring0Count').textContent = ring0Count;
+        document.getElementById('ring1Count').textContent = ring1Count;
+        document.getElementById('totalModules').textContent = topologyState.occupiedNodes;
+    }
+
+    render(topologyState = null) {
+        this.svg.innerHTML = '';
+        
+        // Static hexagon coordinates
+        const nodes = [
+            { id: 0, ring: 0, x: 200, y: 200 }, // Center
+            { id: 1, ring: 1, x: 280, y: 200 },
+            { id: 2, ring: 1, x: 240, y: 130 },
+            { id: 3, ring: 1, x: 160, y: 130 },
+            { id: 4, ring: 1, x: 120, y: 200 },
+            { id: 5, ring: 1, x: 160, y: 270 },
+            { id: 6, ring: 1, x: 240, y: 270 }
+        ];
+        
+        // Draw connections
+        for (let i = 1; i < nodes.length; i++) {
+            const node = nodes[i];
+            const center = nodes[0];
+            
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', center.x);
+            line.setAttribute('y1', center.y);
+            line.setAttribute('x2', node.x);
+            line.setAttribute('y2', node.y);
+            line.setAttribute('stroke', '#2a2a3a');
+            line.setAttribute('stroke-width', '1');
+            this.svg.appendChild(line);
+        }
+
+        // Draw ring connections
+        for (let i = 1; i < nodes.length; i++) {
+            const current = nodes[i];
+            const next = nodes[i === 6 ? 1 : i + 1];
+            
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', current.x);
+            line.setAttribute('y1', current.y);
+            line.setAttribute('x2', next.x);
+            line.setAttribute('y2', next.y);
+            line.setAttribute('stroke', '#2a2a3a');
+            line.setAttribute('stroke-width', '1');
+            this.svg.appendChild(line);
+        }
+
+        // Draw nodes
+        nodes.forEach(node => {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', node.x);
+            circle.setAttribute('cy', node.y);
+            circle.setAttribute('r', node.ring === 0 ? '20' : '16');
+            circle.setAttribute('class', `hex-node ${node.ring === 0 ? 'center' : ''}`);
+            circle.setAttribute('data-node-id', node.id);
+            this.svg.appendChild(circle);
+
+            // Node label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', node.x);
+            text.setAttribute('y', node.y + 4);
+            text.setAttribute('class', 'hex-label');
+            text.textContent = node.id;
+            this.svg.appendChild(text);
+
+            // Module label (from runtime state)
+            if (topologyState) {
+                const allocation = topologyState.allocation.find(a => a.nodeId === node.id);
+                if (allocation) {
+                    const moduleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    moduleText.setAttribute('x', node.x);
+                    moduleText.setAttribute('y', node.y - 25);
+                    moduleText.setAttribute('class', 'hex-label');
+                    moduleText.setAttribute('style', 'font-size: 6px; fill: #4aff9f;');
+                    moduleText.textContent = allocation.module;
+                    this.svg.appendChild(moduleText);
+                }
+            }
+        });
+    }
+}
+
+// ============================================================================
+// hexBYE OBSERVER — STRICT OBSERVATION ONLY (NO WRITE-BACK)
+// ============================================================================
+
+const hexBYEObserver = {
+    // CANON CONSTRAINT: OBSERVATION ONLY
+    _observationOnly: true,
+    _cannotModifyCanon: true,
+    
+    extractFromImage: function(imageSrc) {
+        // GUARD: ENFORCE OBSERVATION-ONLY
+        if (!this._observationOnly) {
+            throw new Error('hexBYE VIOLATION: observation-only constraint broken');
+        }
+
+        // Simulated structural extraction (no actual image processing)
+        const mockResult = {
+            nodes: Math.floor(Math.random() * 12) + 3,
+            density: (Math.random() * 0.8 + 0.1).toFixed(3),
+            status: 'OBSERVED',
+            method: 'hexBYE_observation',
+            timestamp: Date.now(),
+            write_back: false // ENFORCED
+        };
+
+        // LOG ONLY - NO STATE MUTATION
+        console.log('hexBYE Observer:', mockResult);
+        
+        return Object.freeze(mockResult); // Immutable result
+    },
+
+    // STRICT GUARD AGAINST WRITE-BACK
+    _guardAgainstWriteBack: function() {
+        if (arguments.length > 1 || typeof arguments[0] === 'object') {
+            throw new Error('hexBYE CANON VIOLATION: Write-back attempt detected');
+        }
+    }
+};
+
+// FREEZE hexBYE TO PREVENT MODIFICATION
+Object.freeze(hexBYEObserver);
+
+// ============================================================================
+// PIPELINE EXECUTOR — COMPLETELY SEPARATE (NO CANON ACCESS)
+// ============================================================================
+
+class PipelineExecutor {
+    constructor() {
+        this.stages = ['file', 'math', 'energy', 'svg'];
+        this.currentStage = 0;
+        this.canAccessCanon = false; // HARD CONSTRAINT
+    }
+
+    // PIPELINE EXECUTION - ISOLATED FROM CANON
+    execute(input) {
+        const result = {
+            stage: this.stages[this.currentStage],
+            input: input,
+            output: null,
+            canon_access: this.canAccessCanon // Should always be false
+        };
+
+        switch (this.currentStage) {
+            case 0: // file
+                result.output = { type: 'file_processed', data: input };
+                break;
+            case 1: // math  
+                result.output = { type: 'math_computed', equations: 'Ψ(dΦ/dt) = ∇×B' };
+                break;
+            case 2: // energy
+                result.output = { type: 'energy_calculated', level: 0.847 };
+                break;
+            case 3: // svg
+                result.output = { 
+                    type: 'svg_generated', 
+                    svg: '<svg><circle cx="50" cy="50" r="20" fill="blue"/></svg>' 
+                };
+                break;
+        }
+
+        this.currentStage = (this.currentStage + 1) % this.stages.length;
+        return result;
+    }
+}
+
+// ============================================================================
+// EMBEDDED CANONICAL MODULES — ASCPI NATIVE LANGUAGE
+// ============================================================================
+
+const CANONICAL_ASCPI_MODULES = `
+hexMODule CoreClock
+hexACT > hexCIR > hexCLO
+hexOBS adj V0
+close
+
+hexMODule ContextField  
+hexBIN < hexMOD
+hexPHA A > hexPHA B > hexPHA C
+close
+
+hexMODule HexTopology
+hexMOD adj hexMOD adj hexMOD adj hexMOD adj hexMOD adj hexMOD
+hexCIR <-> hexCIR <-> hexCIR <-> hexCIR <-> hexCIR <-> hexCIR
+hexOBS = V0 = V1 = V2 = V3 = V4 = V5
+close
+
+hexMODule Scheduler
+hexACT > hexMOD > hexCIR
+hexPHA A adj hexPHA B adj hexPHA C
+close
+`;
+
+// ============================================================================
+// SYSTEM INITIALIZATION — ASCPI NATIVE LANGUAGE LEADING
+// ============================================================================
+
+function initializeSystem() {
+    // Create runtime with ASCPI authority AND topology enforcement
+    const runtime = new ASCPINativeRuntime();
+    const visualization = new HexagonVisualization(document.getElementById('hexSvg'));
+    const pipeline = new PipelineExecutor();
+
+    // Declare canonical ASCPI modules
+    console.log('Declaring ASCPI Native Language canonical modules...');
+    const success = runtime.loadASCPIModule(CANONICAL_ASCPI_MODULES);
+    
+    if (success) {
+        console.log('✓ ASCPI canonical modules declared');
+        console.log('✓ Topology enforcement active in runtime');
+        
+        // Update visualization to show runtime state
+        visualization.updateFromRuntime(runtime);
+    } else {
+        console.error('✗ Failed to declare ASCPI canonical modules');
+    }
+
+    return { runtime, visualization, pipeline };
+}
+
+// ============================================================================
+// UI CONTROL LAYER
+// ============================================================================
+
+function toggleASCPISection() {
+    const section = document.getElementById('ascpiSection');
+    const toggle = document.getElementById('ascpiToggle');
+    
+    if (section.classList.contains('collapsed')) {
+        section.classList.remove('collapsed');
+        toggle.textContent = '▲';
+    } else {
+        section.classList.add('collapsed');
+        toggle.textContent = '▼';
+    }
+}
+
+function initializeUI(runtime, visualization, pipeline) {
+    // NO runInterval - canonical execution model
+
+    // Status indicators
+    function updateStatus() {
+        const state = runtime.getState();
+        
+        // Canon status
+        const canonDot = document.getElementById('canonStatus');
+        if (state.canonFrozen) {
+            canonDot.className = 'status-dot active';
+        } else {
+            canonDot.className = 'status-dot warning';
+        }
+
+        // Runtime status  
+        const runtimeDot = document.getElementById('runtimeStatus');
+        if (state.running) {
+            runtimeDot.className = 'status-dot active';
+        } else {
+            runtimeDot.className = 'status-dot';
+        }
+
+        // ASCPI status
+        const ascpiDot = document.getElementById('ascpiStatus');
+        if (state.ascpiModuleCount > 0) {
+            ascpiDot.className = 'status-dot active';
+        } else {
+            ascpiDot.className = 'status-dot error';
+        }
+
+        // Update displays
+        document.getElementById('canonState').textContent = state.canonFrozen ? 'FROZEN' : 'UNFROZEN';
+        document.getElementById('canonHash').textContent = state.canonHash || '—';
+        document.getElementById('ascpiModuleCount').textContent = state.ascpiModuleCount;
+        document.getElementById('stepCounter').textContent = state.stepCount;
+
+        // Module status
+        const moduleStatus = document.getElementById('moduleStatus');
+        const moduleList = Array.from(runtime.modules.keys()).map(id => {
+            const isASCPI = runtime._ascpiModules.has(id);
+            return `<div>${id} ${isASCPI ? '(ASCPI)' : '(Legacy)'}</div>`;
+        }).join('');
+        moduleStatus.innerHTML = moduleList || '<div>No modules loaded</div>';
+        
+        // Update visualization from runtime state
+        visualization.updateFromRuntime(runtime);
+    }
+
+    // Runtime log display
+    function updateLog() {
+        const logContent = document.getElementById('runtimeLog');
+        const recentLogs = runtime.logs.slice(-20);
+        
+        logContent.innerHTML = recentLogs.map(entry => {
+            const time = new Date(entry.time).toLocaleTimeString();
+            return `<div class="log-entry">
+                <span class="log-time">[${time}]</span> 
+                <span class="log-level-${entry.level}">${entry.message}</span>
+            </div>`;
+        }).reverse().join('');
+        
+        logContent.scrollTop = logContent.scrollHeight;
+    }
+
+    // Control buttons - CANONICAL EXECUTION (NO TIMER DEPENDENCY)
+    document.getElementById('btnStart').addEventListener('click', () => {
+        runtime.start();
+        // NO setInterval - canonical execution only
+        updateStatus();
+        runtime.log('info', 'Canonical execution mode activated');
+    });
+
+    document.getElementById('btnStep').addEventListener('click', () => {
+        // CANONICAL SINGLE STEP
+        const result = runtime.step();
+        if (result) {
+            runtime.log('info', `Canonical step advanced: ${result.moduleId}`);
+        }
+        updateStatus();
+        updateLog();
+    });
+
+    document.getElementById('btnStop').addEventListener('click', () => {
+        runtime.stop();
+        // No timer to clear - canonical execution model
+        updateStatus();
+        runtime.log('info', 'Canonical execution stopped');
+    });
+
+    // CANONICAL MULTI-STEP EXECUTION (EXPLICIT COUNT)
+    let canonicalStepButton = document.createElement('button');
+    canonicalStepButton.className = 'btn';
+    canonicalStepButton.textContent = '5 STEPS';
+    canonicalStepButton.id = 'btnFiveSteps';
+    canonicalStepButton.addEventListener('click', () => {
+        const results = runtime.executeCanonicalSteps(5);
+        runtime.log('info', `Advanced ${results.length} canonical steps`);
+        updateStatus();
+        updateLog();
+    });
+    
+    // Insert after STEP button
+    document.getElementById('btnStep').insertAdjacentElement('afterend', canonicalStepButton);
+
+    document.getElementById('btnFreeze').addEventListener('click', () => {
+        if (confirm('Canon freeze is onomkeerbaar. Continue?')) {
+            const success = runtime.freezeCanon();
+            if (success) {
+                document.getElementById('btnFreeze').disabled = true;
+                document.getElementById('btnReset').disabled = true;
+            }
+            updateStatus();
+            updateLog();
+        }
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+        if (confirm('Reset runtime? (Only possible if canon not frozen)')) {
+            runtime.reset();
+            updateStatus();
+            updateLog();
+        }
+    });
+
+    // ASCPI Editor - Inline Section
+    document.getElementById('btnASCPI').addEventListener('click', () => {
+        const section = document.getElementById('ascpiSection');
+        if (section.classList.contains('collapsed')) {
+            toggleASCPISection();
+            // Scroll to ASCPI section
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            toggleASCPISection();
+        }
+    });
+
+    // ASCPI Controls
+    const ascpiSource = document.getElementById('ascpiSource');
+    const ascpiStatus = document.getElementById('ascpiStatusText');
+
+    document.getElementById('ascpiValidate').addEventListener('click', () => {
+        const source = ascpiSource.value;
+        const validation = ASCPINativeLanguage.validate(source);
+        
+        if (validation.valid) {
+            ascpiStatus.innerHTML = `✓ Valid ASCPI Native Language<br>Modules: ${validation.modules}<br>Canon Compliant: ${validation.canon_compliant}`;
+            ascpiStatus.style.color = '#4aff9f';
+        } else {
+            ascpiStatus.innerHTML = `✗ ${validation.error}${validation.canon_violation ? '<br>CANON VIOLATION' : ''}`;
+            ascpiStatus.style.color = '#ff4a6a';
+        }
+    });
+
+    document.getElementById('ascpiLoad').addEventListener('click', () => {
+        const source = ascpiSource.value;
+        const success = runtime.loadASCPIModule(source);
+        
+        if (success) {
+            ascpiStatus.innerHTML = '✓ ASCPI canon declared in runtime';
+            ascpiStatus.style.color = '#4aff9f';
+            updateStatus();
+            updateLog();
+        } else {
+            ascpiStatus.innerHTML = '✗ Failed to declare ASCPI canon (check log)';
+            ascpiStatus.style.color = '#ff4a6a';
+        }
+    });
+
+    document.getElementById('ascpiClear').addEventListener('click', () => {
+        ascpiSource.value = '';
+        ascpiStatus.innerHTML = 'Ready for ASCPI Native Language input.';
+        ascpiStatus.style.color = '#e0e0e8';
+    });
+
+    // Initial status update
+    updateStatus();
+    updateLog();
+
+    runtime.log('success', 'hexMHS v1 — ASCPI constitutive formal language system');
+}
+
+// ============================================================================
+// SYSTEM BOOT
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('hexMHS v1 — ASCPI Native Language Leading System');
+    console.log('Canon Hierarchy: ASCPI Native Language > JavaScript execution');
+    
+    const { runtime, visualization, pipeline } = initializeSystem();
+    initializeUI(runtime, visualization, pipeline);
+    
+    // Final initialization log
+    runtime.log('info', 'System ready — ASCPI Native Language canon declared');
+    runtime.log('info', 'Topology enforcement active in runtime');
+    
+    // Check runtime topology state
+    const topologyState = runtime.getTopologyState();
+    if (topologyState.occupiedNodes === 0) {
+        runtime.log('warn', 'No modules allocated to topology');
+    } else {
+        runtime.log('success', `Topology state: ${topologyState.occupiedNodes}/${topologyState.totalNodes} nodes occupied`);
+    }
+});
+
+</script>
+</body>
+</html>
