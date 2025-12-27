@@ -2,9 +2,6 @@
 SHA256 hash of FORENSISCH_PROJECT_OVERZICHT.md:
 c7aff5cf3324751365ec09616045b7a5ac58e43379226d917c76241b8813fbab
 CertUtil: -hashfile command completed successfully.
-==== HASHREGISTER.txt ==== 
-CertUtil: -hashfile command FAILED: 0x80070020 (WIN32: 32 ERROR_SHARING_VIOLATION)
-CertUtil: The process cannot access the file because it is being used by another process.
 ==== hexBYE_complete_system.zip ==== 
 SHA256 hash of hexBYE_complete_system.zip:
 d2fbf6e76477cb138f92726eb27cf9b3156e968a528ee8275029eb97aa1b3ff0
@@ -25,3 +22,4 @@ CertUtil: -hashfile command completed successfully.
 SHA256 hash of PRIOR_ART_POSITIONERING.txt:
 8140cffe133186b68ab47305ea3f596f94ca3d50f60b64d5a74e9809cfedac46
 CertUtil: -hashfile command completed successfully.
+
