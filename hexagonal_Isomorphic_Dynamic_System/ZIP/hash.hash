@@ -1,0 +1,27 @@
+==== FORENSISCH_PROJECT_OVERZICHT.md ==== 
+SHA256 hash of FORENSISCH_PROJECT_OVERZICHT.md:
+c7aff5cf3324751365ec09616045b7a5ac58e43379226d917c76241b8813fbab
+CertUtil: -hashfile command completed successfully.
+==== HASHREGISTER.txt ==== 
+CertUtil: -hashfile command FAILED: 0x80070020 (WIN32: 32 ERROR_SHARING_VIOLATION)
+CertUtil: The process cannot access the file because it is being used by another process.
+==== hexBYE_complete_system.zip ==== 
+SHA256 hash of hexBYE_complete_system.zip:
+d2fbf6e76477cb138f92726eb27cf9b3156e968a528ee8275029eb97aa1b3ff0
+CertUtil: -hashfile command completed successfully.
+==== hexBYE_complete_system.zip.ots ==== 
+SHA256 hash of hexBYE_complete_system.zip.ots:
+635057289607d985f0ac876ab990f080a3e07c8b04e54d4c7b076e03e4c12cf7
+CertUtil: -hashfile command completed successfully.
+==== hexMHS_complete_project.zip ==== 
+SHA256 hash of hexMHS_complete_project.zip:
+f5f4694ad04723b26ba6401146d97c4586cb6d3fa4632c645b8d0e78fde2c67e
+CertUtil: -hashfile command completed successfully.
+==== hexMHS_complete_project.zip.ots ==== 
+SHA256 hash of hexMHS_complete_project.zip.ots:
+ba9dd20415b5f68b40a546afe6a16153acc616eed004a2d4567087b2bbd80515
+CertUtil: -hashfile command completed successfully.
+==== PRIOR_ART_POSITIONERING.txt ==== 
+SHA256 hash of PRIOR_ART_POSITIONERING.txt:
+8140cffe133186b68ab47305ea3f596f94ca3d50f60b64d5a74e9809cfedac46
+CertUtil: -hashfile command completed successfully.

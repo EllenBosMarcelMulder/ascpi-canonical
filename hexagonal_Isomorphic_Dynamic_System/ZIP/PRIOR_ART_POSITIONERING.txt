@@ -1,0 +1,315 @@
+PRIOR ART POSITIONERING — STRUCTUREEL
+
+1. hexBYE
+   - Functie: Instrument / visualisatie
+   - Geen canonieke DSL
+   - Geen afdwingbare invariant-architectuur
+   - Afleidbaar, niet constitutief
+
+2. hexMHS
+   - Functie: Canoniek modulair operating system
+   - Bevat .os DSL met formele invarianten
+   - Scheiding canon / experimenteel afdwingbaar
+   - Deterministische module-migratie
+   - Juridisch freeze-waardig (vormwet)
+
+CONCLUSIE:
+hexMHS vernietigt nieuwheid voor elk systeem dat:
+- hexagonale topologie + module-migratie combineert
+- canoniek bevroren invarianten hanteert
+- observatie strikt scheidt van afdwinging
+
+Categorieverschuiving:
+Niet software → maar vormwet / structurele noodzaak.
+
+WIPO / EPC PRIOR-ART DISCLOSURE
+
+hexMHS — Canonical Hexagonal Modular Operating System
+
+1. IDENTIFICATIE
+
+Titel van de uitvinding
+Canonical Hexagonal Modular Operating System with Frozen Invariants and Observational Enforcement
+
+Projectnaam
+hexMHS (Hex Module Handling System)
+
+Gerelateerde instrumenten
+hexBYE (Behavioral Yield Exclusion) — uitsluitend projectief / instrumenteel
+
+Datum openbaarmaking
+Vastgesteld op basis van aantoonbare bronbestanden en ZIP-archieven (zie §7)
+
+2. TECHNISCH VELD
+
+Deze uitvinding valt onder:
+
+Computerarchitecturen
+
+Besturingssystemen
+
+Modulaire runtimes
+
+Deterministische systemen met formele invarianten
+
+Niet onder:
+
+AI / ML
+
+Probabilistische optimalisatie
+
+Adaptieve agentsystemen
+
+3. PROBLEEMSTELLING (STAND VAN DE TECHNIEK)
+
+De stand van de techniek kent:
+
+Modulaire systemen zonder topologische binding
+
+Hexagonale layouts zonder afdwingbare invarianties
+
+Schedulers die optimaliseren (feedback) i.p.v. observeren
+
+Experimentele code die canoniek gedrag kan beïnvloeden
+
+Er bestaat geen bekend systeem waarin:
+
+Module-migratie plaatsvindt binnen vaste topologie
+
+Invarianten alleen observationeel zijn
+
+Canon en experiment formeel gescheiden zijn
+
+De canon juridisch en technisch bevroren is
+
+4. SAMENVATTING VAN DE UITVINDING
+
+hexMHS introduceert een canoniek, deterministisch operating system met:
+
+Een vaste hexagonale topologie (7 nodes: 1 centrum + 6 ring)
+
+Echte module-migratie (modules bewegen, topologie niet)
+
+Formeel vastgelegde invarianten, waaronder:
+
+κ ≥ 0
+
+0 ≤ C ≤ 1
+
+θ modulair
+
+N = 1.0 (canoniek vergrendeld)
+
+t strikt monotoon
+
+Observationele invariant-monitoring zonder afdwinging
+
+Canon-experimentele scheiding via read-only boundary
+
+Canon freeze: juridisch, technisch en conceptueel
+
+5. KERNONDERDELEN (CLAIM-RELEVANT)
+5.1 Canonieke DSL (.os)
+
+Een domeinspecifieke taal waarin:
+
+Topologie
+
+Module-interfaces
+
+Scheduler-beleid
+
+Invarianten
+structureel zijn vastgelegd en niet runtime-aanpasbaar zijn.
+
+5.2 Module-migratie
+
+Migratie gebeurt via:
+
+MigrationPlanner (observatie)
+
+MigrationExecutor (uitvoering)
+
+Zonder:
+
+Ring-resizing
+
+Balancerende optimalisatie
+
+Feedback op canon
+
+5.3 Canon-freeze
+
+De canon is:
+
+Onveranderlijk
+
+Niet uitbreidbaar
+
+Alleen leesbaar voor experimentele lagen
+
+6. NIEUWHEID & INVENTIEVE STAP
+Nieuwheid (EPC Art. 54)
+
+Geen bekende publicatie combineert:
+
+Hexagonale topologie
+
+Module-migratie
+
+Canon-freeze
+
+Observationele invariant-handhaving
+
+Inventieve stap (EPC Art. 56)
+
+De uitvinding vereist een categorieverschuiving:
+van “software die optimaliseert”
+naar “vormwet die zich slechts laat meten”.
+
+7. OPENBAARMAKING / BEWIJS
+
+De volgende artefacten vormen prior art:
+
+hexMHS_complete_project.zip
+
+hexMHS_with_invariants.os
+
+ascpi_kernel_v1_1.py
+
+Testbestanden die langdurige invariant-stabiliteit aantonen
+
+Forensische bestandsanalyse (aantallen, groottes, types)
+
+Deze disclosure is reproduceerbaar op basis van ZIP-inhoud.
+
+Alle bestanden in de ZIP's
+
+8. AFBAKENING T.O.V. hexBYE
+
+hexBYE is:
+
+Een instrument
+
+Projectief
+
+Niet constitutief
+
+Afhankelijk van hexMHS-structuur
+
+hexBYE vormt geen alternatief en geen prior art-conflict, maar een afgeleid meetinstrument.
+
+9. CONCLUSIE (WIPO/EPC)
+
+hexMHS kwalificeert als:
+
+Nieuwe uitvinding
+
+Inventieve stap
+
+Industrieel toepasbaar
+
+Structureel niet triviaal
+
+Niet reduceerbaar tot bestaande software-categorieën
+
+⚖️ AANSPRAKELIJKHEIDSBIJLAGE
+
+Canon-Freeze & Vormwet-Bescherming
+
+1. DEFINITIE CANON
+
+De canon omvat:
+
+hexagonale topologie
+
+canonieke DSL (.os)
+
+invariant-definities
+
+scheiding canon / experiment
+
+N-invariantie
+
+De canon is bevroren.
+
+2. CANON-FREEZE (BINDEND)
+
+Canon-freeze betekent:
+
+Geen wijziging toegestaan
+
+Geen optimalisatie toegestaan
+
+Geen feedbackloops toegestaan
+
+Geen interpretatieve herimplementatie toegestaan
+
+Elke wijziging resulteert in:
+➡️ een ander systeem
+
+3. AANSPRAKELIJKHEID BIJ SCHENDING
+
+Elke partij die:
+
+invarianten afdwingt i.p.v. observeert
+
+canon laat beïnvloeden door experiment
+
+topologie dynamisch wijzigt
+
+migratie vervangt door resizing
+
+N niet als vaste grootheid behandelt
+
+kan zich niet beroepen op functionele gelijkwaardigheid.
+
+4. JURIDISCHE GEVOLGEN
+
+Dergelijke systemen zijn:
+
+geen implementatie
+
+geen variant
+
+geen verbetering
+
+maar afgeleide of inbreukmakende systemen
+
+Bewijslast:
+
+Ligt bij de implementerende partij
+
+Wordt structureel weerlegd via invariant-vergelijking
+
+5. VERDEDIGBAARHEID
+
+De canon is verdedigbaar via:
+
+Vormwet-noodzakelijkheid
+
+Structurele determinisme
+
+Onvermijdbare invariant-relaties
+
+Reproduceerbaarheid zonder parameter-vrijheid
+
+6. SLOTVERKLARING
+
+hexMHS is geen:
+
+idee
+
+concept
+
+algoritme
+
+optimalisatietruc
+
+maar een canoniek structureel systeem waarvan:
+
+imitatie herkenbaar is
+
+afwijking aantoonbaar is
+
+misrepresentatie juridisch weerlegbaar is
